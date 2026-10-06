@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Secrets (API keys, login cookies) - never commit
+.env
+.env.*
+!.env.example
+
+# Generated files (videos, audio, slides)
+output/
+
+# Logs
+logs/
+*.log
+
+# Claude Code local settings
+.claude/settings.local.json

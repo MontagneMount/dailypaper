@@ -4,7 +4,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { runFfmpeg } from "./ffmpeg.js";
 
-export async function composeVideo({ frames, audioFile, outFile, workDir }) {
+const FADE_OUT_SECONDS = 0.8;
+
+export async function composeVideo({ frames, audioFile, outFile, workDir, duration }) {
   const listFile = path.join(workDir, "frames.txt");
   const lines = ["ffconcat version 1.0"];
   for (const frame of frames) {
@@ -18,7 +20,7 @@ export async function composeVideo({ frames, audioFile, outFile, workDir }) {
     "-y",
     "-f", "concat", "-safe", "0", "-i", listFile,
     "-i", audioFile,
-    "-vf", "fps=30,format=yuv420p",
+    "-vf", `fps=30,format=yuv420p,fade=t=out:st=${Math.max(0, duration - FADE_OUT_SECONDS).toFixed(3)}:d=${FADE_OUT_SECONDS}`,
     "-c:v", "libx264", "-preset", "medium", "-crf", "20",
     "-c:a", "aac", "-b:a", "160k",
     "-shortest", "-movflags", "+faststart",
@@ -29,7 +31,7 @@ export async function composeVideo({ frames, audioFile, outFile, workDir }) {
 export function writeSrt(narration, file) {
   const lines = narration.pages.flatMap((page) => page.lines);
   const body = lines
-    .map((line, index) => `${index + 1}\n${srtTime(line.start)} --> ${srtTime(line.end)}\n${line.text}\n`)
+    .map((line, index) => `${index + 1}\n${srtTime(line.start)} --> ${srtTime(line.end)}\n${line.display}\n`)
     .join("\n");
   fs.writeFileSync(file, body);
 }

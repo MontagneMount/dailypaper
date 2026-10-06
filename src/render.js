@@ -60,7 +60,7 @@ async function main() {
   console.log("[3/3] 合成视频");
   const videoFile = path.join(workDir, "video.mp4");
   const srtFile = path.join(workDir, "subtitles.srt");
-  await composeVideo({ frames, audioFile: narration.audioFile, outFile: videoFile, workDir });
+  await composeVideo({ frames, audioFile: narration.audioFile, outFile: videoFile, workDir, duration: narration.duration });
   writeSrt(narration, srtFile);
 
   console.log(`\n完成！视频时长 ${formatDuration(narration.duration)}`);

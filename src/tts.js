@@ -1,15 +1,16 @@
 // Generate the narration with Edge TTS and work out when each subtitle line is spoken.
 //
-// Each sentence is synthesised separately, so the intonation stays natural and we know
-// exactly how long it lasts. Inside a sentence, time is shared between subtitle lines
-// by character count (good enough for now; see T12 for word-level alignment).
+// Each sentence is synthesised separately and trimmed of the silence Edge TTS adds around it,
+// so we control every pause ourselves and know exactly when the voice starts and stops.
+// Inside a sentence, time is shared between subtitle lines by how long each line takes to say
+// (see timing.js; word-level alignment is T12).
 
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import msedgeTts from "msedge-tts";
 import { runFfmpeg } from "./ffmpeg.js";
-import { applyPronunciations } from "./pronunciation.js";
+import { groupIntoSentences, toSpeech, spreadLines } from "./timing.js";
 
 const { MsEdgeTTS, OUTPUT_FORMAT } = msedgeTts;
 
@@ -18,11 +19,23 @@ export const DEFAULT_VOICE = "zh-CN-XiaoxiaoNeural";
 
 const SAMPLE_RATE = 24000;
 const BYTES_PER_SAMPLE = 2; // 16-bit mono PCM
-const PAGE_LEAD_SECONDS = 0.3;
-const PAGE_TAIL_SECONDS = 0.6;
-const SENTENCE_GAP_SECONDS = 0.15;
-const MAX_SENTENCE_CHARS = 120;
-const SENTENCE_END = /[。！？!?…][”’」』）)]*$/;
+
+// Pauses, in seconds.
+const PAGE_LEAD_SECONDS = 0.3; // before the first sentence of a page (no subtitle yet)
+const SENTENCE_GAP_SECONDS = 0.35; // between two sentences
+const PAGE_TAIL_SECONDS = 0.6; // after the last sentence of a page
+const EXTRA_HOLD_SECONDS = { big_metric: 1.0, comparison: 1.0 }; // pages full of numbers stay a bit longer
+const END_HOLD_SECONDS = 1.5; // extra pause at the very end; the video also fades out there
+
+// Edge TTS pads every clip with ~0.2 s of silence before and ~0.7 s after the voice.
+const TRIM_SILENCE = [
+  "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.03",
+  "areverse",
+  "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.05",
+  "areverse",
+].join(",");
+// Change this whenever the audio processing changes, so cached clips are rebuilt.
+const AUDIO_PROCESSING_VERSION = "trim1";
 
 /**
  * Pages come back in the same order as the slides.
@@ -31,7 +44,7 @@ const SENTENCE_END = /[。！？!?…][”’」』）)]*$/;
  *
  * @returns {Promise<{ audioFile: string, duration: number,
  *   pages: Array<{ number: number, start: number, end: number,
- *                  lines: Array<{ text: string, start: number, end: number }>,
+ *                  lines: Array<{ text: string, display: string, start: number, end: number }>,
  *                  sentences: Array<{ lines: string[], speech: string, start: number, duration: number }> }> }>}
  */
 export async function createNarration(slides, { voice, rate, pronunciations, workDir }) {
@@ -49,23 +62,24 @@ export async function createNarration(slides, { voice, rate, pronunciations, wor
   };
 
   try {
-    for (const slide of slides) {
+    for (const [slideIndex, slide] of slides.entries()) {
       const page = { number: slide.number, start: cursor, end: 0, lines: [], sentences: [] };
       addSilence(PAGE_LEAD_SECONDS);
 
       const sentences = groupIntoSentences(slide.narration);
       for (const [index, lines] of sentences.entries()) {
         if (index > 0) addSilence(SENTENCE_GAP_SECONDS);
-        const speech = applyPronunciations(joinLines(lines), pronunciations);
+        const { speech, spoken } = toSpeech(lines, pronunciations);
         const pcm = await synthesizer.toPcm(speech);
         const duration = pcm.length / (SAMPLE_RATE * BYTES_PER_SAMPLE);
-        page.lines.push(...spreadLines(lines, cursor, duration));
+        page.lines.push(...spreadLines(lines, spoken, cursor, duration));
         page.sentences.push({ lines, speech, start: cursor, duration });
         pcmParts.push(pcm);
         cursor += duration;
       }
 
-      addSilence(PAGE_TAIL_SECONDS);
+      const isLastPage = slideIndex === slides.length - 1;
+      addSilence(PAGE_TAIL_SECONDS + (EXTRA_HOLD_SECONDS[slide.layout] ?? 0) + (isLastPage ? END_HOLD_SECONDS : 0));
       page.end = cursor;
       pages.push(page);
       console.log(`  第 ${slide.number} 页配音完成（${(page.end - page.start).toFixed(1)} 秒）`);
@@ -89,14 +103,16 @@ class Synthesizer {
     this.tts = null;
   }
 
-  /** Returns raw PCM for the text. Results are cached, so re-rendering skips unchanged sentences. */
+  /** Returns trimmed PCM for the text. Clips are cached, so re-rendering skips unchanged sentences. */
   async toPcm(text) {
     const key = crypto.createHash("sha1").update(`${this.voice}|${this.rate}|${text}`).digest("hex").slice(0, 16);
     const mp3File = path.join(this.audioDir, `${key}.mp3`);
-    const wavFile = path.join(this.audioDir, `${key}.wav`);
-    if (!fs.existsSync(wavFile)) {
+    const wavFile = path.join(this.audioDir, `${key}-${AUDIO_PROCESSING_VERSION}.wav`);
+    if (!fs.existsSync(mp3File)) {
       await this.synthesizeWithRetry(text, mp3File);
-      await runFfmpeg(["-y", "-i", mp3File, "-ar", String(SAMPLE_RATE), "-ac", "1", "-c:a", "pcm_s16le", wavFile]);
+    }
+    if (!fs.existsSync(wavFile)) {
+      await runFfmpeg(["-y", "-i", mp3File, "-af", TRIM_SILENCE, "-ar", String(SAMPLE_RATE), "-ac", "1", "-c:a", "pcm_s16le", wavFile]);
     }
     return readWavPcm(wavFile);
   }
@@ -112,6 +128,7 @@ class Synthesizer {
         return;
       } catch (error) {
         this.close();
+        fs.rmSync(file, { force: true }); // never keep a half-written clip in the cache
         if (attempt >= attempts) {
           throw new Error(`配音失败（已试 ${attempts} 次）：${error.message}\n  句子：${text}`);
         }
@@ -135,42 +152,6 @@ class Synthesizer {
     this.tts?.close();
     this.tts = null;
   }
-}
-
-/** Group subtitle lines into sentences; a sentence ends with 。！？ etc. */
-function groupIntoSentences(lines) {
-  const sentences = [];
-  let current = [];
-  for (const line of lines) {
-    current.push(line);
-    if (SENTENCE_END.test(line) || joinLines(current).length > MAX_SENTENCE_CHARS) {
-      sentences.push(current);
-      current = [];
-    }
-  }
-  if (current.length > 0) sentences.push(current);
-  return sentences;
-}
-
-/** Join lines without spaces (Chinese), but keep a space between two English words. */
-function joinLines(lines) {
-  return lines.reduce((text, line) => {
-    const needsSpace = /[A-Za-z0-9]$/.test(text) && /^[A-Za-z0-9]/.test(line);
-    return text + (needsSpace ? " " : "") + line;
-  }, "");
-}
-
-/** Share a sentence's duration between its lines, by how many characters each line speaks. */
-function spreadLines(lines, start, duration) {
-  const weights = lines.map((line) => Math.max(1, line.replace(/[\s\p{P}\p{S}]/gu, "").length));
-  const total = weights.reduce((sum, weight) => sum + weight, 0);
-  let time = start;
-  return lines.map((text, index) => {
-    const lineDuration = duration * (weights[index] / total);
-    const entry = { text, start: time, end: time + lineDuration };
-    time += lineDuration;
-    return entry;
-  });
 }
 
 function escapeXml(text) {

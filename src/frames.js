@@ -43,15 +43,23 @@ export async function renderFrames(slides, narration, workDir) {
       });
       problems.forEach((problem) => warnings.push(`第 ${slide.number} 页：${problem}`));
 
+      // No subtitle during the pause before the first sentence, so text never shows up before the voice.
+      const firstStart = timing.lines[0].start;
+      if (firstStart > timing.start) {
+        await page.evaluate(showSubtitle, "");
+        const file = path.join(framesDir, `p${order}-l00.png`);
+        await page.screenshot({ path: file });
+        frames.push({ file, duration: firstStart - timing.start });
+      }
+
       for (const [index, line] of timing.lines.entries()) {
-        await page.evaluate(showSubtitle, line.text);
+        await page.evaluate(showSubtitle, line.display);
         const file = path.join(framesDir, `p${order}-l${pad(index + 1)}.png`);
         await page.screenshot({ path: file });
 
-        // The first line also covers the pause before it, the last line the pause after it.
-        const start = index === 0 ? timing.start : line.start;
+        // A line stays until the next one starts; the last line also covers the pause after it.
         const end = index === timing.lines.length - 1 ? timing.end : timing.lines[index + 1].start;
-        frames.push({ file, duration: end - start });
+        frames.push({ file, duration: end - line.start });
       }
       console.log(`  第 ${slide.number} 页画面完成（${timing.lines.length} 帧）`);
     }
@@ -108,6 +116,14 @@ async function prepareSlide({ cardCounts, hidden, fitGrid }) {
 
   // Remove labels whose content is empty or「无」.
   hidden.flatMap((selector) => [...document.querySelectorAll(selector)]).forEach((element) => element.remove());
+
+  // big_metric: write "40%", not "40 %".
+  for (const unit of document.querySelectorAll(".metric-unit")) {
+    if (unit.textContent.trim() === "%") {
+      const gap = Number.parseFloat(getComputedStyle(unit.parentElement).columnGap) || 0;
+      unit.style.marginLeft = `${-gap}px`;
+    }
+  }
 
   // Replace the design hint in the subtitle area with a real subtitle line.
   const area = document.querySelector(".subtitle-safe-area");

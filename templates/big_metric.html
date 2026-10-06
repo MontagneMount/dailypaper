@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>DailyPaper - 全屏大字突出核心指标</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: #090d16;
+      background-image: 
+        radial-gradient(circle at 50% 35%, rgba(59, 130, 246, 0.22) 0%, transparent 55%),
+        radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.15) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-bar {
+      height: 80px;
+      padding: 0 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .tag-badge {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.6);
+      color: #fbbf24;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+    }
+    .section-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    .page-index {
+      font-size: 18px;
+      color: #64748b;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    /* 核心指标展示区 (高 838px) */
+    .metric-stage {
+      height: 838px;
+      padding: 30px 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .topic-pill {
+      font-size: 18px;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px 24px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+    }
+    .headline {
+      font-size: 48px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.25;
+      margin-bottom: 36px;
+      max-width: 1400px;
+      letter-spacing: -0.5px;
+    }
+
+    /* 指标卡片网格 */
+    .metric-grid {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 36px;
+      width: 100%;
+      max-width: 1560px;
+      margin-bottom: 32px;
+    }
+    .metric-card {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 34px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+    .metric-card.primary {
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      background: linear-gradient(180deg, rgba(59, 130, 246, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%);
+    }
+    .metric-card.accent {
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%);
+    }
+    .metric-label {
+      font-size: 20px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 10px;
+    }
+    .metric-value-wrap {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .metric-sign {
+      font-size: 50px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+    .metric-num {
+      font-size: 92px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -2px;
+      background: linear-gradient(180deg, #ffffff 30%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .metric-card.primary .metric-num {
+      background: linear-gradient(180deg, #60a5fa 30%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .metric-card.accent .metric-num {
+      background: linear-gradient(180deg, #34d399 30%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .metric-unit {
+      font-size: 28px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+    .metric-sub {
+      font-size: 18px;
+      color: #cbd5e1;
+      line-height: 1.4;
+      max-width: 90%;
+    }
+
+    /* 实验基准说明 */
+    .benchmark-footer {
+      font-size: 16px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .benchmark-footer span {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px 14px;
+      border-radius: 6px;
+    }
+
+    /* 底部 15% 字幕安全保留区 (高 162px) */
+    .subtitle-safe-area {
+      height: 162px;
+      width: 100%;
+      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .subtitle-placeholder-tip {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.25);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-bar">
+    <div class="header-left">
+      <span class="tag-badge">核心实验战报</span>
+      <h2 class="section-title">{{page_topic}}</h2>
+    </div>
+    <div class="page-index">{{page_number}} / {{total_pages}}</div>
+  </div>
+
+  <div class="metric-stage">
+    <div class="topic-pill">{{benchmark_dataset}}</div>
+    <h1 class="headline">{{metric_headline}}</h1>
+
+    <div class="metric-grid">
+      <div class="metric-card primary">
+        <div class="metric-label">{{metric_1_name}}</div>
+        <div class="metric-value-wrap">
+          <span class="metric-sign">{{metric_1_sign}}</span>
+          <span class="metric-num">{{metric_1_val}}</span>
+          <span class="metric-unit">{{metric_1_unit}}</span>
+        </div>
+        <div class="metric-sub">{{metric_1_desc}}</div>
+      </div>
+
+      <div class="metric-card accent">
+        <div class="metric-label">{{metric_2_name}}</div>
+        <div class="metric-value-wrap">
+          <span class="metric-sign">{{metric_2_sign}}</span>
+          <span class="metric-num">{{metric_2_val}}</span>
+          <span class="metric-unit">{{metric_2_unit}}</span>
+        </div>
+        <div class="metric-sub">{{metric_2_desc}}</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">{{metric_3_name}}</div>
+        <div class="metric-value-wrap">
+          <span class="metric-sign">{{metric_3_sign}}</span>
+          <span class="metric-num">{{metric_3_val}}</span>
+          <span class="metric-unit">{{metric_3_unit}}</span>
+        </div>
+        <div class="metric-sub">{{metric_3_desc}}</div>
+      </div>
+    </div>
+
+    <div class="benchmark-footer">
+      <span>对比基线：{{baseline_model}}</span>
+      <span>测试环境：{{hardware_condition}}</span>
+      <span>数据出自原文：{{paper_table_ref}}</span>
+    </div>
+  </div>
+
+  <div class="subtitle-safe-area">
+    <span class="subtitle-placeholder-tip">[底部 15% 字幕保留区 · 压制时在此渲染双行字幕]</span>
+  </div>
+</body>
+</html>

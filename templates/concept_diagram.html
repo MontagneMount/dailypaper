@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>DailyPaper - 自制概念示意图</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: #090d16;
+      background-image: 
+        radial-gradient(circle at 50% 15%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 48px 48px, 48px 48px;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-bar {
+      height: 80px;
+      padding: 0 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .badge-concept {
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.5);
+      color: #c084fc;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+    }
+    .section-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    .page-index {
+      font-size: 18px;
+      color: #64748b;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    /* 主内容区 (高 838px) */
+    .main-area {
+      height: 838px;
+      padding: 24px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .page-heading {
+      font-size: 38px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* 示意图主体画板 */
+    .diagram-board {
+      width: 1760px;
+      height: 520px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      margin-bottom: 24px;
+    }
+    
+    /* 规范要求的强制性「示意图」显著水印标识 */
+    .schematic-watermark {
+      position: absolute;
+      top: 18px;
+      right: 24px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1.5px solid #f59e0b;
+      color: #fbbf24;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 6px 16px;
+      border-radius: 6px;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+    }
+
+    .diagram-graphic {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .diagram-graphic img {
+      max-width: 96%;
+      max-height: 96%;
+      object-fit: contain;
+    }
+
+    /* 下方三栏核心推演提炼 */
+    .takeaway-grid {
+      width: 1760px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .takeaway-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      background: #8b5cf6;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+    .takeaway-body {
+      font-size: 17px;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+    .takeaway-strong {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    /* 底部 15% 字幕安全保留区 (高 162px) */
+    .subtitle-safe-area {
+      height: 162px;
+      width: 100%;
+      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .subtitle-placeholder-tip {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.25);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-bar">
+    <div class="header-left">
+      <span class="badge-concept">原理解析示意</span>
+      <h2 class="section-title">{{page_topic}}</h2>
+    </div>
+    <div class="page-index">{{page_number}} / {{total_pages}}</div>
+  </div>
+
+  <div class="main-area">
+    <h1 class="page-heading">{{diagram_title}}</h1>
+
+    <div class="diagram-board">
+      <div class="schematic-watermark">自制原理 · 示意图</div>
+      <div class="diagram-graphic">
+        <img src="{{diagram_image_path}}" alt="概念示意图">
+      </div>
+    </div>
+
+    <div class="takeaway-grid">
+      <div class="takeaway-card">
+        <div class="step-num">1</div>
+        <div class="takeaway-body"><span class="takeaway-strong">{{step_1_title}}：</span>{{step_1_desc}}</div>
+      </div>
+      <div class="takeaway-card">
+        <div class="step-num">2</div>
+        <div class="takeaway-body"><span class="takeaway-strong">{{step_2_title}}：</span>{{step_2_desc}}</div>
+      </div>
+      <div class="takeaway-card">
+        <div class="step-num">3</div>
+        <div class="takeaway-body"><span class="takeaway-strong">{{step_3_title}}：</span>{{step_3_desc}}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subtitle-safe-area">
+    <span class="subtitle-placeholder-tip">[底部 15% 字幕保留区 · 压制时在此渲染双行字幕]</span>
+  </div>
+</body>
+</html>

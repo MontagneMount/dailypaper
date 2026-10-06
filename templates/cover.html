@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>DailyPaper - 封面/导读</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: #0b0f19;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶栏 (高 90px) */
+    .top-bar {
+      height: 90px;
+      padding: 0 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 22px;
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+    }
+    .brand-name {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .meta-tags {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .tag {
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .tag-category {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.5);
+      color: #60a5fa;
+    }
+    .tag-status {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: #34d399;
+    }
+
+    /* 核心导读区 (高 828px) */
+    .main-content {
+      height: 828px;
+      padding: 50px 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .badge-bar {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .source-badge {
+      font-size: 18px;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-weight: 600;
+    }
+    .title-cn {
+      font-size: 56px;
+      font-weight: 900;
+      line-height: 1.25;
+      color: #ffffff;
+      margin-bottom: 22px;
+      letter-spacing: -0.5px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      max-width: 1520px;
+    }
+    .title-en {
+      font-size: 26px;
+      font-weight: 400;
+      color: #94a3b8;
+      line-height: 1.4;
+      margin-bottom: 40px;
+      max-width: 1400px;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      row-gap: 16px;
+      column-gap: 24px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 28px 40px;
+      max-width: 1300px;
+      backdrop-filter: blur(12px);
+    }
+    .meta-label {
+      font-size: 20px;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .meta-value {
+      font-size: 20px;
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+    .authors-highlight {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    /* 底部 15% 字幕安全保留区 (高 162px) */
+    .subtitle-safe-area {
+      height: 162px;
+      width: 100%;
+      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .subtitle-placeholder-tip {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.25);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="brand">
+      <div class="brand-logo">DP</div>
+      <div class="brand-name">DailyPaper · 每日论文速递</div>
+    </div>
+    <div class="meta-tags">
+      <div class="tag tag-category">{{field_tag}}</div>
+      <div class="tag tag-status">{{paper_status}}</div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="badge-bar">
+      <span class="source-badge">arXiv: {{arxiv_id}}</span>
+      <span class="source-badge">{{conference_or_journal}}</span>
+    </div>
+    <h1 class="title-cn">{{video_title}}</h1>
+    <h2 class="title-en">{{paper_original_title}}</h2>
+    <div class="meta-grid">
+      <div class="meta-label">论文作者</div>
+      <div class="meta-value"><span class="authors-highlight">{{authors_team}}</span> ({{affiliations}})</div>
+      <div class="meta-label">核心突破</div>
+      <div class="meta-value">{{core_highlight}}</div>
+    </div>
+  </div>
+
+  <div class="subtitle-safe-area">
+    <span class="subtitle-placeholder-tip">[底部 15% 字幕保留区 · 压制时在此渲染双行字幕]</span>
+  </div>
+</body>
+</html>

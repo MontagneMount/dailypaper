@@ -10,7 +10,7 @@
 - **方式**：用户手动操作 ChatGPT 和 Gemini；视频走代码流水线（T10 选定方案 B）；流程成熟后再自动化
 - **方向**：先只做 AI（跟着 Hugging Face 日榜选题），流程稳定后再加其他方向
 - **Git**：已推到 GitHub（https://github.com/MontagneMount/dailypaper），分支 main
-- **下一步**：ChatGPT 把格式建议合进讲解稿格式并定稿（T11）；用户选首篇论文和目标时长（T14）；Claude 写合成脚本（T13）；Gemini 设计视频模板（T15）
+- **下一步**：ChatGPT 审核讲解稿格式提案 v1.1（T16）；Claude 说明合成脚本的计划后开工（T13）；用户选首篇论文和目标时长（T14）
 - **最近更新**：2026-10-06 · Claude
 
 ## 待办交接
@@ -27,13 +27,129 @@
 | T8 | 决定选题起步方式：一开始就覆盖六个方向，还是先只做 AI（有现成日榜），流程稳定后再加其他方向 | 用户 | Claude | 已完成 |
 | T9 | 按 docs/onboarding.md 接入 ChatGPT 和 Gemini，把它们的工作记录贴进 WORKLOG.md | 用户 | Claude | 已完成 |
 | T10 | 决定 M1 的视频制作方式：A. 先试 NotebookLM 等能直接生成讲解视频的工具（不写代码）；B. 走代码流水线（Gemini 出分镜和画面设计，Claude 写合成脚本）。用户选 B | 用户 | Gemini、Claude | 已完成 |
-| T11 | 评估 docs/script-format.md 里的讲解稿格式，确定写稿格式（ChatGPT 的 4 条建议用户已确认，待 ChatGPT 合进正文定稿） | ChatGPT | Gemini | 进行中 |
+| T11 | 评估 docs/script-format.md 里的讲解稿格式，确定写稿格式（用户确认的 4 条建议已合入正文，定稿 v1） | ChatGPT | Gemini | 已完成 |
 | T12 | 写合成脚本时，预留发音替换表和自动打轴（TTS 词边界事件或 Whisper） | Claude | Gemini | 待处理 |
-| T13 | 写最小版视频合成脚本：讲解稿 → 画面截图 → TTS 配音 → 字幕 → MP4；开工前先向用户说明计划 | Claude | Claude | 待处理 |
+| T13 | 写最小版视频合成脚本：讲解稿 → 画面截图 → TTS 配音 → 字幕 → MP4；开工前先向用户说明计划，并提出讲解稿开头字段和屏幕文案的固定写法，交 ChatGPT 确认 | Claude | Claude | 进行中 |
 | T14 | 选定首篇论文，确定首条视频的目标时长 | 用户 | ChatGPT | 待处理 |
-| T15 | 设计视频模板：16:9 版式、配色、字体，输出 HTML/CSS（对应讲解稿格式里的版式类型） | Gemini | Claude | 待处理 |
+| T15 | 设计视频模板：16:9 版式、配色、字体，输出 HTML/CSS（对应讲解稿格式里的版式类型）；给出固定的版式名称，之后写进讲解稿格式（6 个模板已存进 templates/） | Gemini | Claude | 已完成 |
+| T16 | 审核 docs/proposals/script-format-v1.1.md（开头字段和 6 个版式各自的字段），确认后合并进 docs/script-format.md，定稿 v1.1 | ChatGPT | Claude | 待处理 |
 
 ## 记录
+
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：保存并检查 Gemini 的模板，提出讲解稿格式 v1.1（T13 的准备工作）
+
+**完成**
+- 把用户转来的 6 个模板存进 templates/，文件名改成版式名，内容和原文件完全一致
+- 检查模板：尺寸 1920×1080、不依赖外部资源、底部 162px 字幕区，都符合要求。有 4 处要在渲染时处理，都由合成脚本解决，不改模板（详见 templates/README.md）：
+  - 字幕区里有提示文字和虚线，渲染时要隐藏
+  - 要点等卡片固定 3 个，内容少于 3 条时要删掉空卡片
+  - figure_annotated 的红框按整个图片区域定位，原图四周有留白时会对不准；渲染时把标注层对齐到原图
+  - 没给红框位置时会显示模板里的默认红框，脚本要报错
+- 记录 Gemini 对两个问题的回答：数量不固定的内容由脚本处理；红框位置写稿时只写意图，M1 阶段由用户看着原图给出百分比，以后可以用视觉模型自动识别
+- 新建 templates/README.md：版式说明、占位符和渲染规则
+- 新建 docs/proposals/script-format-v1.1.md：开头的固定字段，以及 6 个版式各自要写的字段，交 ChatGPT 审核（T16）
+
+**改动文件**
+- `templates/`：新建，6 个模板 + README.md
+- `docs/proposals/script-format-v1.1.md`：新建
+- `WORKLOG.md`：T15 已完成，T13 改为进行中，新增 T16，更新当前状态
+
+**交接**
+- → ChatGPT：审核格式提案 v1.1，确认后合并进 script-format.md（T16）
+- → 用户：用到 figure_annotated 的页，准备材料时要看着原图填写红框位置
+
+**待确认 / 风险**
+- 模板只用了 Windows、macOS 自带的中文字体；以后要在 Linux 服务器上自动化，需要另装中文字体
+
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：贴入 Gemini 的 T15 记录
+
+**完成**
+- 按用户转发，把 Gemini 的记录原样贴进 WORKLOG.md（见下一条）
+- 6 个版式名称已定：cover、figure_text、big_metric、figure_annotated、concept_diagram、comparison
+- 用户转发的内容里缺了「各版式 HTML/CSS 代码」这一部分，模板文件还没存进仓库，所以 T15 先保持「进行中」
+
+**改动文件**
+- `WORKLOG.md`：贴入 Gemini 的记录，更新 T15 和当前状态
+
+**交接**
+- → 用户：把 Gemini 的 6 个模板文件代码转给 Claude
+- → Claude：收到代码后存进 templates/，检查是否符合要求，再根据模板里的占位符提出讲解稿格式的补充（T13）
+
+**待确认 / 风险**
+- 无
+
+### 2026-10-06 · Gemini（网页版）
+
+**任务**：完成 T15：设计 1920×1080 纯 HTML/CSS 视频模板，给出固定版式名称与字幕安全区规范
+
+**完成**
+- 阅读 WORKLOG.md 与 script-format.md 定稿，明确代码流水线对页面模板与固定标识的解析要求
+- 定义了 6 种固定版式标识名，与 Claude 代码和 ChatGPT 写稿一一对应：`cover`（封面/导读）、`figure_text`（左图右文）、`big_metric`（全屏大字/指标）、`figure_annotated`（原图分层标注）、`concept_diagram`（概念示意图）、`comparison`（方案对比）
+- 按照 1920×1080 规格设计并输出了 6 个纯 HTML/CSS 独立模板文件代码，零外部网络依赖，采用无衬线系统字体栈与深色科技风设计
+- 严格在画面底部留出 162px（占比 15%）字幕保留区；落实论文原图与标注分层，自制图强制包含「示意图」显著标识
+- 模板字段均使用 `{{variable_name}}` 占位符，支持自动化脚本精准填充；将 T15 标记为已完成
+
+**改动文件**
+- 无（由用户同步至 `WORKLOG.md`，模板代码由 Claude 或用户保存至 `templates/` 目录）
+
+**交接**
+- → 用户：将本条记录贴入 `WORKLOG.md`；待办交接中 T15 标记为「已完成」
+- → Claude：在 T13 编写合成脚本时，将上述模板存入 `templates/`，并在渲染流水线中使用对应的 6 个版式名称和占位符进行字段替换与 Playwright 截屏
+- → ChatGPT：写稿时在「- 版式：」中直接使用这 6 个英文标识名（`cover`, `figure_text`, `big_metric`, `figure_annotated`, `concept_diagram`, `comparison`）
+
+**待确认 / 风险**
+- 无
+
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：检查 ChatGPT 完成的 T11 改动
+
+**完成**
+- 检查 git diff：只改了 docs/script-format.md 和 WORKLOG.md，历史记录没有被改动，记录格式符合 AGENTS.md
+- 定稿 v1 的内容和用户确认的 4 条建议一致
+- 发现 3 处代码解析需要的细节还没定。不影响定稿，放进 T13、T15 处理：
+  - 开头部分（视频标题、简介、标签、论文信息）还没有固定写法
+  - 「屏幕文案」里的主标题和要点怎么分开写，还没定
+  - 「版式」现在是自由描述，需要固定成几个名字，和 Gemini 的模板一一对应
+
+**改动文件**
+- `WORKLOG.md`：新增本条记录；T13、T15 补充上面的细节；更新「最近更新」
+
+**交接**
+- → Gemini：做 T15 时给出固定的版式名称
+- → Claude：T13 开工时提出开头字段和屏幕文案的固定写法，交 ChatGPT 确认
+
+**待确认 / 风险**
+- 无
+
+### 2026-10-06 · ChatGPT（Codex App）
+
+**任务**：完成 T11，将已确认的 4 条建议合入讲解稿格式正文并定稿
+
+**完成**
+- 开始前阅读 AGENTS.md、WORKLOG.md，检查 Git 状态，确认工作区无未提交改动
+- 将 docs/script-format.md 从草案 v2 更新为定稿 v1，移除已合入正文的文末建议区
+- 新增原文核对表模板，记录论文版本、原文位置、实验条件和局限，明确不进入配音
+- 将字幕 12～18 字改为建议值，优先保证语义完整，不拆开术语、数字与单位
+- 明确字幕保留正式术语，配音使用发音替换表，并保留对应关系；根据实际音频对齐和检查字幕
+- 明确保存论文原图，箭头、红框独立分层，自制概念示意图在画面上标为「示意图」
+- 将 T11 标为已完成，更新当前状态；遵照用户要求不做 commit
+
+**改动文件**
+- `docs/script-format.md`：合并 4 条已确认建议，补充核对表模板并定稿
+- `WORKLOG.md`：更新 T11、当前状态，新增本条记录
+
+**交接**
+- → 用户：选定首篇论文和目标时长（已有待办 T14）
+- → Claude：按定稿格式实现稿件解析、发音替换与字幕对齐，核对表不进入配音（已有待办 T12、T13）
+- → Gemini：按定稿格式设计视频模板，论文原图与额外标注分层，示意图明确标识（已有待办 T15）
+
+**待确认 / 风险**
+- 无
 
 ### 2026-10-06 · Claude（Claude Code）
 

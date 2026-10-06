@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>DailyPaper - 对比版式</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: #090d16;
+      background-image: 
+        radial-gradient(circle at 25% 30%, rgba(239, 68, 68, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 75% 30%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 48px 48px, 48px 48px;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-bar {
+      height: 80px;
+      padding: 0 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .tag-compare {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.6);
+      color: #60a5fa;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+    }
+    .section-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    .page-index {
+      font-size: 18px;
+      color: #64748b;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    /* 主内容区 (高 838px) */
+    .main-area {
+      height: 838px;
+      padding: 30px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .compare-heading {
+      font-size: 42px;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 34px;
+      text-align: center;
+    }
+
+    /* 左右双栏对比 */
+    .compare-container {
+      width: 1760px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: stretch;
+    }
+    .compare-col {
+      background: rgba(255, 255, 255, 0.035);
+      border-radius: 20px;
+      padding: 34px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(10px);
+    }
+    .compare-col.traditional {
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, rgba(15, 23, 42, 0.6) 100%);
+    }
+    .compare-col.ours {
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.6) 100%);
+    }
+
+    .col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .col-title {
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .traditional .col-title { color: #f87171; }
+    .ours .col-title { color: #34d399; }
+    .col-badge {
+      font-size: 15px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+    .traditional .col-badge {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+    }
+    .ours .col-badge {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      flex: 1;
+    }
+    .feature-item {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .feature-label {
+      font-size: 17px;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+    .feature-desc {
+      font-size: 16px;
+      line-height: 1.45;
+      color: #94a3b8;
+    }
+    .ours .feature-desc {
+      color: #d1fae5;
+    }
+
+    /* 底部 15% 字幕安全保留区 (高 162px) */
+    .subtitle-safe-area {
+      height: 162px;
+      width: 100%;
+      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .subtitle-placeholder-tip {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.25);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-bar">
+    <div class="header-left">
+      <span class="tag-compare">方案对比</span>
+      <h2 class="section-title">{{page_topic}}</h2>
+    </div>
+    <div class="page-index">{{page_number}} / {{total_pages}}</div>
+  </div>
+
+  <div class="main-area">
+    <h1 class="compare-heading">{{comparison_headline}}</h1>
+
+    <div class="compare-container">
+      <div class="compare-col traditional">
+        <div class="col-header">
+          <div class="col-title">{{baseline_name}}</div>
+          <div class="col-badge">传统基线方案</div>
+        </div>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-label">{{base_point_1_title}}</div>
+            <div class="feature-desc">{{base_point_1_desc}}</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-label">{{base_point_2_title}}</div>
+            <div class="feature-desc">{{base_point_2_desc}}</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-label">{{base_point_3_title}}</div>
+            <div class="feature-desc">{{base_point_3_desc}}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-col ours">
+        <div class="col-header">
+          <div class="col-title">{{ours_name}}</div>
+          <div class="col-badge">本文提出方案</div>
+        </div>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-label">{{ours_point_1_title}}</div>
+            <div class="feature-desc">{{ours_point_1_desc}}</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-label">{{ours_point_2_title}}</div>
+            <div class="feature-desc">{{ours_point_2_desc}}</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-label">{{ours_point_3_title}}</div>
+            <div class="feature-desc">{{ours_point_3_desc}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subtitle-safe-area">
+    <span class="subtitle-placeholder-tip">[底部 15% 字幕保留区 · 压制时在此渲染双行字幕]</span>
+  </div>
+</body>
+</html>

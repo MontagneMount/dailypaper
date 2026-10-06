@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>DailyPaper - 左侧论文原图 + 右侧要点</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: #0b0f19;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(37, 99, 235, 0.12) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 100% 100%, 48px 48px, 48px 48px;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶栏 (高 80px) */
+    .header-bar {
+      height: 80px;
+      padding: 0 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .step-pill {
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+    }
+    .section-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    .page-index {
+      font-size: 18px;
+      color: #64748b;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    /* 主内容区 (高 838px) */
+    .main-area {
+      height: 838px;
+      padding: 40px 80px;
+      display: grid;
+      grid-template-columns: 1020px 1fr;
+      column-gap: 50px;
+      align-items: center;
+    }
+
+    /* 左侧：原图展示容器 */
+    .figure-container {
+      height: 740px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    }
+    .figure-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .figure-tag {
+      font-size: 15px;
+      font-weight: 700;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+    .source-hint {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    .image-wrapper {
+      flex: 1;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-wrapper img {
+      max-width: 96%;
+      max-height: 96%;
+      object-fit: contain;
+    }
+    .figure-caption {
+      margin-top: 14px;
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    /* 右侧：文案与核心要点 */
+    .text-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .main-heading {
+      font-size: 42px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.25;
+      margin-bottom: 34px;
+      letter-spacing: -0.5px;
+    }
+    .points-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .point-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 6px solid #3b82f6;
+      border-radius: 14px;
+      padding: 20px 24px;
+      backdrop-filter: blur(8px);
+    }
+    .point-card:nth-child(2) { border-left-color: #06b6d4; }
+    .point-card:nth-child(3) { border-left-color: #10b981; }
+    .point-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 6px;
+    }
+    .point-desc {
+      font-size: 18px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* 底部 15% 字幕安全保留区 (高 162px) */
+    .subtitle-safe-area {
+      height: 162px;
+      width: 100%;
+      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .subtitle-placeholder-tip {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.25);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-bar">
+    <div class="header-left">
+      <span class="step-pill">{{module_step}}</span>
+      <h2 class="section-title">{{page_topic}}</h2>
+    </div>
+    <div class="page-index">{{page_number}} / {{total_pages}}</div>
+  </div>
+
+  <div class="main-area">
+    <div class="figure-container">
+      <div class="figure-header">
+        <span class="figure-tag">论文原图 · {{figure_label}}</span>
+        <span class="source-hint">出自原论文 {{figure_source_location}}</span>
+      </div>
+      <div class="image-wrapper">
+        <img src="{{figure_image_path}}" alt="论文原图">
+      </div>
+      <div class="figure-caption">{{figure_caption}}</div>
+    </div>
+
+    <div class="text-container">
+      <h1 class="main-heading">{{heading_title}}</h1>
+      <div class="points-list">
+        <div class="point-card">
+          <div class="point-title">{{point_1_title}}</div>
+          <div class="point-desc">{{point_1_desc}}</div>
+        </div>
+        <div class="point-card">
+          <div class="point-title">{{point_2_title}}</div>
+          <div class="point-desc">{{point_2_desc}}</div>
+        </div>
+        <div class="point-card">
+          <div class="point-title">{{point_3_title}}</div>
+          <div class="point-desc">{{point_3_desc}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subtitle-safe-area">
+    <span class="subtitle-placeholder-tip">[底部 15% 字幕保留区 · 压制时在此渲染双行字幕]</span>
+  </div>
+</body>
+</html>

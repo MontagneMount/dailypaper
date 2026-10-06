@@ -5,12 +5,12 @@
 
 ## 当前状态
 
-- **阶段**：想法 / 规划阶段，还没开始制作
-- **分工**：Claude 写代码；ChatGPT 写稿，并审核代码和讲解稿；Gemini 制作视频（见 AGENTS.md）
-- **方式**：先手动（用户操作 ChatGPT 和 Gemini），流程成熟后再自动化
+- **阶段**：规划完成，准备开始 M1
+- **分工**：Claude 写代码（含视频合成脚本）；ChatGPT 写稿，并审核代码和讲解稿；Gemini 设计视频画面；用户最终确认、审核成片（见 AGENTS.md）
+- **方式**：用户手动操作 ChatGPT 和 Gemini；视频走代码流水线（T10 选定方案 B）；流程成熟后再自动化
 - **方向**：先只做 AI（跟着 Hugging Face 日榜选题），流程稳定后再加其他方向
 - **Git**：已推到 GitHub（https://github.com/MontagneMount/dailypaper），分支 main
-- **下一步**：M1 手动跑通第一条视频（T7），等用户决定何时开始
+- **下一步**：ChatGPT 把格式建议合进讲解稿格式并定稿（T11）；用户选首篇论文和目标时长（T14）；Claude 写合成脚本（T13）；Gemini 设计视频模板（T15）
 - **最近更新**：2026-10-06 · Claude
 
 ## 待办交接
@@ -23,10 +23,189 @@
 | T4 | M1：输入一个 arXiv ID，输出讲解稿（旧 M1，已被新里程碑取代） | 待分配 | Claude | 已取消 |
 | T5 | 确认分工细节：① ChatGPT「审核」的范围（代码、讲解稿还是视频）；② ChatGPT 写稿、Gemini 做视频是手动操作，还是由程序调用 API | 用户 | Claude | 已完成 |
 | T6 | T5 确认后，按新分工更新 README 的工作流、技术栈和里程碑 | Claude | Claude | 已完成 |
-| T7 | M1 手动跑通第一条视频：选论文 → ChatGPT 写稿 → ChatGPT 审稿 → 用户确认 → Gemini 制作视频 → 发布；记下提示词、耗时和问题，确定 Gemini 做视频的方式 | 用户 | Claude | 待处理 |
+| T7 | M1 跑通第一条视频（流程见 README 的 M1） | 用户 | Claude | 待处理 |
 | T8 | 决定选题起步方式：一开始就覆盖六个方向，还是先只做 AI（有现成日榜），流程稳定后再加其他方向 | 用户 | Claude | 已完成 |
+| T9 | 按 docs/onboarding.md 接入 ChatGPT 和 Gemini，把它们的工作记录贴进 WORKLOG.md | 用户 | Claude | 已完成 |
+| T10 | 决定 M1 的视频制作方式：A. 先试 NotebookLM 等能直接生成讲解视频的工具（不写代码）；B. 走代码流水线（Gemini 出分镜和画面设计，Claude 写合成脚本）。用户选 B | 用户 | Gemini、Claude | 已完成 |
+| T11 | 评估 docs/script-format.md 里的讲解稿格式，确定写稿格式（ChatGPT 的 4 条建议用户已确认，待 ChatGPT 合进正文定稿） | ChatGPT | Gemini | 进行中 |
+| T12 | 写合成脚本时，预留发音替换表和自动打轴（TTS 词边界事件或 Whisper） | Claude | Gemini | 待处理 |
+| T13 | 写最小版视频合成脚本：讲解稿 → 画面截图 → TTS 配音 → 字幕 → MP4；开工前先向用户说明计划 | Claude | Claude | 待处理 |
+| T14 | 选定首篇论文，确定首条视频的目标时长 | 用户 | ChatGPT | 待处理 |
+| T15 | 设计视频模板：16:9 版式、配色、字体，输出 HTML/CSS（对应讲解稿格式里的版式类型） | Gemini | Claude | 待处理 |
 
 ## 记录
+
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：记录用户确认的分工调整和格式建议，提交并 push
+
+**完成**
+- 用户同意按方案 B 调整后的分工（见 AGENTS.md）
+- 用户同意 ChatGPT 对讲解稿格式的 4 条建议；docs/script-format.md 标为「用户已确认」，合进正文之前，与正文冲突时以建议为准
+- 把这几次的改动一起提交并推到 GitHub，本条记录也包含在这次提交里
+
+**改动文件**
+- `docs/script-format.md`：状态改为「用户已确认 4 条建议」
+- `WORKLOG.md`：更新 T11 和当前状态，新增本条记录
+
+**交接**
+- → ChatGPT：把 4 条建议合进 docs/script-format.md 正文，定稿（T11）
+
+**待确认 / 风险**
+- 无
+
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：记录 T10 的决定（方案 B），贴入 ChatGPT 的接入记录，按方案 B 更新文档
+
+**完成**
+- 用户在 T10 选定方案 B：视频走代码流水线
+- 按用户转发，把 ChatGPT 的接入记录贴进 WORKLOG.md（见下一条）。用户转发时 Markdown 格式丢了，只恢复了标题和列表格式，文字没有改动
+- ChatGPT 对讲解稿格式的 4 条建议，原文记进 docs/script-format.md 文末，等用户确认
+- README：工作流改成 9 步（新增「画面设计」「合成视频」「审核成片」），技术栈、M1 和配音说明按方案 B 更新；删除备选方案，补充没选 NotebookLM 的原因
+- AGENTS.md：分工按方案 B 更新，Gemini 负责视频画面设计，配音和合成由 Claude 的脚本完成，用户增加「审核成片」
+- 交接表：T9、T10 已完成；T11 改为进行中；新增 T13、T14、T15
+- 环境检查：Node.js v24.18.0、npm 11.16.0 已安装；FFmpeg 还没装，T13 开工前要装
+
+**改动文件**
+- `README.md`：状态、定位、工作流、技术栈、配音说明、M1
+- `AGENTS.md`：参与者表、Codex 读取方式
+- `docs/script-format.md`：加上 ChatGPT 的 4 条建议
+- `WORKLOG.md`：贴入 ChatGPT 的记录，更新当前状态和交接表
+
+**交接**
+- → 用户：确认 ChatGPT 对讲解稿格式的 4 条建议（T11）；选首篇论文和目标时长（T14）
+- → Gemini：设计视频模板（T15）
+- → Claude：写最小版合成脚本（T13），开工前先向用户说明计划
+
+**待确认 / 风险**
+- TTS 引擎还没定：Edge TTS 免费，但是非官方接口，可能失效；Azure 等官方服务更稳，但要注册账号、配置 key
+
+### 2026-10-06 · ChatGPT（Codex App）
+
+**任务**：加入项目，同步工作记录
+
+**完成**
+- 按用户更正，完整重读本次提供的 AGENTS.md、WORKLOG.md、README.md，并阅读 CLAUDE.md 和 docs/script-format.md；以本次文件为准
+- 确认职责：撰写讲解稿，审核 Claude 的代码及视频制作前的稿件内容；用户最终确认，Gemini 制作视频并配音
+- 同步当前进度：Gemini 已接入；T10 视频制作方式待用户决定；T7 首条视频尚未开始
+- 初步评估 T11：草案 v2 可作为写稿基础，建议增加原文核对表、放宽字幕字数硬限制、保留发音替换与字幕的对应关系，并区分论文原图和额外标注；格式尚未定稿
+- 检查 Git 状态：AGENTS.md、WORKLOG.md 有未提交改动，docs/ 未跟踪，与近期工作记录描述的改动范围一致；未覆盖或提交
+- 本次未写稿，等待用户选定论文
+
+**改动文件**
+- 无。按用户明确要求，本次只提供记录供粘贴，不直接修改 WORKLOG.md
+
+**交接**
+- → 用户：将本条记录贴入 WORKLOG.md；Gemini 已接入，本条同步后可将 T9 标为「已完成」
+- → 用户：决定 T10 的视频制作方式；若选方案 B，交由 Claude 同步更新 README 的工作流和 M1 描述
+- → ChatGPT：T11 建议标为「进行中」，待用户确认上述格式建议后完成定稿
+- → 用户：按 T7 选定首篇论文，并确定目标时长，再交给 ChatGPT 写稿
+
+**待确认 / 风险**
+- docs/script-format.md 按方案 B 设计，但 T10 尚未决定，不能视为已批准采用代码流水线
+- 字幕分行与旁白共用文本不保证自动同步，仍需根据实际配音生成时间轴并检查
+
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：贴入 Gemini 的第二条记录，更正 NotebookLM 的说法，合并讲解稿格式草案
+
+**完成**
+- 按用户转发，把 Gemini 的第二条记录原样贴进 WORKLOG.md（见下一条）
+- **更正**：Gemini 说 NotebookLM 只有音频概览、不能生成横屏画面，这不准确。Google 官方博客显示，NotebookLM 在 2025-07-29 推出了视频概览（Video Overview），2025-08-25 起支持 80 种语言
+- 把讲解稿格式合并成草案 v2：旁白只写要念的文字，并按字幕分行（不再单独写一份字幕）；发音替换表放在稿件末尾；时间轴由代码生成
+- 把 Gemini 交给 Claude 的事加进「待办交接」（T12）
+
+**改动文件**
+- `docs/script-format.md`：改成草案 v2
+- `WORKLOG.md`：贴入 Gemini 的记录，新增 T12
+
+**交接**
+- → 用户：决定 T10。Claude 也建议选 B（理由见下）
+- → ChatGPT：评估讲解稿格式草案 v2（T11）
+
+**待确认 / 风险**
+- 更正之后，Claude 仍然建议选 B：我们要求视频按审过的稿子讲、用论文原图、带中文字幕，这些 NotebookLM 都很难保证；以后做自动化也要靠代码流水线
+- 如果选 B，M1 就不再是「不写代码」，README 的里程碑要跟着改
+
+### 2026-10-06 · Gemini（网页版）
+
+**任务**：同步 WORKLOG.md，回应 Claude 关于视频方案与稿件格式的反馈
+
+**完成**
+- 针对 T10 澄清 NotebookLM 现状：其主打 Audio Overview（英文对谈播客），无法直接生成 16:9 横屏画面与中文同步字幕；确认支持方案 B（代码流水线）
+- 采纳 Claude 对讲解稿格式的专业意见，优化交互接口：旁白调整为纯净文本 + 独立发音替换表，规避 TTS 误读；时间戳转交代码层打轴生成，ChatGPT 仅需提供自然分句
+
+**改动文件**
+- 无（由用户同步至 `WORKLOG.md`）
+
+**交接**
+- → 用户：将本条记录贴入 `WORKLOG.md`；建议在 T10 中选定方案 B（代码流水线）
+- → ChatGPT：在评估 T11 时参考上述修正方案（旁白纯净无括号，专有名词单列替换表，分句不写时间戳）
+- → Claude：后续编写合成脚本时，预留专有名词字典替换及 TTS 边界事件/Whisper 打轴逻辑
+
+**待确认 / 风险**
+- 无
+
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：把 Gemini 的接入记录贴进 WORKLOG，评估它的视频方案
+
+**完成**
+- 按用户转发，把 Gemini 的工作记录原样贴进 WORKLOG.md（见下一条）
+- Gemini 提出的讲解稿格式存为 docs/script-format.md（草案），附上 Claude 的意见
+- 把 Gemini 的两条交接写进「待办交接」（T10、T11）
+
+**改动文件**
+- `docs/script-format.md`：新建，讲解稿格式草案
+- `WORKLOG.md`：贴入 Gemini 的记录，新增 T10、T11，更新当前状态
+
+**交接**
+- → 用户：决定 M1 的视频制作方式（T10）
+- → ChatGPT：评估讲解稿格式（T11）
+
+**待确认 / 风险**
+- Gemini 说聊天窗口导不出 MP4，所以建议走代码流水线，也就是 README 里的备选方案。但 Google 还有能直接生成讲解视频的产品，比如 NotebookLM 的视频概览（Video Overview），值得先试；它对中文配音、时长和导出的支持还没核实
+- Gemini 提的稿件格式里，发音标注和停顿标记会被 TTS 照着念出来，字幕时间戳也没法事先写准，详见 docs/script-format.md 里 Claude 的意见
+
+### 2026-10-06 · Gemini（网页版）
+
+**任务**：加入项目，同步工作记录与视频制作方案
+
+**完成**
+- 通读 AGENTS.md、README.md 等项目规则，明确项目职责与多 Agent 协作流程
+- 厘清视频制作的技术边界，明确模型端无法直接导出 MP4 文件，确认推荐采用分镜/HTML 模板 + TTS + FFmpeg 的合成实现方案
+- 制定讲解稿分镜格式规范与原图引用要求，以便 ChatGPT 规范化输出定稿
+
+**改动文件**
+- 无（由用户同步至 `WORKLOG.md`）
+
+**交接**
+- → 用户：将本条记录贴入 `WORKLOG.md`；确认 M1 视频制作是否按照「Gemini 出分镜与 HTML/CSS 资产 + Claude 写合成脚本」的方式推进
+- → ChatGPT：后续撰写与终审讲解稿时，按照「分镜编号与时长 + 画面呈现与原图指示 + 旁白口播 + 字幕分句」格式交付
+
+**待确认 / 风险**
+- 风险：Gemini 无法直接在聊天窗口导出 MP4 视频文件。需要尽快与 Claude 协同建立基础的合成与排版代码管道，以确保 M1 阶段流程顺利跑通。
+
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：准备 ChatGPT 和 Gemini 的接入材料
+
+**完成**
+- 新建 docs/onboarding.md：接入步骤，以及发给 ChatGPT、Gemini 的接入消息
+- Gemini 的接入消息里请它说明做视频的能力、需要的稿件格式和限制，为 M1 做准备
+- AGENTS.md 里网页版 agent 的接入方式改为参照 docs/onboarding.md，要发的文件加上 README.md
+
+**改动文件**
+- `docs/onboarding.md`：新建
+- `AGENTS.md`：第 3 节、第 6 节的网页版接入方式
+- `WORKLOG.md`：新增 T9，更新当前状态
+
+**交接**
+- → 用户：按 docs/onboarding.md 接入 ChatGPT 和 Gemini，把它们的工作记录贴进 WORKLOG.md（T9）
+
+**待确认 / 风险**
+- Gemini 对自己做视频能力的说法不一定准确，最终以 M1 实际做出来的效果为准
 
 ### 2026-10-06 · Claude（Claude Code）
 

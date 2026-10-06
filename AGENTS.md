@@ -14,12 +14,12 @@
 
 | 参与者 | 角色 |
 |---|---|
-| 用户 | 项目负责人：做决定、分配任务、最终确认内容、发布视频 |
-| Claude（Claude Code） | 写代码 |
+| 用户 | 项目负责人：做决定、分配任务、最终确认内容、审核成片、发布视频 |
+| Claude（Claude Code） | 写代码，包括视频合成脚本（画面截图、TTS 配音、字幕、FFmpeg 合成） |
 | ChatGPT | 写稿（论文讲解稿）；审核 Claude 写的代码和讲解稿内容，也就是视频制作之前的所有内容 |
-| Gemini | 制作视频 |
+| Gemini | 视频画面设计：版式和视觉风格（HTML/CSS 模板），配合 Claude 的合成脚本出片 |
 
-分工由用户在 2026-10-06 确定。以后如有调整，由用户决定，并同步更新这张表。
+分工由用户在 2026-10-06 确定；同日按 T10 选定代码流水线，Gemini 改为负责画面设计，配音和合成由 Claude 的脚本完成。以后如有调整，由用户决定，并同步更新这张表。
 
 **现阶段先手动**：ChatGPT 和 Gemini 由用户在网页或 App 里操作，程序不调用它们的 API；流程成熟后再逐步自动化（见 README.md 的里程碑）。
 
@@ -41,7 +41,7 @@
 
 ### 不能直接读写文件的 agent（如网页版 ChatGPT、Gemini）
 
-- 用户把 AGENTS.md 和 WORKLOG.md 的内容发给它。
+- 用户按 [docs/onboarding.md](docs/onboarding.md)，把 AGENTS.md、WORKLOG.md、README.md 发给它，并发送接入消息。
 - 它按第 4 节的格式输出一条记录，由用户粘贴进 WORKLOG.md。
 
 ## 4. 记录格式
@@ -80,7 +80,7 @@
 
 | 工具 | 方式 |
 |---|---|
-| Codex（ChatGPT 里的编程 agent，或 Codex CLI） | 自动读取 `AGENTS.md` |
+| Codex（Codex App、Codex CLI，或 ChatGPT 里的 Codex） | 自动读取 `AGENTS.md` |
 | Claude Code | `CLAUDE.md` 里写了 `@AGENTS.md`，会自动引入 |
 | Gemini CLI | 用到时新建 `GEMINI.md`，写一行 `@./AGENTS.md` |
-| 网页版聊天 | 用户手动发送 AGENTS.md 和 WORKLOG.md |
+| 网页版 / App（ChatGPT、Gemini） | 按 `docs/onboarding.md` 上传文件并发送接入消息 |

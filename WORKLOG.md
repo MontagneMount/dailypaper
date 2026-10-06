@@ -6,11 +6,11 @@
 ## 当前状态
 
 - **阶段**：M1 进行中：格式 v1.1 已定稿；审核发现的 5 类问题已修复，等 ChatGPT 复审（T20）
-- **分工**：Claude 写代码（含视频合成脚本）；ChatGPT 写稿，并审核代码和讲解稿；Gemini 设计视频画面；用户最终确认、审核成片（见 AGENTS.md）
+- **分工**：Claude 写代码（含视频合成脚本）；ChatGPT 写稿，并审核代码和讲解稿；Gemini 负责视觉设计（模板、示意图、红框定位、频道门面）和成片预审；用户最终确认、审核成片（见 AGENTS.md）
 - **方式**：用户手动操作 ChatGPT 和 Gemini；视频走代码流水线（T10 选定方案 B）；流程成熟后再自动化
 - **方向**：先只做 AI（跟着 Hugging Face 日榜选题），流程稳定后再加其他方向
 - **Git**：已推到 GitHub（https://github.com/MontagneMount/dailypaper），分支 main
-- **下一步**：ChatGPT 复审代码和回归测试（T20）；用户选首篇论文和目标时长（T14）；字幕精确对齐继续按 T12 推进
+- **下一步**：ChatGPT 复审代码和回归测试（T20）；Gemini 试一次成片预审（T21），设计封面模板（T22），做频道门面（T23）；用户选首篇论文和目标时长（T14）
 - **最近更新**：2026-10-06 · Claude
 
 ## 待办交接
@@ -37,9 +37,43 @@
 | T18 | 审核合成脚本代码（src/）：逻辑是否正确，稿件解析是否符合讲解稿格式（第一轮审核完成，5 类问题转 T19 修复、T20 复审） | ChatGPT | Claude | 已完成 |
 | T19 | 修复 T18 的 R1～R5：重复页码、红框坐标、复合字段校验、开头元信息校验、发音替换级联；补充对应回归检查，详见最新审核记录 | Claude | ChatGPT | 已完成 |
 | T20 | T19 完成后复审代码及回归结果，确认与 docs/script-format.md v1.1 一致 | ChatGPT | ChatGPT | 待处理 |
+| T21 | 用示例视频（episodes/example/output/video.mp4，女声）试一次成片预审：看画面、听声音，列出带时间点的问题（读错的词、字幕和声音没对上、画面问题、节奏） | Gemini | Claude | 待处理 |
+| T22 | 设计 B 站封面模板 templates/bilibili-cover.html，要求见 templates/README.md | Gemini | Claude | 待处理 |
+| T23 | 提频道名建议，做频道头像和头图（频道名由用户最终决定） | Gemini | Claude | 待处理 |
+| T24 | 合成脚本生成 B 站封面（等 T22 的模板）；讲解稿开头要加「封面文字」字段，交 ChatGPT 确认 | Claude | Claude | 待处理 |
+| T25 | 背景音乐：用 Gemini 的「制作音乐」做轻音乐，合成时压低音量垫在讲解下面 | Gemini、Claude | Claude | 暂缓 |
+| T26 | 合成脚本支持插入视频片段，比如 Gemini 生成的片头 | Claude | Claude | 暂缓 |
 
 ## 记录
 
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：按用户决定，扩充 Gemini 的分工
+
+**完成**
+- 用户问为什么不直接用 Gemini App 的「制作视频」。Claude 的回答：它是生成式视频，一次只有几秒，可能画错论文原图和数字，也不能按审过的稿子讲，不适合做讲解的主体。用户决定「插入 Gemini 生成的视频片段」先放一放（T26，暂缓）
+- 用户采纳 Gemini 的 4 项新工作：
+  - 成片预审：看画面、听声音，列出带时间点的问题
+  - 红框定位：看论文原图给出「上, 左, 宽, 高」，用户确认
+  - 示意图：每期优先写成 SVG，中文不会写错
+  - 频道门面：B 站封面模板、头像、头图、频道名建议
+- 背景音乐先放一放（T25，暂缓）
+- 更新 AGENTS.md 的分工、README 的工作流和技术栈、docs/onboarding.md 的接入消息；templates/README.md 写明封面模板的要求
+- 之前的改动分两次提交并推到 GitHub：3b4b8f5（格式 v1.1）、a59e289（合成脚本）
+
+**改动文件**
+- `AGENTS.md`、`README.md`、`docs/onboarding.md`、`templates/README.md`、`WORKLOG.md`
+
+**交接**
+- → Gemini：用示例视频试一次成片预审（T21）；设计封面模板（T22）；频道名、头像、头图（T23）
+- → Claude：封面模板到了之后，让脚本生成封面（T24）
+
+**待确认 / 风险**
+- 红框位置和成片预审都是 Gemini 看图、看视频后的判断，可能有偏差，最后要用户确认
+
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：修复代码审核问题 R1～R5（T19）；默认配音改成女声（T17）
 ### 2026-10-06 · Claude（Claude Code）
 
 **任务**：修复代码审核问题 R1～R5（T19）；默认配音改成女声（T17）

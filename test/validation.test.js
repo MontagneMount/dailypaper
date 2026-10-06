@@ -93,7 +93,7 @@ test("R3 同一字段写两次、字段名写错都会报错", () => {
   assertError(typo, "「主标提」不是 figure_text 版式的字段");
 });
 
-test("R4 开头缺少字段会报错，和用不用封面无关", () => {
+test("R4 开头缺少字段会报错", () => {
   const removed = [
     "- arXiv：0000.00000v1\n",
     "- 状态：预印本\n",
@@ -103,6 +103,16 @@ test("R4 开头缺少字段会报错，和用不用封面无关", () => {
   ];
   const result = check((t) => removed.reduce((text, line) => replaceOnce(text, line, ""), t));
   for (const key of ["arXiv", "状态", "链接", "简介", "标签"]) assertError(result, `缺少「${key}」`);
+});
+
+test("R4 没有封面页时，照样检查开头", () => {
+  const result = check((t) => {
+    const withoutCover = t.replace(/### 第 1 页 · 开场[\s\S]*?(?=### 第 2 页)/, "");
+    assert.notEqual(withoutCover, t, "没能删掉封面页");
+    return replaceOnce(withoutCover, "- 链接：https://arxiv.org/abs/0000.00000v1\n", "");
+  });
+  assert.ok(result.slides.every((slide) => slide.layout !== "cover"), "封面页应该已经删掉");
+  assertError(result, "缺少「链接」");
 });
 
 test("R4 arXiv 必须带版本号", () => {
@@ -120,6 +130,19 @@ test("R4 链接要和 arXiv 编号是同一个版本", () => {
 test("R4 预印本的「会议或期刊」必须写「无」", () => {
   const result = check((t) => replaceOnce(t, "- 会议或期刊：无", "- 会议或期刊：NeurIPS 2026"));
   assertError(result, "要写「无」");
+});
+
+test("T27 核对表写 v10、开头是 v1 时会给出警告", () => {
+  const result = check((t) => replaceOnce(t, "| v1 | Table 2 |", "| v10 | Table 2 |"));
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("v10") && warning.includes("不一致")),
+    `应该警告版本不一致，实际：${result.warnings.join("\n") || "（没有警告）"}`,
+  );
+});
+
+test("T27 核对表写完整编号且版本一致时，不警告", () => {
+  const result = check((t) => replaceOnce(t, "| v1 | Table 2 |", "| 0000.00000v1 | Table 2 |"));
+  assert.deepEqual(result.warnings, []);
 });
 
 test("R5 发音替换只做一次，替换出的读法不会被再次替换", () => {

@@ -172,7 +172,11 @@ function checkSourceTable(rows, header, warnings) {
   if (!version) return;
   for (const { cells, lineNo } of rows) {
     const usedVersion = cells[2] ?? "";
-    if (usedVersion && !usedVersion.includes(version)) {
+    // Compare whole version tags, so "v10" never counts as "v1". A date instead of a tag is not compared.
+    const tags = usedVersion.match(/v\d+/g) ?? [];
+    if (!usedVersion) {
+      warnings.push(`原文核对表（第 ${lineNo} 行）：没写论文版本`);
+    } else if (tags.length > 0 && !tags.includes(version)) {
       warnings.push(`原文核对表（第 ${lineNo} 行）：论文版本写的是「${usedVersion}」，和开头的 ${version} 不一致`);
     }
   }

@@ -10,6 +10,11 @@ const TEMPLATES_DIR = fileURLToPath(new URL("../templates/", import.meta.url));
 const WIDTH = 1920;
 const HEIGHT = 1080;
 
+// A figure at least this many times wider than tall looks tiny next to the points, so the page
+// switches to the wide variant of its template: figure across the top, points below it.
+const WIDE_FIGURE_RATIO = 2.2;
+const WIDE_VARIANTS = { figure_text: "figure_text_wide" };
+
 /**
  * @returns {Promise<{ frames: Array<{ file: string, duration: number }>, warnings: string[] }>}
  */
@@ -34,8 +39,7 @@ export async function renderFrames(slides, narration, workDir) {
       const timing = narration.pages[slideIndex];
       const order = pad(slideIndex + 1);
       const htmlFile = path.join(pagesDir, `page${order}.html`);
-      fs.writeFileSync(htmlFile, fillTemplate(slide));
-      await page.goto(pathToFileURL(htmlFile).href);
+      const template = await openSlide(page, slide, htmlFile);
 
       const problems = await page.evaluate(prepareSlide, {
         cardCounts: slide.cardCounts,
@@ -62,7 +66,8 @@ export async function renderFrames(slides, narration, workDir) {
         const end = index === timing.lines.length - 1 ? timing.end : timing.lines[index + 1].start;
         frames.push({ file, duration: end - line.start });
       }
-      console.log(`  第 ${slide.number} 页画面完成（${timing.lines.length} 帧）`);
+      const variant = template === slide.layout ? "" : `，${template}`;
+      console.log(`  第 ${slide.number} 页画面完成（${timing.lines.length} 帧${variant}）`);
     }
   } finally {
     await browser.close();
@@ -90,6 +95,18 @@ export async function renderCover(cover, workDir) {
   } finally {
     await browser.close();
   }
+}
+
+/** Fill the slide's template and open it; switch to the wide variant for a very wide figure. */
+async function openSlide(page, slide, htmlFile) {
+  fs.writeFileSync(htmlFile, fillTemplate(slide));
+  await page.goto(pathToFileURL(htmlFile).href);
+
+  const variant = WIDE_VARIANTS[slide.layout];
+  if (!variant || (await page.evaluate(figureRatio)) < WIDE_FIGURE_RATIO) return slide.layout;
+  fs.writeFileSync(htmlFile, fillTemplate({ ...slide, layout: variant }));
+  await page.goto(pathToFileURL(htmlFile).href);
+  return variant;
 }
 
 function fillTemplate({ layout, values }) {
@@ -209,6 +226,14 @@ async function prepareSlide({ cardCounts, hidden, fitGrid }) {
   }
 
   return problems;
+}
+
+/** Width ÷ height of the paper figure on the page, or 0 when there is none or it failed to load. */
+async function figureRatio() {
+  const image = document.querySelector(".image-wrapper img");
+  if (!image) return 0;
+  await image.decode().catch(() => {});
+  return image.naturalHeight > 0 ? image.naturalWidth / image.naturalHeight : 0;
 }
 
 function showSubtitle(text) {

@@ -8,6 +8,7 @@
     "render": "node src/render.js",
     "check": "node src/render.js --check",
     "assets": "node src/export-assets.js",
+    "figure": "node src/crop-figure.js",
     "test": "node --test"
   },
   "engines": {

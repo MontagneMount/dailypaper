@@ -372,6 +372,8 @@ const builders = {
       },
       cardCounts: { ".points-list .point-card": points.length },
       hideWhenEmpty: { ".step-pill": data["步骤标签"] },
+      // Only matters in the wide variant, where the points sit in one row.
+      fitGrid: ".points-list",
     };
   },
 

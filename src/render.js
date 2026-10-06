@@ -6,12 +6,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { parseScript } from "./parse-script.js";
 import { buildSlides } from "./layouts.js";
-import { createNarration, DEFAULT_VOICE } from "./tts.js";
+import { createNarration, DEFAULT_RATE, DEFAULT_VOICE } from "./tts.js";
 import { renderCover, renderFrames } from "./frames.js";
-import { composeVideo, writeSrt } from "./compose.js";
+import { composeVideo, writeChapters, writeSrt } from "./compose.js";
 
 const USAGE = `用法：
-  npm run render -- <本期文件夹> [--voice ${DEFAULT_VOICE}] [--rate +0%]
+  npm run render -- <本期文件夹> [--voice ${DEFAULT_VOICE}] [--rate ${DEFAULT_RATE}]
   npm run check -- <本期文件夹>`;
 
 async function main() {
@@ -60,8 +60,10 @@ async function main() {
   console.log("[3/4] 合成视频");
   const videoFile = path.join(workDir, "video.mp4");
   const srtFile = path.join(workDir, "subtitles.srt");
+  const chaptersFile = path.join(workDir, "chapters.txt");
   await composeVideo({ frames, audioFile: narration.audioFile, outFile: videoFile, workDir, duration: narration.duration });
   writeSrt(narration, srtFile);
+  writeChapters(slides.map((slide, index) => ({ start: narration.pages[index].start, title: slide.topic })), chaptersFile);
 
   console.log("[4/4] 生成 B 站封面");
   const { file: coverFile, warnings: coverWarnings } = await renderCover(cover, workDir);
@@ -70,11 +72,12 @@ async function main() {
   console.log(`\n完成！视频时长 ${formatDuration(narration.duration)}`);
   console.log(`  视频：${videoFile}`);
   console.log(`  字幕：${srtFile}`);
+  console.log(`  章节：${chaptersFile}（贴到 B 站的章节设置、简介或置顶评论，观众可以点时间跳转）`);
   console.log(`  封面：${coverFile}`);
 }
 
 function parseArgs(args) {
-  const options = { episodeDir: null, check: false, voice: DEFAULT_VOICE, rate: "+0%" };
+  const options = { episodeDir: null, check: false, voice: DEFAULT_VOICE, rate: DEFAULT_RATE };
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "--check") options.check = true;

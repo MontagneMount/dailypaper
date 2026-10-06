@@ -1,4 +1,4 @@
-// Turn the frames and the narration into an MP4, and write an SRT subtitle file.
+// Turn the frames and the narration into an MP4, and write the SRT subtitles and the chapter list.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -34,6 +34,23 @@ export function writeSrt(narration, file) {
     .map((line, index) => `${index + 1}\n${srtTime(line.start)} --> ${srtTime(line.end)}\n${line.display}\n`)
     .join("\n");
   fs.writeFileSync(file, body);
+}
+
+/**
+ * One "mm:ss 标题" line per page. Pasted into Bilibili's chapter setting, or into the description
+ * or a pinned comment (where the timestamps are clickable), it lets viewers jump between parts.
+ */
+export function writeChapters(chapters, file) {
+  fs.writeFileSync(file, `${formatChapters(chapters).join("\n")}\n`);
+}
+
+/** [{ start: 17.04, title: "任务" }] -> ["00:17 任务"] */
+export function formatChapters(chapters) {
+  const two = (n) => String(n).padStart(2, "0");
+  return chapters.map(({ start, title }) => {
+    const seconds = Math.floor(start);
+    return `${two(Math.floor(seconds / 60))}:${two(seconds % 60)} ${title}`;
+  });
 }
 
 /** 83.5 -> "00:01:23,500" */

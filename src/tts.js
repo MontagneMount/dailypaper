@@ -16,6 +16,8 @@ const { MsEdgeTTS, OUTPUT_FORMAT } = msedgeTts;
 
 // Chosen by the user on 2026-10-06 (T17). The male voice is zh-CN-YunxiNeural.
 export const DEFAULT_VOICE = "zh-CN-XiaoxiaoNeural";
+// 1.25× the voice's normal speed; the user found the normal speed too slow (2026-10-07).
+export const DEFAULT_RATE = "+25%";
 
 const SAMPLE_RATE = 24000;
 const BYTES_PER_SAMPLE = 2; // 16-bit mono PCM

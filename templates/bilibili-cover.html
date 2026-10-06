@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Bilibili 视频封面模板 - DailyPaper</title>
+  <!--
+    【B 站视频封面推荐尺寸与规范说明】
+    1. 推荐尺寸：1920 × 1080 像素（16:9 标准横版比例，与 1080P 视频画幅点对点对应）。
+       信息来源：Bilibili 创作者服务中心官方投稿规范（支持 16:9 比例，推荐 1920×1080 上传）。
+    2. 避让遮挡设计：
+       - 左下角安全区：B 站客户端与网页端会在此叠加【播放量】与【弹幕数】图标（约 260px × 80px）。
+       - 右下角安全区：会叠加半透明黑底【视频时长标签】（约 180px × 80px）。
+       - 底部整体：预留 120px 安全暗角，核心大字与主要卖点全部上浮至中上方与左侧视线区。
+    3. 视觉规范：
+       - 严禁放论文原图（封面空间无法规范标注引用出处）；
+       - 纯 CSS / 内联 SVG 矢量科技图形，字体超大、对比极强，手机端缩略图缩小至 150px 宽依然一眼看清。
+  -->
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: #070a13;
+      background-image: 
+        radial-gradient(circle at 85% 25%, rgba(59, 130, 246, 0.28) 0%, transparent 50%),
+        radial-gradient(circle at 15% 75%, rgba(16, 185, 129, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.12) 0%, transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
+      color: #ffffff;
+      position: relative;
+    }
+
+    /* 顶部频道品牌与标签栏 */
+    .header-bar {
+      height: 140px;
+      padding: 0 100px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 900;
+      color: #ffffff;
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+    }
+    .brand-title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      background: linear-gradient(90deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .tags-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .badge-tag {
+      padding: 10px 24px;
+      border-radius: 999px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .tag-field {
+      background: rgba(37, 99, 235, 0.25);
+      border: 2px solid #3b82f6;
+      color: #60a5fa;
+    }
+    .tag-status {
+      background: rgba(16, 185, 129, 0.25);
+      border: 2px solid #10b981;
+      color: #34d399;
+    }
+
+    /* 核心视觉展示区（左侧为主、上浮排版） */
+    .content-stage {
+      height: 740px;
+      padding: 20px 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 1360px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* 震撼卖点高亮小标 (Highlight Pill) */
+    .highlight-pill {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.25), rgba(245, 158, 11, 0.15));
+      border: 2px solid #f59e0b;
+      padding: 10px 26px;
+      border-radius: 12px;
+      font-size: 26px;
+      font-weight: 800;
+      color: #fbbf24;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
+    }
+    .highlight-pill::before {
+      content: "★";
+      color: #f59e0b;
+      font-size: 22px;
+    }
+
+    /* 封面核心大字 (Super Headline) */
+    .cover-headline {
+      font-size: 94px;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -2px;
+      color: #ffffff;
+      margin-bottom: 34px;
+      text-shadow: 0 6px 30px rgba(0, 0, 0, 0.8), 0 0 50px rgba(56, 189, 248, 0.3);
+      max-width: 1280px;
+      word-break: break-word;
+    }
+
+    /* 副标题 / 论文点睛短语 */
+    .cover-sub {
+      font-size: 38px;
+      font-weight: 600;
+      color: #cbd5e1;
+      line-height: 1.4;
+      max-width: 1200px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .sub-bar {
+      width: 6px;
+      height: 38px;
+      background: #3b82f6;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    /* 右侧几何科技徽章挂件（纯代码矢量展示） */
+    .hero-graphic {
+      position: absolute;
+      right: 100px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 440px;
+      height: 440px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      z-index: 5;
+    }
+    .hero-graphic svg {
+      width: 180px;
+      height: 180px;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.5));
+    }
+    .hero-metric-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .hero-metric-val {
+      font-size: 52px;
+      font-weight: 900;
+      color: #34d399;
+      letter-spacing: -1px;
+    }
+
+    /* 底部避让安全保护层（120px 预留，避开 B 站播放量与时长覆盖） */
+    .bottom-safety-zone {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.65) 100%);
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部栏 -->
+  <div class="header-bar">
+    <div class="brand-group">
+      <div class="brand-icon">DP</div>
+      <div class="brand-title">{{brand_text}}</div>
+    </div>
+    <div class="tags-group">
+      <div class="badge-tag tag-field">{{field_tag}}</div>
+      <div class="badge-tag tag-status">{{paper_status}}</div>
+    </div>
+  </div>
+
+  <!-- 核心视效大字区 -->
+  <div class="content-stage">
+    <div class="highlight-pill">{{impact_highlight}}</div>
+    <h1 class="cover-headline">{{cover_title}}</h1>
+    <div class="cover-sub">
+      <span class="sub-bar"></span>
+      <span>{{cover_subtitle}}</span>
+    </div>
+  </div>
+
+  <!-- 右侧纯代码矢量图表与突破性徽章（不放论文原图） -->
+  <div class="hero-graphic">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="18" y="14" width="48" height="64" rx="6" stroke="#38bdf8" stroke-width="4" fill="rgba(56,189,248,0.08)"/>
+      <path d="M30 32H54" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+      <path d="M30 46H48" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+      <path d="M30 60H42" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+      <path d="M52 38L78 52L62 58L76 78L64 82L52 64L44 72L52 38Z" fill="#34d399" stroke="#059669" stroke-width="2"/>
+    </svg>
+    <div class="hero-metric-title">CORE BREAKTHROUGH</div>
+    <div class="hero-metric-val">{{metric_summary}}</div>
+  </div>
+
+  <!-- 底部遮挡安全区 -->
+  <div class="bottom-safety-zone"></div>
+</body>
+</html>

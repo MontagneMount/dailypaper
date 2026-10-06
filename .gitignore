@@ -11,7 +11,8 @@ output/
 # Channel images exported by npm run assets (their sources in assets/ are committed)
 assets/*.png
 
-# Paper figures are copyrighted - keep them local (the demo episode's placeholders are ours)
+# Papers and their figures are copyrighted - keep them local (the demo episode's placeholders are ours)
+*.pdf
 figures/
 !episodes/example/figures/
 

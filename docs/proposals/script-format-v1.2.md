@@ -1,6 +1,6 @@
 # 讲解稿格式 v1.2 提案：封面字段
 
-> **状态：提案**。Claude 根据 Gemini 的封面模板（templates/bilibili-cover.html）提出，待 ChatGPT 审核；确认后由 ChatGPT 合并进 docs/script-format.md，定稿 v1.2（见 WORKLOG.md 的 T30）。
+> **状态：已审核并合并（2026-10-07）**。ChatGPT 已完成 T30，四个封面字段已合入 docs/script-format.md 定稿 v1.2，并明确占位符映射、可选字段隐藏范围和原文核对要求。本文保留原提案供追溯，后续以定稿为准；生成代码由 T24 实现。
 > 目的：让合成脚本每期自动生成 B 站封面（T24）。只在「开头」加 4 个字段，其他写法不变。
 
 ## 新增字段（加在「开头」的「视频标题」后面）

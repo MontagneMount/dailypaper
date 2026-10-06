@@ -1,6 +1,6 @@
 # dailypaper
 
-每天挑选一篇热门的前沿论文，生成中文讲解稿，做成视频发布到 B 站（频道「DailyPaper 每日论文」）。先做 AI，之后扩展到经济、材料、化学、数学、物理。
+每天挑选一篇热门的前沿论文，生成中文讲解稿，做成视频发布到 B 站（栏目名「DailyPaper 每日论文」）。先做 AI，之后扩展到经济、材料、化学、数学、物理。
 
 > **状态：🛠️ M1 进行中**：合成脚本第一版已完成，可以用示例稿生成视频。
 
@@ -13,13 +13,14 @@ npm install
 npm run render -- episodes/example
 ```
 
-生成的视频在 `episodes/example/output/video.mp4`，SRT 字幕在同一个文件夹的 `subtitles.srt`。
+生成的视频在 `episodes/example/output/video.mp4`，同一个文件夹里还有 SRT 字幕 `subtitles.srt` 和 B 站封面 `cover.png`。
 
 **做新的一期**：新建 `episodes/<日期>-<arXiv 编号>/`，放进这些文件（可以照着 `episodes/example/` 写）：
 
+- `<arXiv 编号>v<版本>.pdf`：论文 PDF，如 `2610.05608v1.pdf`，每期开始时由 Claude 或 ChatGPT 先下载（不提交到仓库）
 - `script.md`：讲解稿，格式见 [docs/script-format.md](docs/script-format.md)
-- `figures/`：论文原图，如 `figure2.png`（有版权，不提交到仓库）
-- `diagrams/`：示意图，如 `page5.png`（Gemini 制作）
+- `figures/`：论文原图，如 `figure2.png`（有版权，不提交到仓库）。由 Claude 用 `npm run figure` 从 PDF 原样截取：先 `npm run figure -- <本期文件夹> <页码>` 渲染整页找到图，再 `npm run figure -- <本期文件夹> <页码> <名字> <上,左,下,右>` 截出来（范围是 0～1 的小数，白边会自动裁掉）
+- `diagrams/`：示意图，如 `page5.svg`（Claude 按稿子画，优先写成 SVG）
 
 生成之前，可以先只检查稿子：
 
@@ -27,16 +28,16 @@ npm run render -- episodes/example
 npm run check -- episodes/<本期文件夹>
 ```
 
-可选参数：`--voice zh-CN-YunxiNeural` 换成男声（默认是女声「晓晓」），`--rate +10%` 让语速快 10%。
+可选参数：`--voice zh-CN-YunxiNeural` 换成男声（默认是女声「晓晓」）；`--rate +0%` 换回正常语速（默认是 `+25%`，也就是 1.25 倍）。
 
 改了代码之后，运行 `npm test`，确认稿子的检查规则没有被改坏。
 
-**频道头像和头图**：源文件在 `assets/`（Gemini 设计）。运行 `npm run assets`，导出 `assets/avatar.png`（800×800）和 `assets/channel-banner.png`（2560×400），再上传到 B 站。导出的图片不提交，改了源文件之后重新导出。
+**头像和头图**：源文件在 `assets/`（Gemini 设计）。要用时运行 `npm run assets`，导出 `assets/avatar.png`（800×800）和 `assets/channel-banner.png`（2560×400）。导出的图片不提交，改了源文件之后重新导出。
 
 ## 定位
 
 - **AI 辅助 + 人工把关**：写稿、做视频交给 AI；内容准不准，先由 ChatGPT 审核，再由用户最终确认。
-- **先手动，再自动**：现阶段由用户手动操作 ChatGPT 和 Gemini，视频由 Claude 写的合成脚本生成；流程成熟后，再把稳定的步骤改成程序调用 API。
+- **先手动，再自动**：现阶段由用户手动操作 ChatGPT，视频由 Claude 写的合成脚本生成；流程成熟后，再把稳定的步骤改成程序调用 API。
 - **先验证，再加量**：先每周 3 更，看看有没有人看，再考虑日更。
 
 ## 工作流
@@ -44,12 +45,12 @@ npm run check -- episodes/<本期文件夹>
 | 步骤 | 负责 | 做什么 |
 |---|---|---|
 | ① 选题 | 用户 | 按「选题与受众」里的来源挑一篇论文，定好目标时长（M2 之后由脚本先列出候选） |
-| ② 准备材料 | Claude 的脚本 + Gemini | 整理论文信息、正文和原图，生成给 ChatGPT 的写稿材料包；用到红框的页，由 Gemini 看原图给出红框位置，用户确认 |
+| ② 准备材料 | Claude 或 ChatGPT | 先把论文 PDF 下载到本期文件夹；整理论文信息和正文，生成给 ChatGPT 的写稿材料包（M2 之后由 Claude 的脚本做） |
 | ③ 写稿 | ChatGPT | 先判断这篇适合科普向还是专业向，再按[讲解稿格式](docs/script-format.md)写稿，附标题、简介、标签 |
 | ④ 审稿 | ChatGPT → 用户 | ChatGPT 开一个新对话，逐条核对数字和结论是否出自原文；用户最终确认 |
-| ⑤ 画面设计 | Gemini | 视频模板和封面模板（HTML/CSS）设计一次反复用；每期按稿子画示意图，优先写成 SVG（中文不会写错） |
-| ⑥ 合成视频 | Claude 的脚本 | 按定稿生成每页画面、TTS 配音和字幕，用 FFmpeg 合成 MP4；B 站封面也由脚本按模板生成（待做） |
-| ⑦ 审核成片 | Gemini → 用户 | Gemini 先看画面、听声音，列出带时间点的问题（读错的词、字幕和声音没对上、画面问题）；用户最终确认 |
+| ⑤ 画面素材 | Claude | 按稿子从 PDF 截取论文原图（`npm run figure`）、画示意图（优先写成 SVG，中文不会写错）；用到红框的页，看原图给出红框位置，用户确认。视频模板和封面模板（HTML/CSS）也由 Claude 维护 |
+| ⑥ 合成视频 | Claude 的脚本 | 按定稿生成每页画面、TTS 配音和字幕，用 FFmpeg 合成 MP4；B 站封面也由脚本按模板生成 |
+| ⑦ 审核成片 | Claude → 用户 | Claude 先检查画面和时间轴（逐页截图、字幕和配音的时间、超出版面的提醒），列出带时间点的问题；用户听声音（读错的词、停顿是否自然）并最终确认 |
 | ⑧ 发布 | 用户 | 上传 B 站，声明含 AI 生成内容，注明论文出处 |
 | ⑨ 归档 | Claude 的脚本 | 保存讲解稿、审稿记录和发布信息，避免重复选题 |
 
@@ -60,8 +61,8 @@ M1 阶段先只写⑥的合成脚本，②和⑨先手动完成。
 | 用途 | 现阶段 | 成熟后（自动） |
 |---|---|---|
 | 写稿、审稿 | ChatGPT（网页 / App） | OpenAI API |
-| 画面设计 | Gemini（网页 / App）：视频模板和封面模板（HTML/CSS），示意图（SVG） | 同左 |
-| 成片预审 | Gemini（网页 / App）：上传成片，看画面、听声音 | 同左 |
+| 画面素材 | Claude：视频模板和封面模板（HTML/CSS）、示意图（SVG）；论文原图用 pdf.js 在 Edge 里从 PDF 截取 | 同左 |
+| 成片预审 | Claude 检查画面和时间轴，用户听声音 | 同左 |
 | 视频合成 | Node.js 脚本：Playwright 控制 Edge 截图，FFmpeg（ffmpeg-static）合成 | 同左，再加定时运行 |
 | 配音 | Edge TTS（msedge-tts，免费，非官方接口） | 开始定期发布前换成官方服务（Azure、火山引擎、阿里云等） |
 | 辅助脚本 | Node.js：选题候选、材料整理、归档 | 再加定时运行（Windows 任务计划程序） |
@@ -108,7 +109,7 @@ M1 阶段先只写⑥的合成脚本，②和⑨先手动完成。
 
 ## 协作方式
 
-本项目由用户和多个 AI agent 协作开发：Claude 写代码；ChatGPT 写稿，并审核代码和讲解稿；Gemini 负责视觉设计和成片预审。协作规则和进度见：
+本项目由用户和多个 AI agent 协作开发：Claude 写代码，并负责画面素材和成片的画面检查；ChatGPT 写稿，并审核代码和讲解稿。Gemini 设计过最初的模板、头像和头图，2026-10-07 起暂时退出。协作规则和进度见：
 
 - [AGENTS.md](AGENTS.md)：协作共识，所有 agent 开始工作前必读
 - [WORKLOG.md](WORKLOG.md)：工作记录和待办交接

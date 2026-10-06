@@ -9,6 +9,7 @@
 
 - 完整规划见 [README.md](README.md)
 - GitHub 仓库：[MontagneMount/dailypaper](https://github.com/MontagneMount/dailypaper)
+- B 站频道名：「DailyPaper 每日论文」（用户 2026-10-06 选定），画面上写作「DailyPaper · 每日论文」
 
 ## 2. 参与者
 

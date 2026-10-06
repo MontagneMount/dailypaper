@@ -8,6 +8,8 @@ node_modules/
 
 # Generated files (videos, audio, slides)
 output/
+# Channel images exported by npm run assets (their sources in assets/ are committed)
+assets/*.png
 
 # Paper figures are copyrighted - keep them local (the demo episode's placeholders are ours)
 figures/

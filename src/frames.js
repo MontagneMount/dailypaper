@@ -87,7 +87,7 @@ function pad(number) {
   return String(number).padStart(2, "0");
 }
 
-async function launchBrowser() {
+export async function launchBrowser() {
   try {
     return await chromium.launch({ channel: "msedge" });
   } catch {

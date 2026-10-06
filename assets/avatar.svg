@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f1d"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="paperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="speedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="800" rx="400" fill="url(#bgGrad)"/>
+  <circle cx="400" cy="400" r="390" stroke="rgba(255,255,255,0.08)" stroke-width="4" fill="none"/>
+  <circle cx="400" cy="380" r="300" fill="url(#glowGrad)"/>
+
+  <path d="M210 240 C210 220, 230 205, 255 205 L375 205 C395 205, 400 220, 400 230 L400 580 C395 570, 380 560, 360 560 L245 560 C225 560, 210 545, 210 525 Z" 
+        fill="url(#paperGrad)" opacity="0.9"/>
+
+  <path d="M400 230 C405 215, 420 205, 445 205 L550 205 C575 205, 590 220, 590 240 L590 525 C590 545, 575 560, 550 560 L440 560 C420 560, 405 570, 400 580 Z" 
+        fill="#1e293b" stroke="#38bdf8" stroke-width="6"/>
+
+  <rect x="435" y="270" width="115" height="12" rx="6" fill="#64748b"/>
+  <rect x="435" y="310" width="90" height="12" rx="6" fill="#64748b"/>
+  <rect x="435" y="350" width="105" height="12" rx="6" fill="#64748b"/>
+
+  <path d="M300 480 L520 260 L440 260 L570 190 L530 330 L470 290 L320 500 Z" 
+        fill="url(#speedGrad)" filter="drop-shadow(0 8px 16px rgba(16,185,129,0.5))"/>
+
+  <text x="400" y="680" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" 
+        font-size="64" font-weight="900" fill="#f8fafc" text-anchor="middle" letter-spacing="8">DAILY PAPER</text>
+  <text x="400" y="725" font-family="-apple-system, BlinkMacSystemFont, PingFang SC, Microsoft YaHei, sans-serif" 
+        font-size="28" font-weight="700" fill="#38bdf8" text-anchor="middle" letter-spacing="4">每日论文</text>
+</svg>

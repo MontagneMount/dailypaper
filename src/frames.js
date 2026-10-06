@@ -1,4 +1,5 @@
 // Fill the templates with each slide's content and take one screenshot per subtitle line.
+// Also renders the Bilibili cover from the same kind of template.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -70,9 +71,30 @@ export async function renderFrames(slides, narration, workDir) {
   return { frames, warnings };
 }
 
-function fillTemplate(slide) {
-  const template = fs.readFileSync(path.join(TEMPLATES_DIR, `${slide.layout}.html`), "utf8");
-  return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, name) => escapeHtml(slide.values[name] ?? ""));
+/**
+ * Render the Bilibili cover (templates/bilibili-cover.html) as a 1920×1080 PNG.
+ * @returns {Promise<{ file: string, warnings: string[] }>}
+ */
+export async function renderCover(cover, workDir) {
+  const htmlFile = path.join(workDir, "cover.html");
+  const file = path.join(workDir, "cover.png");
+  fs.writeFileSync(htmlFile, fillTemplate(cover));
+
+  const browser = await launchBrowser();
+  try {
+    const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1 });
+    await page.goto(pathToFileURL(htmlFile).href);
+    const problems = await page.evaluate(prepareCover, cover.hidden);
+    await page.screenshot({ path: file });
+    return { file, warnings: problems.map((problem) => `封面：${problem}`) };
+  } finally {
+    await browser.close();
+  }
+}
+
+function fillTemplate({ layout, values }) {
+  const template = fs.readFileSync(path.join(TEMPLATES_DIR, `${layout}.html`), "utf8");
+  return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, name) => escapeHtml(values[name] ?? ""));
 }
 
 function escapeHtml(text) {
@@ -192,4 +214,34 @@ async function prepareSlide({ cardCounts, hidden, fitGrid }) {
 function showSubtitle(text) {
   const subtitle = document.getElementById("dp-subtitle");
   if (subtitle) subtitle.textContent = text;
+}
+
+/** Remove the cover's empty optional boxes and report text that does not fit. */
+async function prepareCover(hidden) {
+  hidden.flatMap((selector) => [...document.querySelectorAll(selector)]).forEach((element) => element.remove());
+  await document.fonts.ready;
+
+  const problems = [];
+  const lineLimits = [
+    { selector: ".cover-headline", name: "封面大字", max: 2 },
+    { selector: ".hero-metric-val", name: "封面指标", max: 1 },
+  ];
+  for (const { selector, name, max } of lineLimits) {
+    const element = document.querySelector(selector);
+    const lines = element ? countLines(element) : 0;
+    if (lines > max) problems.push(`「${name}」排成了 ${lines} 行（最多 ${max} 行），缩小后不好认，建议精简`);
+  }
+  for (const element of document.querySelectorAll(".content-stage, .hero-graphic")) {
+    if (element.scrollHeight > element.clientHeight + 2 || element.scrollWidth > element.clientWidth + 2) {
+      problems.push("有文字超出了版面，建议精简");
+    }
+  }
+  return problems;
+
+  // The number of lines the text was laid out in: one distinct top edge per line.
+  function countLines(element) {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size;
+  }
 }

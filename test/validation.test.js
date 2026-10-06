@@ -1,4 +1,4 @@
-// Regression checks for the script checker (code review T18: R1–R5).
+// Regression checks for the script checker (code review T18: R1–R5; later T24, T27).
 // Each test edits the demo script a little and expects a specific error.
 // Run with: npm test
 
@@ -130,6 +130,46 @@ test("R4 链接要和 arXiv 编号是同一个版本", () => {
 test("R4 预印本的「会议或期刊」必须写「无」", () => {
   const result = check((t) => replaceOnce(t, "- 会议或期刊：无", "- 会议或期刊：NeurIPS 2026"));
   assertError(result, "要写「无」");
+});
+
+test("T24 封面内容取自开头", () => {
+  const { cover } = check();
+  assert.equal(cover.layout, "bilibili-cover");
+  assert.equal(cover.values.cover_title, "看懂分块注意力");
+  assert.equal(cover.values.field_tag, "AI · 示例");
+  assert.equal(cover.values.paper_status, "预印本");
+  assert.equal(cover.values.brand_text, "DailyPaper · 每日论文");
+  assert.deepEqual(cover.hidden, []);
+});
+
+test("T24 缺少「封面大字」会报错", () => {
+  const result = check((t) => replaceOnce(t, "- 封面大字：看懂分块注意力\n", ""));
+  assertError(result, "缺少「封面大字」");
+});
+
+test("T24 可选的封面字段可以不写，封面上整块隐藏", () => {
+  const result = check((t) => {
+    let text = replaceOnce(t, "- 封面副标题：FastAttn：一种虚构的注意力加速方法\n", "");
+    text = replaceOnce(text, "- 封面卖点：显存减少 40%\n", "");
+    return replaceOnce(text, "- 封面指标：提速 2.3 倍\n", "");
+  });
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(result.cover.hidden, [".cover-sub", ".highlight-pill", ".hero-graphic"]);
+});
+
+test("T24 封面字段不能写「无」，也不能带上「（可选）」", () => {
+  const none = check((t) => replaceOnce(t, "- 封面卖点：显存减少 40%", "- 封面卖点：无"));
+  assertError(none, "不用就整行删掉，不要写「无」");
+  const note = check((t) => replaceOnce(t, "- 封面指标：提速 2.3 倍", "- 封面指标：提速 2.3 倍（可选）"));
+  assertError(note, "「（可选）」只是格式说明");
+});
+
+test("T24 封面大字太长会提醒", () => {
+  const result = check((t) => replaceOnce(t, "- 封面大字：看懂分块注意力", "- 封面大字：一分钟带你彻底看懂分块注意力机制"));
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("「封面大字」有") && warning.includes("不超过 12 个字")),
+    `应该提醒封面大字太长，实际：${result.warnings.join("\n") || "（没有警告）"}`,
+  );
 });
 
 test("T27 核对表写 v10、开头是 v1 时会给出警告", () => {

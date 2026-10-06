@@ -1,6 +1,7 @@
-// Check a parsed script against docs/script-format.md (v1.1) and map each page onto the
-// placeholders of its template (templates/*.html). Every problem is collected, so the
-// author can fix them all at once. Passing these checks does not mean the content is right.
+// Check a parsed script against docs/script-format.md (v1.2) and map each page onto the
+// placeholders of its template (templates/*.html), and the header onto the Bilibili cover.
+// Every problem is collected, so the author can fix them all at once.
+// Passing these checks does not mean the content is right.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -13,10 +14,20 @@ const MAX_ITEMS = 3;
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".svg", ".webp"];
 const ITEM_HINT = "标题 | 一句话说明";
 
-// Every header field is required (docs/script-format.md「开头」).
-const HEADER_KEYS = ["视频标题", "简介", "标签", "领域", "论文标题", "作者", "机构", "arXiv", "状态", "会议或期刊", "链接"];
+// The header fields, in the order of docs/script-format.md「开头」. All are required except
+// the optional cover fields.
+const HEADER_KEYS = [
+  "视频标题", "封面大字", "封面副标题", "封面卖点", "封面指标", "简介", "标签",
+  "领域", "论文标题", "作者", "机构", "arXiv", "状态", "会议或期刊", "链接",
+];
+const OPTIONAL_HEADER_KEYS = ["封面副标题", "封面卖点", "封面指标"];
 const ARXIV_ID = /^\d{4}\.\d{4,5}v\d+$/;
 const PAPER_STATUSES = ["预印本", "已接收"];
+
+// Suggested maximum length of each cover field. Longer text may not fit, or not be readable
+// when the cover is shown small.
+const COVER_TEXT_LIMITS = { 封面大字: 12, 封面副标题: 24, 封面卖点: 10, 封面指标: 8 };
+export const BRAND_TEXT = "DailyPaper · 每日论文";
 
 /*
  * The fields of each layout.
@@ -70,27 +81,29 @@ const LAYOUT_FIELDS = {
 };
 
 /**
- * @returns {{ slides: object[], errors: string[], warnings: string[] }}
+ * @returns {{ slides: object[], cover: object, errors: string[], warnings: string[] }}
  * Each slide: { number, topic, layout, values, cardCounts, hidden, fitGrid, narration }
+ * The cover:  { layout, values, hidden }, for templates/bilibili-cover.html
  */
 export function buildSlides(script, episodeDir) {
   const errors = [];
   const warnings = [];
 
-  const header = checkHeader(script.headerFields, errors);
+  const header = checkHeader(script.headerFields, errors, warnings);
   checkPageNumbers(script.pages, errors);
   checkPronunciations(script.pronunciations, errors);
   checkSourceTable(script.sourceRows, header, warnings);
 
   const slides = script.pages.map((page) => buildSlide(page, script.pages.length, header, episodeDir, errors));
-  return { slides, errors, warnings };
+  return { slides, cover: buildCover(header), errors, warnings };
 }
 
 // ---- Script-level checks ----
 
-function checkHeader(fields, errors) {
+function checkHeader(fields, errors, warnings) {
   const report = (message, lineNo) => errors.push(lineNo ? `开头（第 ${lineNo} 行）：${message}` : `开头：${message}`);
   const header = {};
+  const lineOf = {};
 
   if (fields.length === 0) {
     report("没有找到「## 开头」，或者里面没有字段");
@@ -103,11 +116,13 @@ function checkHeader(fields, errors) {
       report(`「${field.key}」写了不止一次`, field.lineNo);
     } else {
       header[field.key] = field.value;
+      lineOf[field.key] = field.lineNo;
     }
   }
   for (const key of HEADER_KEYS) {
-    if (!header[key]) report(`缺少「${key}」`);
+    if (!header[key] && !OPTIONAL_HEADER_KEYS.includes(key)) report(`缺少「${key}」`);
   }
+  checkCoverText(header, lineOf, report, warnings);
 
   const id = header["arXiv"];
   const status = header["状态"];
@@ -134,6 +149,27 @@ function checkHeader(fields, errors) {
 function isArxivLink(link, id) {
   const escapedId = id.replace(/\./g, "\\.");
   return new RegExp(`^https?://arxiv\\.org/(abs|pdf)/${escapedId}(\\.pdf)?/?$`).test(link);
+}
+
+/** The cover fields go straight onto the cover, so notes and placeholders must not slip through. */
+function checkCoverText(header, lineOf, report, warnings) {
+  for (const [key, limit] of Object.entries(COVER_TEXT_LIMITS)) {
+    const value = header[key];
+    if (!value) continue;
+    const lineNo = lineOf[key];
+
+    if (/[（(]\s*可选\s*[）)]/.test(value)) {
+      report(`「${key}」里的「（可选）」只是格式说明，不要写进去`, lineNo);
+    } else if (value === "无" || /^[.。…]+$/.test(value)) {
+      const fix = OPTIONAL_HEADER_KEYS.includes(key) ? "不用就整行删掉" : "要写实际内容";
+      report(`「${key}」${fix}，不要写「${value}」`, lineNo);
+    }
+
+    const length = [...value.replace(/\s/g, "")].length;
+    if (length > limit) {
+      warnings.push(`开头（第 ${lineNo} 行）：「${key}」有 ${length} 个字，建议不超过 ${limit} 个字，不然封面上可能放不下、缩小后看不清`);
+    }
+  }
 }
 
 /** Pages are numbered 1, 2, 3 ... with no gaps and no repeats; the number also names files. */
@@ -182,6 +218,30 @@ function checkSourceTable(rows, header, warnings) {
   }
 }
 
+// ---- Bilibili cover ----
+
+function buildCover(header) {
+  const values = {
+    brand_text: BRAND_TEXT,
+    field_tag: header["领域"] ?? "",
+    paper_status: header["状态"] ?? "",
+    cover_title: header["封面大字"] ?? "",
+    cover_subtitle: header["封面副标题"] ?? "",
+    impact_highlight: header["封面卖点"] ?? "",
+    metric_summary: header["封面指标"] ?? "",
+  };
+  return {
+    layout: "bilibili-cover",
+    values,
+    // An optional field that is left out hides its whole box, decorations included.
+    hidden: emptySelectors({
+      ".cover-sub": values.cover_subtitle,
+      ".highlight-pill": values.impact_highlight,
+      ".hero-graphic": values.metric_summary,
+    }),
+  };
+}
+
 // ---- Page checks and template values ----
 
 function buildSlide(page, totalPages, header, episodeDir, errors) {
@@ -210,9 +270,7 @@ function buildSlide(page, totalPages, header, episodeDir, errors) {
       ...result.values,
     },
     cardCounts: result.cardCounts ?? {},
-    hidden: Object.entries(result.hideWhenEmpty ?? {})
-      .filter(([, value]) => isEmpty(value))
-      .map(([selector]) => selector),
+    hidden: emptySelectors(result.hideWhenEmpty ?? {}),
     fitGrid: result.fitGrid ?? null,
     narration: page.narration,
   };
@@ -444,6 +502,13 @@ function findImageUrl(dir, baseName, description, report) {
     report(`${description}有 ${found.length} 个图片文件（${names}），只能保留一个`);
   }
   return pathToFileURL(found[0]).href;
+}
+
+/** { selector: value } -> the selectors whose value is empty, so their elements get removed. */
+function emptySelectors(hideWhenEmpty) {
+  return Object.entries(hideWhenEmpty)
+    .filter(([, value]) => isEmpty(value))
+    .map(([selector]) => selector);
 }
 
 function isEmpty(value) {

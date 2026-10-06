@@ -196,6 +196,13 @@
       letter-spacing: -1px;
     }
 
+    /* 没写「封面指标」时，右侧卡片整个去掉：大字区占满宽度、字号放大，右边不空着（Claude 2026-10-07） */
+    body:not(:has(.hero-graphic)) .content-stage { max-width: 1720px; }
+    body:not(:has(.hero-graphic)) .cover-headline { font-size: 132px; max-width: 1720px; }
+    body:not(:has(.hero-graphic)) .cover-sub { font-size: 46px; }
+    body:not(:has(.hero-graphic)) .sub-bar { height: 46px; }
+    body:not(:has(.hero-graphic)) .highlight-pill { font-size: 32px; }
+
     /* 底部避让安全保护层（120px 预留，避开 B 站播放量与时长覆盖） */
     .bottom-safety-zone {
       position: absolute;

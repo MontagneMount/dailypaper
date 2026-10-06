@@ -2,7 +2,34 @@
 
 每天挑选一篇热门的前沿论文，生成中文讲解稿，做成视频发布到 B 站。先做 AI，之后扩展到经济、材料、化学、数学、物理。
 
-> **状态：🛠️ 准备 M1**：规划已完成，还没开始制作。
+> **状态：🛠️ M1 进行中**：合成脚本第一版已完成，可以用示例稿生成视频。
+
+## 快速开始
+
+需要 Node.js 20 以上。截图用的是 Windows 自带的 Microsoft Edge，不用另外装浏览器。
+
+```bash
+npm install
+npm run render -- episodes/example
+```
+
+生成的视频在 `episodes/example/output/video.mp4`，SRT 字幕在同一个文件夹的 `subtitles.srt`。
+
+**做新的一期**：新建 `episodes/<日期>-<arXiv 编号>/`，放进这些文件（可以照着 `episodes/example/` 写）：
+
+- `script.md`：讲解稿，格式见 [docs/script-format.md](docs/script-format.md)
+- `figures/`：论文原图，如 `figure2.png`（有版权，不提交到仓库）
+- `diagrams/`：示意图，如 `page5.png`（Gemini 制作）
+
+生成之前，可以先只检查稿子：
+
+```bash
+npm run check -- episodes/<本期文件夹>
+```
+
+可选参数：`--voice zh-CN-YunxiNeural` 换成男声（默认是女声「晓晓」），`--rate +10%` 让语速快 10%。
+
+改了代码之后，运行 `npm test`，确认稿子的检查规则没有被改坏。
 
 ## 定位
 
@@ -32,8 +59,8 @@ M1 阶段先只写⑥的合成脚本，②和⑨先手动完成。
 |---|---|---|
 | 写稿、审稿 | ChatGPT（网页 / App） | OpenAI API |
 | 画面设计 | Gemini（网页 / App）出 HTML/CSS 模板 | 同左 |
-| 视频合成 | Node.js 脚本：浏览器截图（Puppeteer 或 Playwright）+ TTS 配音 + FFmpeg 合成 | 同左，再加定时运行 |
-| 配音 | TTS 引擎在 M1 里选：Edge TTS（免费，非官方接口）或 Azure 等官方服务 | 同左 |
+| 视频合成 | Node.js 脚本：Playwright 控制 Edge 截图，FFmpeg（ffmpeg-static）合成 | 同左，再加定时运行 |
+| 配音 | Edge TTS（msedge-tts，免费，非官方接口） | 开始定期发布前换成官方服务（Azure、火山引擎、阿里云等） |
 | 辅助脚本 | Node.js：选题候选、材料整理、归档 | 再加定时运行（Windows 任务计划程序） |
 | 论文来源 | Hugging Face Daily Papers、arXiv | 同左 |
 
@@ -61,7 +88,7 @@ M1 阶段先只写⑥的合成脚本，②和⑨先手动完成。
 - **方向**：先只做 AI，跟着 Hugging Face 日榜选题；流程稳定后，再逐步加入经济、材料、化学、数学、物理。
 - **选题原则**：有榜单的方向，跟着榜单选；没有日榜的方向，用每周精选或关注度来补。
 - **受众**：按论文决定。适合可视化、能讲得通俗的，做**科普向**；专业性强、很难通俗化的，做**专业向**。在 B 站用合集或标题标签区分，让观众知道是哪一类。
-- **配音**：不用本人声音，由合成脚本调用 TTS 生成（引擎在 M1 里选）。
+- **配音**：不用本人声音，由合成脚本调用 Edge TTS 生成。默认女声「晓晓」，也可以换男声「云希」。
 - **审核**：每个视频都必须审核后才能发布；审核时间不固定。
 
 ### 选题来源

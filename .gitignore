@@ -9,6 +9,10 @@ node_modules/
 # Generated files (videos, audio, slides)
 output/
 
+# Paper figures are copyrighted - keep them local (the demo episode's placeholders are ours)
+figures/
+!episodes/example/figures/
+
 # Logs
 logs/
 *.log

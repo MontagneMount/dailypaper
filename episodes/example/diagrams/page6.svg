@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <!-- Placeholder concept diagram for the demo episode (fictional) -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c4b5fd"/>
+    </marker>
+  </defs>
+  <g text-anchor="middle" font-size="44" fill="#ffffff">
+    <rect x="40" y="100" width="340" height="200" rx="20" fill="rgba(139,92,246,0.18)" stroke="#a78bfa" stroke-width="3"/>
+    <text x="210" y="216">① 切块</text>
+    <rect x="530" y="100" width="340" height="200" rx="20" fill="rgba(139,92,246,0.18)" stroke="#a78bfa" stroke-width="3"/>
+    <text x="700" y="216">② 计算</text>
+    <rect x="1020" y="100" width="340" height="200" rx="20" fill="rgba(139,92,246,0.18)" stroke="#a78bfa" stroke-width="3"/>
+    <text x="1190" y="216">③ 合并</text>
+  </g>
+  <g stroke="#c4b5fd" stroke-width="5" marker-end="url(#arrow)">
+    <line x1="390" y1="200" x2="518" y2="200"/>
+    <line x1="880" y1="200" x2="1008" y2="200"/>
+  </g>
+  <text x="700" y="380" text-anchor="middle" font-size="22" fill="#94a3b8">示例示意图（虚构）</text>
+</svg>

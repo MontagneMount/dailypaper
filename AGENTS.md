@@ -5,9 +5,10 @@
 
 ## 1. 项目
 
-**dailypaper**：每天挑选一篇热门的前沿论文（AI、经济、材料、化学、数学、物理），生成中文讲解稿，做成视频发布到 B 站。
+**dailypaper**：每天挑选一篇热门的前沿论文，生成中文讲解稿，做成视频发布到 B 站。先做 AI，之后扩展到经济、材料、化学、数学、物理。
 
-完整规划见 [README.md](README.md)。
+- 完整规划见 [README.md](README.md)
+- GitHub 仓库：[MontagneMount/dailypaper](https://github.com/MontagneMount/dailypaper)
 
 ## 2. 参与者
 

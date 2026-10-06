@@ -8,8 +8,8 @@
 - **阶段**：想法 / 规划阶段，还没开始制作
 - **分工**：Claude 写代码；ChatGPT 写稿，并审核代码和讲解稿；Gemini 制作视频（见 AGENTS.md）
 - **方式**：先手动（用户操作 ChatGPT 和 Gemini），流程成熟后再自动化
-- **方向**：AI、经济、材料、化学、数学、物理；起步方式待定（T8）
-- **Git**：2026-10-06 已做首次 commit；还没推到 GitHub
+- **方向**：先只做 AI（跟着 Hugging Face 日榜选题），流程稳定后再加其他方向
+- **Git**：已推到 GitHub（https://github.com/MontagneMount/dailypaper），分支 main
 - **下一步**：M1 手动跑通第一条视频（T7），等用户决定何时开始
 - **最近更新**：2026-10-06 · Claude
 
@@ -24,9 +24,33 @@
 | T5 | 确认分工细节：① ChatGPT「审核」的范围（代码、讲解稿还是视频）；② ChatGPT 写稿、Gemini 做视频是手动操作，还是由程序调用 API | 用户 | Claude | 已完成 |
 | T6 | T5 确认后，按新分工更新 README 的工作流、技术栈和里程碑 | Claude | Claude | 已完成 |
 | T7 | M1 手动跑通第一条视频：选论文 → ChatGPT 写稿 → ChatGPT 审稿 → 用户确认 → Gemini 制作视频 → 发布；记下提示词、耗时和问题，确定 Gemini 做视频的方式 | 用户 | Claude | 待处理 |
-| T8 | 决定选题起步方式：一开始就覆盖六个方向，还是先只做 AI（有现成日榜），流程稳定后再加其他方向 | 用户 | Claude | 待处理 |
+| T8 | 决定选题起步方式：一开始就覆盖六个方向，还是先只做 AI（有现成日榜），流程稳定后再加其他方向 | 用户 | Claude | 已完成 |
 
 ## 记录
+
+### 2026-10-06 · Claude（Claude Code）
+
+**任务**：记录选题起步方式（T8）和 GitHub 推送
+
+**完成**
+- 用户决定：先只做 AI，流程稳定后再加其他方向
+- 用户已把仓库推到 GitHub：https://github.com/MontagneMount/dailypaper（已确认本地 main 和 origin/main 一致）
+- README：
+  - 项目简介和「选题与受众」按「先做 AI」更新
+  - M1 改成从 Hugging Face 日榜选一篇 AI 论文；M2 的选题脚本先接 Hugging Face
+  - 新增 M5「扩展方向」；删除已解决的「待决定」
+- AGENTS.md：项目简介同步更新，加上 GitHub 仓库地址
+
+**改动文件**
+- `README.md`：项目简介、「选题与受众」、里程碑；删除「待决定」
+- `AGENTS.md`：项目简介、GitHub 仓库地址
+- `WORKLOG.md`：T8 已完成；更新当前状态
+
+**交接**
+- → 用户：有空时按 M1 手动跑通第一条视频（T7）
+
+**待确认 / 风险**
+- 无
 
 ### 2026-10-06 · Claude（Claude Code）
 

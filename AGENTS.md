@@ -10,6 +10,7 @@
 - 完整规划见 [README.md](README.md)
 - GitHub 仓库：[MontagneMount/dailypaper](https://github.com/MontagneMount/dailypaper)
 - 栏目名：「DailyPaper 每日论文」（用户 2026-10-06 选定），视频和封面上写作「DailyPaper · 每日论文」；B 站账号的昵称和头像不改（用户 2026-10-07 决定）
+- 视频风格：浅色学术（米白纸张底色、宋体标题，用户 2026-10-07 选定），视频画面跟着旁白做动画；方案见 [docs/proposals/visual-v2.md](docs/proposals/visual-v2.md)
 
 ## 2. 参与者
 

@@ -7,6 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { splitParts } from "./parse-script.js";
+import { checkCues } from "./cues.js";
 
 export const LAYOUT_NAMES = ["cover", "figure_text", "big_metric", "figure_annotated", "concept_diagram", "comparison"];
 
@@ -90,8 +91,9 @@ const LAYOUT_FIELDS = {
 };
 
 /**
- * @returns {{ slides: object[], cover: object, errors: string[], warnings: string[] }}
- * Each slide: { number, topic, layout, values, cardCounts, hidden, fitGrid, narration }
+ * @returns {{ slides: object[], cover: object, cues: Map<number, object>, errors: string[], warnings: string[] }}
+ * Each slide: { number, topic, layout, values, cards, cardCounts, hidden, fitGrid, narration }
+ * cues: the checked cue table (cues.md) by page number, empty without one
  * The cover:  { layout, values, hidden }, for templates/bilibili-cover.html
  */
 export function buildSlides(script, episodeDir) {
@@ -105,7 +107,10 @@ export function buildSlides(script, episodeDir) {
 
   const slides = script.pages.map((page) => buildSlide(page, script.pages.length, header, episodeDir, errors));
   checkDiagramColours(slides, warnings);
-  return { slides, cover: buildCover(header), errors, warnings };
+  const cues = checkCues(episodeDir, slides);
+  errors.push(...cues.errors);
+  warnings.push(...cues.warnings);
+  return { slides, cover: buildCover(header), cues: cues.pages, errors, warnings };
 }
 
 // ---- Script-level checks ----
@@ -311,6 +316,8 @@ function buildSlide(page, totalPages, header, episodeDir, errors) {
       total_pages: String(totalPages),
       ...result.values,
     },
+    // The texts of the page's cards (要点, 步骤, 指标), in the order the cue table counts them.
+    cards: result.cards ?? [],
     cardCounts: result.cardCounts ?? {},
     hidden: emptySelectors(result.hideWhenEmpty ?? {}),
     fitGrid: result.fitGrid ?? null,
@@ -417,6 +424,7 @@ const builders = {
         figure_image_path: label ? figureUrl(label) : "",
         ...numbered("point", points, ["title", "desc"]),
       },
+      cards: points,
       cardCounts: { ".points-list .point-card": points.length },
       hideWhenEmpty: { ".step-pill": data["步骤标签"] },
       // Only matters in the wide variant, where the points sit in one row.
@@ -435,6 +443,7 @@ const builders = {
         paper_table_ref: data["原文出处"],
         ...numbered("metric", metrics, ["name", "sign", "val", "unit", "desc"]),
       },
+      cards: metrics,
       cardCounts: { ".metric-grid .metric-card": metrics.length },
       hideWhenEmpty: { ".benchmark-footer span:nth-of-type(2)": data["测试环境"] },
     };
@@ -459,6 +468,7 @@ const builders = {
         box_height: box.height,
         ...numbered("detail", details, ["title", "content"]),
       },
+      cards: details,
       cardCounts: { ".detail-cards .detail-card": details.length },
     };
   },
@@ -471,6 +481,7 @@ const builders = {
         diagram_image_path: diagramUrl(),
         ...numbered("step", steps, ["title", "desc"]),
       },
+      cards: steps,
       cardCounts: { ".takeaway-grid .takeaway-card": steps.length },
       fitGrid: ".takeaway-grid",
     };
@@ -487,6 +498,8 @@ const builders = {
         ...numbered("base_point", basePoints, ["title", "desc"]),
         ...numbered("ours_point", oursPoints, ["title", "desc"]),
       },
+      // The baseline's points count first, then the paper's.
+      cards: [...basePoints, ...oursPoints],
       cardCounts: {
         ".compare-col.traditional .feature-item": basePoints.length,
         ".compare-col.ours .feature-item": oursPoints.length,

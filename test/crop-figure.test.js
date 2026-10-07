@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
-import { figureFile, parseRegion, pixelBox } from "../src/crop-figure.js";
+import { blankRuns, figureFile, parseRegion, pixelBox } from "../src/crop-figure.js";
 
 const EPISODE = path.resolve("episodes/some-episode");
 
@@ -44,4 +44,13 @@ test("T39 R2 范围换算成像素后，宽和高不能是 0", () => {
   const page = { width: 1000, height: 2000 };
   assert.deepEqual(pixelBox({ top: 0.1, left: 0.2, bottom: 0.3, right: 0.8 }, page), { x: 200, y: 200, width: 600, height: 400 });
   assert.throws(() => pixelBox({ top: 0.5, left: 0.2, bottom: 0.5001, right: 0.8 }, page), /太小/);
+});
+
+test("T63 --gaps：找出连续的空白行，太窄的不算，开头和结尾的也算", () => {
+  //               0  1  2  3  4  5  6  7  8  9
+  const flags = [1, 1, 0, 0, 1, 0, 1, 1, 1, 1];
+  assert.deepEqual(blankRuns(flags, 2), [[0, 2], [6, 10]]);
+  assert.deepEqual(blankRuns(flags, 1), [[0, 2], [4, 5], [6, 10]]);
+  assert.deepEqual(blankRuns([0, 0, 0], 1), []);
+  assert.deepEqual(blankRuns([1, 1, 1], 2), [[0, 3]]);
 });

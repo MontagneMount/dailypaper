@@ -53,6 +53,7 @@
   --text-gradient: 0;             /* 大数字、标题不用渐变字，0 就是纯色 */
   --logo-bg: var(--accent);       /* 「DP」标志的底色 */
   --metric-sign: var(--text-soft); /* 大数字前面的 ↑ ↓ */
+  --spotlight-veil: rgba(245, 241, 232, 0.8); /* 聚光时盖住其余部分的一层：浅色里是一层纸色，把其余部分冲淡 */
 
   /* 强调色：深蓝、砖红、深绿、赭橙 */
   --accent: #1e3a8a;

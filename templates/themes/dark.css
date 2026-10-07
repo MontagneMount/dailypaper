@@ -53,6 +53,7 @@
   --text-gradient: 1;             /* 大数字、标题的渐变字强度，0 就是纯色 */
   --logo-bg: linear-gradient(135deg, var(--accent), var(--accent-2)); /* 「DP」标志的底色 */
   --metric-sign: var(--info);     /* 大数字前面的 ↑ ↓ */
+  --spotlight-veil: rgba(11, 15, 25, 0.7); /* 聚光时盖住其余部分的一层：深色里压暗 */
 
   /* 强调色 */
   --accent: #3b82f6;

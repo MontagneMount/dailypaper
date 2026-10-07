@@ -7,6 +7,7 @@
   "scripts": {
     "render": "node src/render.js",
     "check": "node src/render.js --check",
+    "preview": "node src/preview.js",
     "assets": "node src/export-assets.js",
     "figure": "node src/crop-figure.js",
     "topics": "node src/topics.js",

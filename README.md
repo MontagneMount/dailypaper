@@ -26,7 +26,8 @@ npm run new -- <arXiv 编号>
 
 - `<arXiv 编号>v<版本>.pdf`：论文 PDF，如 `2610.05608v1.pdf`（不提交到仓库）
 - `script.md`：讲解稿，格式见 [docs/script-format.md](docs/script-format.md)
-- `figures/`：论文原图，如 `figure2.png`（有版权，不提交到仓库）。由 Claude 用 `npm run figure` 从 PDF 原样截取：先 `npm run figure -- <本期文件夹> <页码>` 渲染整页找到图，再 `npm run figure -- <本期文件夹> <页码> <名字> <上,左,下,右>` 截出来（范围是 0～1 的小数，白边会自动裁掉）
+- `figures/`：论文原图，如 `figure2.png`（有版权，不提交到仓库）。由 Claude 用 `npm run figure` 从 PDF 原样截取：先 `npm run figure -- <本期文件夹> <页码>` 渲染整页找到图，再 `npm run figure -- <本期文件夹> <页码> <名字> <上,左,下,右>` 截出来（范围是 0～1 的小数，白边会自动裁掉；按 576 dpi 截，推镜头放大后字也清楚；加 `--gaps` 列出空白行、空白列，方便找边界）
+- `cues.md`：镜头表，哪句话说到时画面做什么（卡片出现、数字强调、示意图逐步出现、框选、聚光、推镜头），格式见 [docs/cues-format.md](docs/cues-format.md)；没有它也能合成，每页完整显示、只有翻页动画
 - `diagrams/`：示意图，如 `page5.svg`（Claude 按稿子画，优先写成 SVG；颜色用类名，跟着风格走，画法见 [templates/README.md](templates/README.md)「示意图怎么画」）
 
 **期数和发布记录**：已发布的视频记在 [episodes/published.json](episodes/published.json)（期数、文件夹、标题、B 站链接、发布日期）。用户发布后把链接发给 Claude，由 Claude 记上。新一期的期数按这个记录往下排，不按文件夹数；同时有几期在做时，哪一期先发布就用这个号，`npm run check` 会提醒其他期改号。
@@ -38,6 +39,14 @@ npm run check -- episodes/<本期文件夹>
 ```
 
 可选参数：`--theme dark` 换成深色风格（默认是浅色学术，见 [templates/README.md](templates/README.md)「风格」）；`--static` 不要动画，每句字幕一张静止画面（默认每页淡入淡出）；`--voice zh-CN-YunxiNeural` 换成男声（默认是女声「晓晓」）；`--rate +0%` 换回正常语速（默认是 `+25%`，也就是 1.25 倍）。
+
+写了镜头表的期，先看预览再合成：
+
+```bash
+npm run preview -- episodes/<本期文件夹>
+```
+
+它用实际配音的时间，给每个动作截「之前、进场中、稳定、之后」几张图，生成 `output/preview/index.html`（带手机尺寸的缩图）；加页码和 `--clip`（如 `npm run preview -- episodes/<本期文件夹> 3 --clip`）把这一页做成带声音的短片。讲稿、原图、镜头表等一改，预览就过期，`npm run check` 会提醒。
 
 已经记进 `episodes/published.json` 的期，`npm run render` 不会再生成，免得覆盖发布用的视频和封面；确实要重做时加 `--force`。
 
@@ -58,8 +67,8 @@ npm run check -- episodes/<本期文件夹>
 | ① 选题 | 用户 | 用 `npm run topics` 看 Hugging Face 日榜的候选，或按「选题与受众」里的其他来源挑一篇论文，定好目标时长 |
 | ② 准备材料 | Claude 或 ChatGPT | 运行 `npm run new -- <arXiv 编号>`：建好本期文件夹、下载论文 PDF、填好稿件开头的论文信息；整理论文信息和正文，生成给 ChatGPT 的写稿材料包（M2 之后由 Claude 的脚本做） |
 | ③ 写稿 | ChatGPT | 先判断这篇适合科普向还是专业向，再按[讲解稿格式](docs/script-format.md)写稿，附标题、简介、标签 |
-| ④ 审稿 | ChatGPT → 用户 | ChatGPT 开一个新对话，逐条核对数字和结论是否出自原文；用户最终确认 |
-| ⑤ 画面素材 | Claude | 按稿子从 PDF 截取论文原图（`npm run figure`）、画示意图（优先写成 SVG，中文不会写错）；用到红框的页，看原图给出红框位置，用户确认。视频模板和封面模板（HTML/CSS）也由 Claude 维护 |
+| ④ 审稿 | ChatGPT → 用户 | ChatGPT 开一个新对话，逐条核对数字和结论是否出自原文；素材和镜头表做完后，对照预览（`npm run preview`）一起审，两样都做完才算审完；用户最终确认 |
+| ⑤ 画面素材 | Claude | 按稿子从 PDF 截取论文原图（`npm run figure`）、画示意图（SVG，颜色用类名跟着风格走，见 templates/README.md）；用到红框的页，看原图给出红框位置；写镜头表 `cues.md`（[格式](docs/cues-format.md)），用 `npm run check` 和 `npm run preview` 自查。视频模板和封面模板（HTML/CSS）也由 Claude 维护 |
 | ⑥ 合成视频 | Claude 的脚本 | 按定稿生成每页画面、TTS 配音和字幕，用 FFmpeg 合成 MP4；B 站封面也由脚本按模板生成 |
 | ⑦ 审核成片 | Claude → 用户 | Claude 先检查画面和时间轴（逐页截图、字幕和配音的时间、超出版面的提醒），列出带时间点的问题；用户听声音（读错的词、停顿是否自然）并最终确认 |
 | ⑧ 发布 | 用户 | 上传 B 站，声明含 AI 生成内容，注明论文出处；把视频链接发给 Claude，记进 `episodes/published.json` |

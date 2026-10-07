@@ -12,6 +12,7 @@ const TEMPLATES_DIR = fileURLToPath(new URL("../templates/", import.meta.url));
 const THEMES_DIR = path.join(TEMPLATES_DIR, "themes");
 const WIDTH = 1920;
 const HEIGHT = 1080;
+export const VIEWPORT = { width: WIDTH, height: HEIGHT };
 
 // Every template links the default theme, so it also looks right when opened on its own;
 // the filled-in page points that link at the chosen theme (templates/themes/<name>.css).
@@ -25,9 +26,11 @@ const WIDE_VARIANTS = { figure_text: "figure_text_wide" };
 
 /**
  * With `animate: false` (npm run render -- --static) nothing moves: one screenshot per subtitle line.
- * @returns {Promise<{ frames: Array<{ file: string, duration: number }>, warnings: string[] }>}
+ * `schedules` are the cue table's actions per page number (scheduleAll in cues.js).
+ * @returns {Promise<{ frames: Array<{ file: string, duration: number }>, warnings: string[], fonts: string[] }>}
+ *   fonts: warnings for the theme's fonts missing on this computer
  */
-export async function renderFrames(slides, narration, workDir, { theme = DEFAULT_THEME, animate = true } = {}) {
+export async function renderFrames(slides, narration, workDir, { theme = DEFAULT_THEME, animate = true, schedules = new Map() } = {}) {
   const pagesDir = path.join(workDir, "pages");
   const framesDir = path.join(workDir, "frames");
   for (const dir of [pagesDir, framesDir]) {
@@ -37,6 +40,7 @@ export async function renderFrames(slides, narration, workDir, { theme = DEFAULT
 
   const frames = [];
   const warnings = [];
+  const fonts = []; // missing fonts, also an input of the preview
   const browser = await launchBrowser();
 
   try {
@@ -48,30 +52,16 @@ export async function renderFrames(slides, narration, workDir, { theme = DEFAULT
       const timing = narration.pages[slideIndex];
       const order = pad(slideIndex + 1);
       const htmlFile = path.join(pagesDir, `page${order}.html`);
-      const template = await openSlide(page, slide, htmlFile, theme);
-      const diagram = slide.values.diagram_image_path;
-      if (diagram?.endsWith(".svg")) await page.evaluate(inlineDiagram, fs.readFileSync(fileURLToPath(diagram), "utf8"));
-
-      const problems = await page.evaluate(prepareSlide, {
-        cardCounts: slide.cardCounts,
-        hidden: slide.hidden,
-        fitGrid: slide.fitGrid,
-      });
+      const schedule = schedules.get(slide.number);
+      const { template, problems, moves } = await setUpSlide(page, slide, { htmlFile, theme, timing, animate, schedule });
       problems.forEach((problem) => warnings.push(`第 ${slide.number} 页：${problem}`));
-      if (slideIndex === 0) (await page.evaluate(missingFonts)).forEach((font) => warnings.push(missingFontWarning(font, theme)));
-
-      const moves = [];
-      if (animate) {
-        const turn = pageTurn(timing.end - timing.start);
-        await page.evaluate(setUpPageTurn, { ...turn, duration: timing.end - timing.start });
-        moves.push(...turn.moves);
-      }
+      if (slideIndex === 0) fonts.push(...(await fontWarnings(page, theme)));
 
       // Before the first sentence no subtitle shows, so text never appears ahead of the voice;
       // the last line stays up through the pause after it.
       const shots = planPageFrames(timing, moves);
       for (const [index, shot] of shots.entries()) {
-        await page.evaluate(showFrame, { ms: shot.time * 1000, subtitle: timing.lines[shot.line]?.display ?? "" });
+        await showMoment(page, { time: shot.time, subtitle: timing.lines[shot.line]?.display ?? "" });
         const file = path.join(framesDir, `p${order}-${String(index + 1).padStart(3, "0")}.png`);
         await page.screenshot({ path: file });
         frames.push({ file, duration: shot.count / FPS });
@@ -84,7 +74,7 @@ export async function renderFrames(slides, narration, workDir, { theme = DEFAULT
     await browser.close();
   }
 
-  return { frames, warnings };
+  return { frames, warnings, fonts };
 }
 
 /**
@@ -101,12 +91,49 @@ export async function renderCover(cover, workDir, { theme = DEFAULT_THEME } = {}
     const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1 });
     await page.goto(pathToFileURL(htmlFile).href);
     const problems = await page.evaluate(prepareCover, cover.hidden);
-    const fonts = (await page.evaluate(missingFonts)).map((font) => missingFontWarning(font, theme));
+    const fonts = await fontWarnings(page, theme);
     await page.screenshot({ path: file });
     return { file, warnings: [...problems.map((problem) => `封面：${problem}`), ...fonts] };
   } finally {
     await browser.close();
   }
+}
+
+/**
+ * Open a slide so that any moment of it can be shown with showMoment: the template filled in, the
+ * diagram put into the page, the render rules applied, the page turn and the cue table's actions
+ * set up. npm run render and npm run preview both go through here, so they show the same thing.
+ * @returns {Promise<{ template: string, problems: string[], moves: Array<[number, number]>,
+ *   cameraWindows: object[], turn: object | null }>}
+ */
+export async function setUpSlide(page, slide, { htmlFile, theme, timing, animate, schedule }) {
+  const template = await openSlide(page, slide, htmlFile, theme);
+  const diagram = slide.values.diagram_image_path;
+  if (diagram?.endsWith(".svg")) await page.evaluate(inlineDiagram, fs.readFileSync(fileURLToPath(diagram), "utf8"));
+  const problems = await page.evaluate(prepareSlide, { cardCounts: slide.cardCounts, hidden: slide.hidden, fitGrid: slide.fitGrid });
+
+  const moves = [];
+  let cameraWindows = [];
+  let turn = null;
+  if (animate) {
+    turn = pageTurn(timing.end - timing.start);
+    await page.evaluate(setUpPageTurn, { ...turn, duration: timing.end - timing.start });
+    moves.push(...turn.moves);
+    if (schedule) {
+      cameraWindows = await page.evaluate(setUpCues, cueSetup(schedule, slide));
+      moves.push(...schedule.moves);
+    }
+  }
+  return { template, problems, moves, cameraWindows, turn };
+}
+
+/**
+ * Show the slide as it is `time` seconds after it starts, with this subtitle line. The preview
+ * can show the page turn at another moment (`turnTime`), to see an action at the very start of a
+ * page without the page still fading in.
+ */
+export async function showMoment(page, { time, subtitle, turnTime = time }) {
+  await page.evaluate(showFrame, { ms: time * 1000, turnMs: turnTime * 1000, subtitle });
 }
 
 /** Fill the slide's template and open it; switch to the wide variant for a very wide figure. */
@@ -141,8 +168,20 @@ export function fillTemplate({ layout, values }, theme = DEFAULT_THEME) {
     .replace(THEME_LINK, () => `href="${pathToFileURL(themeFile).href}"`);
 }
 
-function missingFontWarning(font, theme) {
-  return `风格「${theme}」要用的字体「${font}」这台电脑上没有，画面会退回别的字体`;
+/** What setUpCues needs in the page: the timed actions without their table rows, the readable regions and the cards. */
+export function cueSetup(schedule, slide) {
+  return {
+    tracks: schedule.tracks.map(({ action, ...track }) => track),
+    readable: schedule.readable.map((region) => region.box),
+    // The same selectors that keep the right number of cards, in the order the cue table counts them.
+    cardSelectors: Object.keys(slide.cardCounts),
+  };
+}
+
+/** A warning for each font the theme asks for that this computer does not have (checked in the open page). */
+export async function fontWarnings(page, theme) {
+  const missing = await page.evaluate(missingFonts);
+  return missing.map((font) => `风格「${theme}」要用的字体「${font}」这台电脑上没有，画面会退回别的字体`);
 }
 
 function escapeHtml(text) {
@@ -328,11 +367,240 @@ function setUpPageTurn({ fadeIn, fadeOut, duration }) {
   }
 }
 
-/** Show the page as it is `ms` milliseconds after it starts, with this subtitle line. */
-function showFrame({ ms, subtitle }) {
-  for (const animation of document.getAnimations()) animation.currentTime = ms;
+/** Show the page as it is `ms` milliseconds after it starts (the page turn at `turnMs`), with this subtitle line. */
+function showFrame({ ms, turnMs = ms, subtitle }) {
+  for (const animation of document.getAnimations()) animation.currentTime = turnMs;
+  window.dpRender?.(ms / 1000);
   const element = document.getElementById("dp-subtitle");
   if (element) element.textContent = subtitle;
+}
+
+/**
+ * Set up the cue table's actions (visual-v2.md section 4) and define window.dpRender(t), which
+ * shows each of them as it is t seconds after the page starts. Positions are percent of the figure
+ * file. The camera zooms the figure (and figure_annotated's red-box layer) inside its frame; boxes
+ * and the spotlight are drawn over it in the frame's own pixels, so their lines keep their width.
+ * @returns {Array<{ start: number, top: number, left: number, width: number, height: number }>}
+ *   what each camera shows of the figure when fully zoomed in, in percent, for the preview index
+ */
+function setUpCues({ tracks, readable, cardSelectors }) {
+  const cards = cardSelectors.flatMap((selector) => [...document.querySelectorAll(selector)]);
+  const of = (kind) => tracks.filter((track) => track.kind === kind);
+  const clamp = (x) => Math.min(1, Math.max(0, x));
+  const ease = (x) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
+  const ramp = (t, from, to) => (to > from ? ease(clamp((t - from) / (to - from))) : Number(t >= from));
+  // Box, spotlight, camera: 0 before, rising to 1, held, falling back to 0 (or leaving with the page).
+  const level = (track, t) => (t < track.leave ? ramp(t, track.start, track.shown) : 1 - ramp(t, track.leave, track.end));
+
+  // ---- The figure in its frame, and the camera ----
+  const figure = document.querySelector(".image-wrapper img, .base-figure");
+  const frame = figure?.parentElement;
+  const usesFigure = tracks.some((track) => track.box);
+  let image = null;
+  let frameSize = null;
+  let zoomed = [];
+  if (figure && frame && usesFigure) {
+    if (getComputedStyle(frame).position === "static") frame.style.position = "relative";
+    const frameBox = frame.getBoundingClientRect();
+    const offset = (element) => {
+      const box = element.getBoundingClientRect();
+      return { x: box.left - frameBox.left - frame.clientLeft, y: box.top - frameBox.top - frame.clientTop, w: box.width, h: box.height };
+    };
+    image = offset(figure);
+    frameSize = { w: frame.clientWidth, h: frame.clientHeight };
+    zoomed = [figure, frame.querySelector(".annotation-layer")].filter(Boolean).map((element) => {
+      element.style.transformOrigin = "0 0";
+      return { element, ...offset(element) };
+    });
+  }
+  const area = (box) => ({
+    x: image.x + (box.left / 100) * image.w,
+    y: image.y + (box.top / 100) * image.h,
+    w: (box.width / 100) * image.w,
+    h: (box.height / 100) * image.h,
+  });
+
+  // Fit the area into the frame and center it, but keep the zoomed figure covering the frame,
+  // so no blank shows beyond the figure's edges.
+  const cameraView = (target) => {
+    const scale = Math.max(1, Math.min(4, (frameSize.w * 0.96) / target.w, (frameSize.h * 0.96) / target.h));
+    const shift = (frameLength, imageStart, imageLength, center) => {
+      if (scale * imageLength <= frameLength) return (frameLength - scale * imageLength) / 2 - scale * imageStart;
+      const centered = frameLength / 2 - scale * center;
+      return Math.min(-scale * imageStart, Math.max(frameLength - scale * (imageStart + imageLength), centered));
+    };
+    return { scale, x: shift(frameSize.w, image.x, image.w, target.x + target.w / 2), y: shift(frameSize.h, image.y, image.h, target.y + target.h / 2) };
+  };
+  const cameras = image ? of("camera").map((track) => ({ ...track, view: cameraView(area(track.box)) })) : [];
+  const cameraAt = (t) => {
+    const camera = cameras.find((track) => t >= track.start && t < track.end);
+    if (!camera) return { scale: 1, x: 0, y: 0 };
+    const p = level(camera, t);
+    return { scale: 1 + (camera.view.scale - 1) * p, x: camera.view.x * p, y: camera.view.y * p };
+  };
+  const place = (box, camera) => {
+    const target = area(box);
+    return { x: camera.scale * target.x + camera.x, y: camera.scale * target.y + camera.y, w: camera.scale * target.w, h: camera.scale * target.h };
+  };
+
+  // ---- Boxes and the spotlight, over the figure ----
+  const overlay = image ? document.createElement("div") : null;
+  if (overlay) {
+    Object.assign(overlay.style, { position: "absolute", left: "0", top: "0", width: `${frameSize.w}px`, height: `${frameSize.h}px`, pointerEvents: "none", zIndex: "5" });
+    frame.appendChild(overlay);
+  }
+  const svgNode = (name, attributes) => {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+    for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
+    return node;
+  };
+  const spotlights = image ? of("spotlight") : [];
+  let veil = null;
+  if (spotlights.length > 0) {
+    // Everything but the spotlight and the always-readable regions is covered by a veil.
+    const size = { width: frameSize.w, height: frameSize.h };
+    const svg = svgNode("svg", { ...size, style: "position: absolute; left: 0; top: 0" });
+    // A mask region starts at -10% unless told otherwise, which would leave a strip uncovered.
+    const mask = svgNode("mask", { id: "dp-spotlight", maskUnits: "userSpaceOnUse", x: "0", y: "0", ...size });
+    mask.appendChild(svgNode("rect", { ...size, fill: "white" }));
+    const holes = [null, ...readable].map(() => mask.appendChild(svgNode("rect", { fill: "black", rx: "6" })));
+    const shade = svgNode("rect", { ...size, mask: "url(#dp-spotlight)", style: "fill: var(--spotlight-veil); opacity: 0" });
+    const defs = svgNode("defs", {});
+    defs.appendChild(mask);
+    svg.append(defs, shade);
+    overlay.appendChild(svg);
+    veil = { holes, shade };
+  }
+  const boxes = image
+    ? of("box").map((track) => {
+        const element = document.createElement("div");
+        Object.assign(element.style, {
+          position: "absolute",
+          boxSizing: "border-box",
+          border: "4px solid var(--negative)",
+          borderRadius: "6px",
+          boxShadow: "0 0 0 2px color-mix(in srgb, var(--figure-bg) 80%, transparent)",
+          opacity: "0",
+        });
+        overlay.appendChild(element);
+        return { ...track, element };
+      })
+    : [];
+
+  // ---- Cards and diagram parts that appear; lines are drawn like a pen stroke ----
+  const appearing = of("appear").map((track) => {
+    const element = track.target.type === "card" ? cards[track.target.index - 1] : document.getElementById(track.target.id);
+    const parts = element instanceof SVGElement ? [element, ...element.querySelectorAll("*")] : [];
+    const lines = parts
+      .filter((part) => part.classList.contains("line") && typeof part.getTotalLength === "function")
+      .map((part) => ({ part, length: part.getTotalLength(), marker: getComputedStyle(part).markerEnd !== "none" }));
+    const shapes = parts.filter((part) => part instanceof SVGGeometryElement || part instanceof SVGTextElement);
+    const drawOnly = shapes.length > 0 && shapes.every((part) => part.classList.contains("line"));
+    return { ...track, element, lines, drawOnly };
+  });
+
+  // ---- Emphasis: the words grow and change colour, then go back ----
+  const emphasis = of("emphasize").map((track) => {
+    const span = wrapWords(cards[track.card - 1], track.text);
+    return { ...track, span, base: span ? baseColour(span) : null };
+  });
+
+  window.dpRender = (t) => {
+    const camera = image ? cameraAt(t) : null;
+    for (const item of camera ? zoomed : []) {
+      const still = camera.scale === 1 && camera.x === 0 && camera.y === 0;
+      const dx = camera.scale * item.x + camera.x - item.x;
+      const dy = camera.scale * item.y + camera.y - item.y;
+      item.element.style.transform = still ? "" : `translate(${dx}px, ${dy}px) scale(${camera.scale})`;
+    }
+    for (const box of boxes) {
+      const shown = t >= box.start && t < box.end ? level(box, t) : 0;
+      box.element.style.opacity = String(shown);
+      if (shown > 0) {
+        const at = place(box.box, camera);
+        const pad = 6;
+        Object.assign(box.element.style, { left: `${at.x - pad}px`, top: `${at.y - pad}px`, width: `${at.w + 2 * pad}px`, height: `${at.h + 2 * pad}px` });
+      }
+    }
+    if (veil) {
+      const spotlight = spotlights.find((track) => t >= track.start && t < track.end);
+      veil.shade.style.opacity = spotlight ? String(level(spotlight, t)) : "0";
+      if (spotlight) {
+        [spotlight.box, ...readable].forEach((box, index) => {
+          const at = place(box, camera);
+          const pad = 4;
+          for (const [key, value] of Object.entries({ x: at.x - pad, y: at.y - pad, width: at.w + 2 * pad, height: at.h + 2 * pad })) {
+            veil.holes[index].setAttribute(key, String(value));
+          }
+        });
+      }
+    }
+    for (const item of appearing) {
+      const p = ramp(t, item.start, item.end);
+      if (item.target.type === "card") {
+        item.element.style.opacity = String(p);
+        item.element.style.transform = p < 1 ? `translateY(${(1 - p) * 16}px)` : "";
+        continue;
+      }
+      item.element.style.opacity = item.drawOnly ? (t >= item.start ? "1" : "0") : String(p);
+      for (const line of item.lines) {
+        line.part.style.strokeDasharray = `${line.length} ${line.length}`;
+        line.part.style.strokeDashoffset = String(line.length * (1 - p));
+        if (line.marker) line.part.style.markerEnd = p < 0.98 ? "none" : "";
+      }
+    }
+    for (const item of emphasis.filter((entry) => entry.span)) {
+      const k = Math.min(ramp(t, item.start, item.start + 0.25), 1 - ramp(t, item.end - 0.25, item.end));
+      if (k <= 0) {
+        item.span.removeAttribute("style");
+        continue;
+      }
+      const colour = `color-mix(in srgb, var(--highlight-text) ${Math.round(k * 100)}%, ${item.base})`;
+      Object.assign(item.span.style, { display: "inline-block", transform: `scale(${1 + 0.15 * k})`, transformOrigin: "50% 60%", color: colour });
+      item.span.style.setProperty("-webkit-text-fill-color", colour);
+    }
+  };
+
+  // What each camera shows of the figure when fully zoomed in, in percent of the figure.
+  return cameras.map((camera) => {
+    const { scale, x, y } = camera.view;
+    const left = clamp(((-x / scale - image.x) / image.w)) * 100;
+    const top = clamp(((-y / scale - image.y) / image.h)) * 100;
+    const right = clamp((((frameSize.w - x) / scale - image.x) / image.w)) * 100;
+    const bottom = clamp((((frameSize.h - y) / scale - image.y) / image.h)) * 100;
+    return { start: camera.start, top, left, width: right - left, height: bottom - top };
+  });
+
+  /** Put the words (standing on their own, as in cues.js countText) into a span of their own. */
+  function wrapWords(card, text) {
+    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      for (let at = node.data.indexOf(text); at !== -1; at = node.data.indexOf(text, at + 1)) {
+        const before = node.data[at - 1] ?? "";
+        const after = node.data.slice(at + text.length, at + text.length + 2);
+        if (/^\d/.test(text) && /[\d.]/.test(before)) continue;
+        if (/\d$/.test(text) && /^(\d|\.\d)/.test(after)) continue;
+        const range = document.createRange();
+        range.setStart(node, at);
+        range.setEnd(node, at + text.length);
+        const span = document.createElement("span");
+        range.surroundContents(span);
+        return span;
+      }
+    }
+    return null;
+  }
+
+  /** The colour the words show in now; for gradient text (background-clip: text), its first colour. */
+  function baseColour(span) {
+    const fill = getComputedStyle(span).webkitTextFillColor;
+    if (fill && fill !== "rgba(0, 0, 0, 0)" && fill !== "transparent") return fill;
+    for (let element = span.parentElement; element; element = element.parentElement) {
+      const stop = getComputedStyle(element).backgroundImage.match(/(?:rgba?|color)\([^)]*\)/);
+      if (stop) return stop[0];
+    }
+    return getComputedStyle(span).color;
+  }
 }
 
 /** Remove the cover's empty optional boxes and report text that does not fit. */

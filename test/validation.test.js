@@ -72,7 +72,8 @@ test("R3 指标的必填部分为空会报错", () => {
 });
 
 test("R3 指标的符号和单位可以留空", () => {
-  const result = check((t) => replaceOnce(t, METRIC_LINE, "指标：准确率 |  | 92.3 |  | 相同数据集下"));
+  // 2.3 stays as it is: the demo's cue table emphasizes 「2.3」 on this card.
+  const result = check((t) => replaceOnce(t, METRIC_LINE, "指标：准确率 |  | 2.3 |  | 相同数据集下"));
   assert.deepEqual(result.errors, []);
 });
 

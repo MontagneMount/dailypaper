@@ -10,6 +10,8 @@ import { createNarration, DEFAULT_RATE, DEFAULT_VOICE } from "./tts.js";
 import { DEFAULT_THEME, listThemes, renderCover, renderFrames } from "./frames.js";
 import { composeVideo, writeChapters, writeSrt } from "./compose.js";
 import { assertCanRender, episodeNumberProblem, readPublished } from "./episodes.js";
+import { scheduleAll } from "./cues.js";
+import { previewProblems } from "./preview.js";
 
 const USAGE = `用法：
   npm run render -- <本期文件夹> [--theme ${DEFAULT_THEME}|dark] [--static] [--force] [--voice ${DEFAULT_VOICE}] [--rate ${DEFAULT_RATE}]
@@ -33,7 +35,7 @@ async function main() {
   if (!fs.existsSync(scriptFile)) throw new Error(`找不到讲解稿：${scriptFile}`);
 
   const script = parseScript(fs.readFileSync(scriptFile, "utf8"));
-  const { slides, cover, errors, warnings } = buildSlides(script, episodeDir);
+  const { slides, cover, cues, errors, warnings } = buildSlides(script, episodeDir);
   // The number in the title follows the publishing order kept in episodes/published.json.
   const published = readPublished();
   const titleField = script.headerFields.find((field) => field.key === "视频标题");
@@ -49,6 +51,23 @@ async function main() {
 
   printSummary(script, slides);
   if (options.check) {
+    // The cue table's timing needs a voice-over: use the last one if it still fits the script.
+    const hasCues = [...cues.values()].some((page) => page.actions.length > 0);
+    const last = hasCues ? lastNarration(path.join(episodeDir, "output"), slides, options) : null;
+    if (last) {
+      const timed = scheduleAll(cues, last);
+      timed.warnings.forEach((warning) => console.warn(`⚠️  ${warning}`));
+      if (timed.errors.length > 0) {
+        console.error(`镜头表的时间有 ${timed.errors.length} 个问题（按上次生成的配音算）：`);
+        timed.errors.forEach((error) => console.error(`  - ${error}`));
+        process.exitCode = 1;
+        return;
+      }
+    } else if (hasCues) {
+      console.log("\n（镜头表的时间要按配音检查：运行 npm run preview 时会查）");
+    }
+    // The cue table is reviewed with its preview, which must have been made from the current inputs.
+    previewProblems(episodeDir, slides, cues, options.theme).forEach((problem) => console.warn(`⚠️  ${problem}`));
     console.log("\n检查通过。");
     return;
   }
@@ -65,12 +84,27 @@ async function main() {
     workDir,
   });
 
+  // The cue table's timing can only be checked against the real narration.
+  const timed = options.static ? { schedules: new Map(), errors: [], warnings: [] } : scheduleAll(cues, narration);
+  timed.warnings.forEach((warning) => console.warn(`⚠️  ${warning}`));
+  if (timed.errors.length > 0) {
+    console.error(`镜头表有 ${timed.errors.length} 个问题（按这次配音的时间算），改好之后再生成：`);
+    timed.errors.forEach((error) => console.error(`  - ${error}`));
+    process.exitCode = 1;
+    return;
+  }
+
   console.log(`[2/4] 渲染画面（风格：${options.theme}${options.static ? "，静态" : ""}）`);
-  const { frames, warnings: frameWarnings } = await renderFrames(slides, narration, workDir, {
+  const { frames, warnings: frameWarnings, fonts } = await renderFrames(slides, narration, workDir, {
     theme: options.theme,
     animate: !options.static,
+    schedules: timed.schedules,
   });
-  frameWarnings.forEach((warning) => console.warn(`⚠️  ${warning}`));
+  [...frameWarnings, ...fonts].forEach((warning) => console.warn(`⚠️  ${warning}`));
+  if (!options.static) {
+    const stale = previewProblems(episodeDir, slides, cues, options.theme, { voice: options.voice, rate: options.rate, narration, fonts });
+    stale.forEach((problem) => console.warn(`⚠️  ${problem}`));
+  }
 
   console.log("[3/4] 合成视频");
   const videoFile = path.join(workDir, "video.mp4");
@@ -105,6 +139,24 @@ function parseArgs(args) {
     else throw new Error(`不认识「${arg}」这个选项\n${USAGE}`);
   }
   return options;
+}
+
+/**
+ * The narration of the last render or preview (output/narration.json), when it was made from the
+ * same lines with the same voice and rate, so its times are the ones the video will have; else null.
+ */
+function lastNarration(workDir, slides, { voice, rate }) {
+  const file = path.join(workDir, "narration.json");
+  if (!fs.existsSync(file)) return null;
+  try {
+    const narration = JSON.parse(fs.readFileSync(file, "utf8"));
+    const sameLines = (page, slide) => page.number === slide.number && page.lines.map((line) => line.text).join("\n") === slide.narration.join("\n");
+    const same = narration.voice === voice && narration.rate === rate && narration.pages.length === slides.length
+      && narration.pages.every((page, index) => sameLines(page, slides[index]));
+    return same ? narration : null;
+  } catch {
+    return null;
+  }
 }
 
 function printSummary(script, slides) {

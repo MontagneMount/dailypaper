@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1650 460" width="1650" height="460" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <!-- 第 5 页示意图：Counterfactual Induction，据论文第 3.1 节和附录 E.1 概括（Claude 按 materials.md 绘制，2026-10-07）
+       两个分支都是假设场景，不是额外的实验；这一阶段不输入当前问题；不给记忆画数值权重 -->
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#f59e0b"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="34" font-size="22" font-weight="700" fill="#fbbf24">示意图 · 据第 3.1 节与附录 E.1</text>
+
+  <!-- 固定的记忆 -->
+  <rect x="20" y="140" width="330" height="170" rx="16" fill="rgba(59, 130, 246, 0.16)" stroke="#3b82f6" stroke-width="3"/>
+  <text x="185" y="184" text-anchor="middle" font-size="24" font-weight="700" fill="#93c5fd">固定记忆</text>
+  <text x="185" y="234" text-anchor="middle" font-size="30" font-weight="700" fill="#f1f5f9">用户熟悉</text>
+  <text x="185" y="276" text-anchor="middle" font-size="30" font-weight="700" fill="#f1f5f9">Northstar Backup</text>
+  <rect x="70" y="326" width="230" height="44" rx="22" fill="rgba(59, 130, 246, 0.10)" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="185" y="356" text-anchor="middle" font-size="23" font-weight="700" fill="#93c5fd">记忆保持不变</text>
+  <text x="20" y="440" font-size="21" fill="#94a3b8">这一阶段不输入当前问题</text>
+
+  <!-- 记忆分别放进两个假设场景 -->
+  <path d="M350 200 C 385 200, 385 115, 416 115" fill="none" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow-blue)"/>
+  <path d="M350 250 C 385 250, 385 345, 416 345" fill="none" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow-blue)"/>
+
+  <!-- 假设场景一 -->
+  <rect x="420" y="40" width="410" height="150" rx="16" fill="rgba(245, 158, 11, 0.07)" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="10 7"/>
+  <rect x="444" y="58" width="132" height="38" rx="19" fill="#f59e0b"/>
+  <text x="510" y="85" text-anchor="middle" font-size="22" font-weight="800" fill="#0f172a">假设场景</text>
+  <text x="625" y="152" text-anchor="middle" font-size="30" font-weight="700" fill="#f1f5f9">重视上手方便</text>
+
+  <!-- 假设场景二 -->
+  <rect x="420" y="270" width="410" height="150" rx="16" fill="rgba(245, 158, 11, 0.07)" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="10 7"/>
+  <rect x="444" y="288" width="132" height="38" rx="19" fill="#f59e0b"/>
+  <text x="510" y="315" text-anchor="middle" font-size="22" font-weight="800" fill="#0f172a">假设场景</text>
+  <text x="625" y="362" text-anchor="middle" font-size="30" font-weight="700" fill="#f1f5f9">比较冷存储成本</text>
+  <text x="625" y="402" text-anchor="middle" font-size="30" font-weight="700" fill="#f1f5f9">与完整恢复</text>
+
+  <!-- 各自得出的结论 -->
+  <path d="M830 115 L886 115" fill="none" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow-gray)"/>
+  <rect x="890" y="40" width="370" height="150" rx="16" fill="#1e293b" stroke="#64748b" stroke-width="2.5"/>
+  <text x="1075" y="106" text-anchor="middle" font-size="29" font-weight="700" fill="#f1f5f9">熟悉程度</text>
+  <text x="1075" y="148" text-anchor="middle" font-size="29" font-weight="700" fill="#f1f5f9">可以参与选择</text>
+
+  <path d="M830 345 L886 345" fill="none" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow-gray)"/>
+  <rect x="890" y="270" width="370" height="150" rx="16" fill="#1e293b" stroke="#64748b" stroke-width="2.5"/>
+  <text x="1075" y="336" text-anchor="middle" font-size="29" font-weight="700" fill="#f1f5f9">熟悉程度不能证明</text>
+  <text x="1075" y="378" text-anchor="middle" font-size="29" font-weight="700" fill="#f1f5f9">成本或可靠性</text>
+
+  <!-- 合并成有条件的使用规则 -->
+  <path d="M1260 115 C 1292 115, 1290 190, 1316 190" fill="none" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow-amber)"/>
+  <path d="M1260 345 C 1292 345, 1290 270, 1316 270" fill="none" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow-amber)"/>
+  <rect x="1320" y="95" width="310" height="270" rx="16" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-width="3"/>
+  <text x="1475" y="144" text-anchor="middle" font-size="28" font-weight="800" fill="#fbbf24">条件 → 允许的影响</text>
+  <text x="1475" y="178" text-anchor="middle" font-size="20" fill="#94a3b8">Counterfactual Induction</text>
+  <line x1="1350" y1="200" x2="1600" y2="200" stroke="rgba(245, 158, 11, 0.4)" stroke-width="1.5"/>
+  <text x="1475" y="246" text-anchor="middle" font-size="25" fill="#f1f5f9">重视方便：可作参考</text>
+  <text x="1475" y="294" text-anchor="middle" font-size="25" fill="#f1f5f9">比较成本、恢复：</text>
+  <text x="1475" y="332" text-anchor="middle" font-size="25" fill="#f1f5f9">不能替代证据</text>
+</svg>

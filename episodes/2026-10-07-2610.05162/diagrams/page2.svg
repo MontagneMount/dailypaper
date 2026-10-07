@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1650 460" width="1650" height="460" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <!-- 第 2 页示意图：论文附录 E.1 的备份案例，只概括案例，不是产品推荐（Claude 按 materials.md 绘制，2026-10-07）
+       颜色约定（第 5～7 页沿用）：蓝 = 个人偏好 / 记忆，绿 = 当前任务证据 -->
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#10b981"/>
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="34" font-size="22" font-weight="700" fill="#fbbf24">示意图 · 论文案例（附录 E.1）</text>
+
+  <!-- 左上：历史记忆，个人偏好 -->
+  <rect x="20" y="52" width="540" height="168" rx="16" fill="rgba(59, 130, 246, 0.16)" stroke="#3b82f6" stroke-width="3"/>
+  <text x="50" y="98" font-size="26" font-weight="700" fill="#93c5fd">历史记忆 · 个人偏好</text>
+  <text x="50" y="150" font-size="30" font-weight="700" fill="#f1f5f9">用户喜欢 Northstar Backup</text>
+  <text x="50" y="196" font-size="27" fill="#cbd5e1">熟悉客户端、使用方便</text>
+
+  <!-- 左下：任务证据 -->
+  <rect x="20" y="262" width="540" height="168" rx="16" fill="rgba(16, 185, 129, 0.16)" stroke="#10b981" stroke-width="3"/>
+  <text x="50" y="308" font-size="26" font-weight="700" fill="#6ee7b7">任务证据 · 当前给出</text>
+  <text x="50" y="360" font-size="30" font-weight="700" fill="#f1f5f9">Pine Archive 冷存储更便宜</text>
+  <text x="50" y="406" font-size="27" fill="#cbd5e1">完整恢复演练成功</text>
+
+  <!-- 右上：当前任务 -->
+  <rect x="1090" y="52" width="540" height="168" rx="16" fill="#1e293b" stroke="#64748b" stroke-width="2.5"/>
+  <text x="1120" y="98" font-size="26" font-weight="700" fill="#cbd5e1">当前任务</text>
+  <text x="1120" y="150" font-size="30" font-weight="700" fill="#f1f5f9">保存大型视频文件</text>
+  <text x="1120" y="196" font-size="27" fill="#cbd5e1">很少访问，偶尔需要完整恢复</text>
+
+  <!-- 右下：本次选择 -->
+  <path d="M1360 220 L1360 286" fill="none" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow-gray)"/>
+  <rect x="1090" y="290" width="540" height="140" rx="16" fill="#1e293b" stroke="#e2e8f0" stroke-width="2.5"/>
+  <text x="1360" y="350" text-anchor="middle" font-size="32" font-weight="800" fill="#f1f5f9">本次选择</text>
+  <text x="1360" y="396" text-anchor="middle" font-size="25" fill="#94a3b8">偏好和证据，作用不同</text>
+
+  <!-- 两类信息分别连到本次选择 -->
+  <path d="M560 136 C 820 136, 840 335, 1086 335" fill="none" stroke="#3b82f6" stroke-width="3.5" marker-end="url(#arrow-blue)"/>
+  <text x="780" y="112" text-anchor="middle" font-size="26" font-weight="700" fill="#fbbf24">熟悉 ≠ 成本或恢复能力的证明</text>
+  <path d="M560 346 C 820 346, 840 385, 1086 385" fill="none" stroke="#10b981" stroke-width="3.5" marker-end="url(#arrow-green)"/>
+
+  <text x="825" y="452" text-anchor="middle" font-size="21" fill="#94a3b8">仅为论文案例，不是实际产品推荐</text>
+</svg>

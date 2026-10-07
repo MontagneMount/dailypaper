@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1650 460" width="1650" height="460" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <!-- 第 7 页示意图：Evidence-Based Reasoning，据论文第 3.3 节和附录 E.1 概括（Claude 按 materials.md 绘制，2026-10-07）
+       核对在内部完成，不作为报告返回，也不是联网事实核查；出口只有最终回答 -->
+  <defs>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#10b981"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrow-white" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e2e8f0"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="34" font-size="22" font-weight="700" fill="#fbbf24">示意图 · 据第 3.3 节与附录 E.1</text>
+
+  <!-- 两条来源 -->
+  <rect x="20" y="70" width="360" height="130" rx="16" fill="rgba(16, 185, 129, 0.16)" stroke="#10b981" stroke-width="3"/>
+  <text x="200" y="128" text-anchor="middle" font-size="27" font-weight="700" fill="#f1f5f9">当前成本与</text>
+  <text x="200" y="166" text-anchor="middle" font-size="27" font-weight="700" fill="#f1f5f9">恢复证据</text>
+  <rect x="20" y="270" width="360" height="130" rx="16" fill="rgba(59, 130, 246, 0.16)" stroke="#3b82f6" stroke-width="3"/>
+  <text x="200" y="328" text-anchor="middle" font-size="27" font-weight="700" fill="#f1f5f9">熟悉 Northstar</text>
+  <text x="200" y="366" text-anchor="middle" font-size="27" font-weight="700" fill="#f1f5f9">的记忆</text>
+
+  <!-- 内部检查（虚线框） -->
+  <rect x="420" y="16" width="840" height="428" rx="18" fill="rgba(245, 158, 11, 0.05)" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="12 8"/>
+  <text x="446" y="54" font-size="21" fill="#94a3b8">Evidence-Based Reasoning</text>
+  <text x="1236" y="54" text-anchor="end" font-size="22" font-weight="700" fill="#fbbf24">内部检查，不作为报告返回</text>
+
+  <!-- 来源对应到回答里的表述 -->
+  <path d="M380 135 L886 135" fill="none" stroke="#10b981" stroke-width="3.5" marker-end="url(#arrow-green)"/>
+  <path d="M380 335 L886 335" fill="none" stroke="#3b82f6" stroke-width="3.5" marker-end="url(#arrow-blue)"/>
+  <rect x="890" y="80" width="345" height="110" rx="14" fill="#1e293b" stroke="#10b981" stroke-width="2.5"/>
+  <text x="1062" y="122" text-anchor="middle" font-size="27" font-weight="700" fill="#f1f5f9">本次推荐</text>
+  <text x="1062" y="162" text-anchor="middle" font-size="27" font-weight="700" fill="#f1f5f9">Pine Archive</text>
+  <rect x="890" y="280" width="345" height="110" rx="14" fill="#1e293b" stroke="#3b82f6" stroke-width="2.5"/>
+  <text x="1062" y="322" text-anchor="middle" font-size="27" font-weight="700" fill="#f1f5f9">保留熟悉与便利</text>
+  <text x="1062" y="362" text-anchor="middle" font-size="27" font-weight="700" fill="#f1f5f9">的取舍说明</text>
+
+  <!-- 每一句都核对 -->
+  <line x1="640" y1="137" x2="640" y2="170" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4"/>
+  <line x1="640" y1="300" x2="640" y2="333" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4"/>
+  <rect x="470" y="170" width="340" height="130" rx="14" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-width="2.5"/>
+  <path d="M500 203 l8 8 l14 -16" fill="none" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="536" y="214" font-size="25" fill="#f1f5f9">来源存在</text>
+  <path d="M500 241 l8 8 l14 -16" fill="none" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="536" y="252" font-size="25" fill="#f1f5f9">支持这句话</text>
+  <path d="M500 279 l8 8 l14 -16" fill="none" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="536" y="290" font-size="25" fill="#f1f5f9">记忆没有越界</text>
+
+  <!-- 唯一的出口：最终回答 -->
+  <path d="M1260 235 L1296 235" fill="none" stroke="#e2e8f0" stroke-width="3" marker-end="url(#arrow-white)"/>
+  <rect x="1300" y="165" width="330" height="140" rx="16" fill="#1e293b" stroke="#e2e8f0" stroke-width="2.5"/>
+  <text x="1465" y="228" text-anchor="middle" font-size="32" font-weight="800" fill="#f1f5f9">最终回答</text>
+  <text x="1465" y="272" text-anchor="middle" font-size="22" fill="#94a3b8">只返回这一份回答</text>
+</svg>

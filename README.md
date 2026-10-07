@@ -2,7 +2,7 @@
 
 每天挑选一篇热门的前沿论文，生成中文讲解稿，做成视频发布到 B 站（栏目名「DailyPaper 每日论文」）。先做 AI，之后扩展到经济、材料、化学、数学、物理。
 
-> **状态：✅ M1 完成**：第一期已发布（[【每日论文 #1】Kandinsky 6.0 Video](https://www.bilibili.com/video/BV1PdpN6SEk7/)，2026-10-07）。M2 的选题和开工脚本已做好，下一步做第二期。
+> **状态：✅ M1 完成**：已发布 2 期：[【每日论文 #1】Kandinsky 6.0 Video](https://www.bilibili.com/video/BV1PdpN6SEk7/)、[【每日论文 #2】Memadapter](https://www.bilibili.com/video/BV1PFpM6REtz/)（都在 2026-10-07），发布记录见 [episodes/published.json](episodes/published.json)。M2 的选题和开工脚本已做好，正在做 M3 的连续发布。
 
 ## 快速开始
 
@@ -83,7 +83,7 @@ M1 阶段先只写⑥的合成脚本，②和⑨先手动完成。
 
 - [x] **M1 跑通第一条视频**（2026-10-07 发布第一期）：Claude 写最小版合成脚本（讲解稿 → 画面 → 配音 → 字幕 → MP4），Gemini 设计视频模板；从 Hugging Face 日榜选一篇 AI 论文 → ChatGPT 写稿 → ChatGPT 审稿 → 用户确认 → 脚本合成视频 → 用户审核成片 → 发布。记下每一步遇到的问题
 - [ ] **M2 辅助脚本**：Claude 开发选题候选（先接 Hugging Face 日榜）、材料整理和归档脚本（`npm run topics`、`npm run new` 已完成，T52 复审通过；归档待做），把 M1 里最费时的手工步骤自动化；ChatGPT 审核代码
-- [ ] **M3 连续发布 10 条**：固定流程和模板，看播放量、完播率、评论
+- [ ] **M3 连续发布 10 条**：固定流程和模板，看播放量、完播率、评论（已发布 2 条）
 - [ ] **M4 逐步自动化**：把成熟的步骤改成程序调用 API，最后加定时运行
 - [ ] **M5 扩展方向**：流程稳定后，逐步加入经济、材料、化学、数学、物理
 

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1650 460" width="1650" height="460" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <!-- 第 6 页示意图：Context-Aware Reflection，据论文第 3.2 节和附录 E.1 概括（Claude 按 materials.md 绘制，2026-10-07）
+       输出是自然语言的使用要求；不是过滤、删除记忆，原记忆照常交给生成阶段 -->
+  <defs>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrow-white" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e2e8f0"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="34" font-size="22" font-weight="700" fill="#fbbf24">示意图 · 据第 3.2 节与附录 E.1</text>
+
+  <!-- 三个输入 -->
+  <rect x="20" y="52" width="420" height="104" rx="16" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-width="3"/>
+  <text x="230" y="115" text-anchor="middle" font-size="29" font-weight="700" fill="#f1f5f9">上一步的条件规则</text>
+  <rect x="20" y="178" width="420" height="104" rx="16" fill="rgba(16, 185, 129, 0.16)" stroke="#10b981" stroke-width="3"/>
+  <text x="230" y="241" text-anchor="middle" font-size="29" font-weight="700" fill="#f1f5f9">当前请求与证据</text>
+  <rect x="20" y="304" width="420" height="104" rx="16" fill="rgba(59, 130, 246, 0.16)" stroke="#3b82f6" stroke-width="3"/>
+  <text x="230" y="367" text-anchor="middle" font-size="29" font-weight="700" fill="#f1f5f9">原记忆及其他记忆</text>
+
+  <path d="M440 104 C 500 104, 500 190, 556 190" fill="none" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow-gray)"/>
+  <path d="M440 230 L556 230" fill="none" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow-gray)"/>
+  <path d="M440 340 C 500 340, 500 270, 556 270" fill="none" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow-gray)"/>
+
+  <!-- 结合当前任务重新判断 -->
+  <rect x="560" y="150" width="430" height="160" rx="16" fill="#1e293b" stroke="#e2e8f0" stroke-width="2.5"/>
+  <text x="775" y="216" text-anchor="middle" font-size="29" font-weight="800" fill="#f1f5f9">Context-Aware Reflection</text>
+  <text x="775" y="260" text-anchor="middle" font-size="25" fill="#94a3b8">结合当前任务重新判断</text>
+  <rect x="610" y="74" width="330" height="44" rx="22" fill="rgba(245, 158, 11, 0.10)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="775" y="104" text-anchor="middle" font-size="23" font-weight="700" fill="#fbbf24">核对更新、限定、冲突</text>
+  <line x1="775" y1="118" x2="775" y2="150" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4"/>
+
+  <!-- 输出：本次任务的使用要求 -->
+  <path d="M990 230 L1076 230" fill="none" stroke="#e2e8f0" stroke-width="3" marker-end="url(#arrow-white)"/>
+  <rect x="1080" y="100" width="550" height="260" rx="16" fill="#1e293b" stroke="#e2e8f0" stroke-width="2.5"/>
+  <text x="1355" y="158" text-anchor="middle" font-size="31" font-weight="800" fill="#f1f5f9">本次任务使用卡</text>
+  <line x1="1110" y1="182" x2="1600" y2="182" stroke="rgba(226, 232, 240, 0.25)" stroke-width="1.5"/>
+  <circle cx="1124" cy="236" r="9" fill="#3b82f6"/>
+  <text x="1146" y="245" font-size="26" fill="#f1f5f9">承认熟悉与方便的价值</text>
+  <circle cx="1124" cy="306" r="9" fill="#10b981"/>
+  <text x="1146" y="315" font-size="26" fill="#f1f5f9">不得以此推翻成本与完整恢复证据</text>
+
+  <!-- 原记忆没有被删掉 -->
+  <path d="M440 384 L1000 384 C 1040 384, 1040 420, 1080 420 L1626 420" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="10 8" marker-end="url(#arrow-blue)"/>
+  <text x="1355" y="406" text-anchor="middle" font-size="22" fill="#93c5fd">原记忆不删除，照常交给下一步生成</text>
+</svg>

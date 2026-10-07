@@ -10,7 +10,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { fetchPaper, licenseFromAbsPage, licenseName, paperProblems, parseArxivEntry } from "../src/arxiv.js";
-import { describeEpisodes, episodeNumberProblem, listEpisodes, nextEpisodeNumber, readPublished } from "../src/episodes.js";
+import { assertCanRender, describeEpisodes, episodeNumberProblem, listEpisodes, nextEpisodeNumber, readPublished } from "../src/episodes.js";
 import { httpGet } from "../src/http.js";
 import { authorsText, createEpisode, scriptSkeleton, shortName, writeEpisode } from "../src/new-episode.js";
 import { parseScript } from "../src/parse-script.js";
@@ -267,6 +267,14 @@ test("期数按发布记录排，不按文件夹数；先发布的那期占号�
     "#2 已经发布过了（episodes/2026-10-08-2610.00002），这一期发布时应该是 #3");
   assert.equal(episodeNumberProblem("2026-10-09-2610.04198", "【每日论文 #7】ALoDLM｜看点", later), "标题写的是 #7，按发布记录下一期是 #3");
   assert.equal(episodeNumberProblem("example", "【每日论文 #9】示例", published), null);
+});
+
+test("T63 已发布的期默认不让重新生成，加 --force 才行", () => {
+  const published = [FIRST];
+  assert.throws(() => assertCanRender(FIRST.folder, published), /第 1 期已经发布.*加上 --force/);
+  assert.doesNotThrow(() => assertCanRender(FIRST.folder, published, { force: true }));
+  assert.doesNotThrow(() => assertCanRender("2026-10-09-2610.04198", published));
+  assert.doesNotThrow(() => assertCanRender("example", published));
 });
 
 // ---- npm run new ----

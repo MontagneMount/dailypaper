@@ -37,7 +37,9 @@ npm run new -- <arXiv 编号>
 npm run check -- episodes/<本期文件夹>
 ```
 
-可选参数：`--theme dark` 换成深色风格（默认是浅色学术，见 [templates/README.md](templates/README.md)「风格」）；`--voice zh-CN-YunxiNeural` 换成男声（默认是女声「晓晓」）；`--rate +0%` 换回正常语速（默认是 `+25%`，也就是 1.25 倍）。
+可选参数：`--theme dark` 换成深色风格（默认是浅色学术，见 [templates/README.md](templates/README.md)「风格」）；`--static` 不要动画，每句字幕一张静止画面（默认每页淡入淡出）；`--voice zh-CN-YunxiNeural` 换成男声（默认是女声「晓晓」）；`--rate +0%` 换回正常语速（默认是 `+25%`，也就是 1.25 倍）。
+
+已经记进 `episodes/published.json` 的期，`npm run render` 不会再生成，免得覆盖发布用的视频和封面；确实要重做时加 `--force`。
 
 改了代码之后，运行 `npm test`，确认稿子的检查规则没有被改坏。
 

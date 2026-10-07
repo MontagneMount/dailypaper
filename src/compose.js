@@ -8,13 +8,7 @@ const FADE_OUT_SECONDS = 0.8;
 
 export async function composeVideo({ frames, audioFile, outFile, workDir, duration }) {
   const listFile = path.join(workDir, "frames.txt");
-  const lines = ["ffconcat version 1.0"];
-  for (const frame of frames) {
-    lines.push(`file '${toFfmpegPath(frame.file)}'`, `duration ${frame.duration.toFixed(3)}`);
-  }
-  // The concat demuxer only honours the last duration if the last file is listed again.
-  lines.push(`file '${toFfmpegPath(frames.at(-1).file)}'`);
-  fs.writeFileSync(listFile, lines.join("\n"));
+  fs.writeFileSync(listFile, concatList(frames));
 
   await runFfmpeg([
     "-y",
@@ -26,6 +20,20 @@ export async function composeVideo({ frames, audioFile, outFile, workDir, durati
     "-shortest", "-movflags", "+faststart",
     outFile,
   ]);
+}
+
+/**
+ * The ffconcat list: each screenshot and how long it stays on screen. Durations keep microseconds,
+ * so hundreds of 1/30-second animation frames do not add up to a visible drift.
+ */
+export function concatList(frames) {
+  const lines = ["ffconcat version 1.0"];
+  for (const frame of frames) {
+    lines.push(`file '${toFfmpegPath(frame.file)}'`, `duration ${frame.duration.toFixed(6)}`);
+  }
+  // The concat demuxer only honours the last duration if the last file is listed again.
+  lines.push(`file '${toFfmpegPath(frames.at(-1).file)}'`);
+  return lines.join("\n");
 }
 
 export function writeSrt(narration, file) {

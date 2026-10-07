@@ -106,6 +106,17 @@ export function episodeNumberProblem(folderName, title, published) {
     : `标题写的是 #${titleNumber}，按发布记录下一期是 #${next}`;
 }
 
+/**
+ * A published episode keeps the video and cover it was published with, so rendering it again
+ * needs `force` (npm run render -- --force). Throws when it is not allowed.
+ */
+export function assertCanRender(folderName, published, { force = false } = {}) {
+  const entry = published.find((item) => item.folder === folderName);
+  if (entry && !force) {
+    throw new Error(`第 ${entry.number} 期已经发布（${entry.url}），重新生成会覆盖 output/ 里发布用的视频和封面；确实要重做，加上 --force`);
+  }
+}
+
 /** Today's local date as YYYY-MM-DD, shifted by a number of days. */
 export function localDate(shiftDays = 0) {
   const date = new Date();

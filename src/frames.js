@@ -1,10 +1,12 @@
-// Fill the templates with each slide's content and take one screenshot per subtitle line.
-// Also renders the Bilibili cover from the same kind of template.
+// Fill the templates with each slide's content and take the screenshots for the video: a new one
+// whenever the picture changes (a page turn moves, a subtitle line starts), held while it stays
+// still. Also renders the Bilibili cover from the same kind of template.
 
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright";
+import { FPS, pageTurn, planPageFrames } from "./animation.js";
 
 const TEMPLATES_DIR = fileURLToPath(new URL("../templates/", import.meta.url));
 const THEMES_DIR = path.join(TEMPLATES_DIR, "themes");
@@ -22,9 +24,10 @@ const WIDE_FIGURE_RATIO = 2.2;
 const WIDE_VARIANTS = { figure_text: "figure_text_wide" };
 
 /**
+ * With `animate: false` (npm run render -- --static) nothing moves: one screenshot per subtitle line.
  * @returns {Promise<{ frames: Array<{ file: string, duration: number }>, warnings: string[] }>}
  */
-export async function renderFrames(slides, narration, workDir, { theme = DEFAULT_THEME } = {}) {
+export async function renderFrames(slides, narration, workDir, { theme = DEFAULT_THEME, animate = true } = {}) {
   const pagesDir = path.join(workDir, "pages");
   const framesDir = path.join(workDir, "frames");
   for (const dir of [pagesDir, framesDir]) {
@@ -57,26 +60,25 @@ export async function renderFrames(slides, narration, workDir, { theme = DEFAULT
       problems.forEach((problem) => warnings.push(`第 ${slide.number} 页：${problem}`));
       if (slideIndex === 0) (await page.evaluate(missingFonts)).forEach((font) => warnings.push(missingFontWarning(font, theme)));
 
-      // No subtitle during the pause before the first sentence, so text never shows up before the voice.
-      const firstStart = timing.lines[0].start;
-      if (firstStart > timing.start) {
-        await page.evaluate(showSubtitle, "");
-        const file = path.join(framesDir, `p${order}-l00.png`);
-        await page.screenshot({ path: file });
-        frames.push({ file, duration: firstStart - timing.start });
+      const moves = [];
+      if (animate) {
+        const turn = pageTurn(timing.end - timing.start);
+        await page.evaluate(setUpPageTurn, { ...turn, duration: timing.end - timing.start });
+        moves.push(...turn.moves);
       }
 
-      for (const [index, line] of timing.lines.entries()) {
-        await page.evaluate(showSubtitle, line.display);
-        const file = path.join(framesDir, `p${order}-l${pad(index + 1)}.png`);
+      // Before the first sentence no subtitle shows, so text never appears ahead of the voice;
+      // the last line stays up through the pause after it.
+      const shots = planPageFrames(timing, moves);
+      for (const [index, shot] of shots.entries()) {
+        await page.evaluate(showFrame, { ms: shot.time * 1000, subtitle: timing.lines[shot.line]?.display ?? "" });
+        const file = path.join(framesDir, `p${order}-${String(index + 1).padStart(3, "0")}.png`);
         await page.screenshot({ path: file });
-
-        // A line stays until the next one starts; the last line also covers the pause after it.
-        const end = index === timing.lines.length - 1 ? timing.end : timing.lines[index + 1].start;
-        frames.push({ file, duration: end - line.start });
+        frames.push({ file, duration: shot.count / FPS });
       }
+      const moving = animate ? `，其中 ${shots.filter((shot) => shot.moving).length} 张是动画` : "";
       const variant = template === slide.layout ? "" : `，${template}`;
-      console.log(`  第 ${slide.number} 页画面完成（${timing.lines.length} 帧${variant}）`);
+      console.log(`  第 ${slide.number} 页画面完成（${shots.length} 张截图${moving}${variant}）`);
     }
   } finally {
     await browser.close();
@@ -312,9 +314,25 @@ function missingFonts() {
   return missing;
 }
 
-function showSubtitle(text) {
-  const subtitle = document.getElementById("dp-subtitle");
-  if (subtitle) subtitle.textContent = text;
+/** Fade the page in and out (all but the subtitles), as paused animations that showFrame moves. */
+function setUpPageTurn({ fadeIn, fadeOut, duration }) {
+  const parts = [...document.body.children].filter((element) => !element.classList.contains("subtitle-safe-area"));
+  for (const part of parts) {
+    const fades = [
+      { opacity: 0, offset: 0, easing: "ease-out" },
+      { opacity: 1, offset: fadeIn / duration },
+      { opacity: 1, offset: 1 - fadeOut / duration, easing: "ease-in" },
+      { opacity: 0, offset: 1 },
+    ];
+    part.animate(fades, { duration: duration * 1000, fill: "both" }).pause();
+  }
+}
+
+/** Show the page as it is `ms` milliseconds after it starts, with this subtitle line. */
+function showFrame({ ms, subtitle }) {
+  for (const animation of document.getAnimations()) animation.currentTime = ms;
+  const element = document.getElementById("dp-subtitle");
+  if (element) element.textContent = subtitle;
 }
 
 /** Remove the cover's empty optional boxes and report text that does not fit. */

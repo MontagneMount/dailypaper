@@ -14,7 +14,7 @@ import { FPS } from "./animation.js";
 import { composeVideo } from "./compose.js";
 import { CUES_FILE, scheduleAll, targetName } from "./cues.js";
 import { runFfmpeg } from "./ffmpeg.js";
-import { DEFAULT_THEME, fontWarnings, launchBrowser, listThemes, renderFrames, setUpSlide, showMoment, VIEWPORT } from "./frames.js";
+import { DEFAULT_THEME, fontWarnings, launchBrowser, listThemes, renderEnvironment, renderFrames, setUpSlide, showMoment, VIEWPORT } from "./frames.js";
 import { buildSlides } from "./layouts.js";
 import { parseScript } from "./parse-script.js";
 import { createNarration, DEFAULT_RATE, DEFAULT_VOICE } from "./tts.js";
@@ -24,21 +24,25 @@ const USAGE = `用法：
   不写页码就预览每一页；--clip 要和页码一起用，把这一页做成带声音的短片`;
 const RECORD_FILE = "preview.json";
 
-// Everything a page's preview depends on. Code and templates are the same for every episode.
-const CODE_FILES = ["animation.js", "cues.js", "frames.js", "preview.js"].map((name) => fileURLToPath(new URL(name, import.meta.url)));
+// Everything a page's preview depends on (previewInputs). Code, dependencies and templates are the
+// same for every episode; all of the code counts, since any of it can change what a page shows.
+const SRC_DIR = fileURLToPath(new URL("./", import.meta.url));
+const LOCK_FILE = fileURLToPath(new URL("../package-lock.json", import.meta.url));
 const TEMPLATES_DIR = fileURLToPath(new URL("../templates/", import.meta.url));
 const INPUT_NAMES = {
-  code: "动作代码",
+  code: "代码或依赖版本",
   templates: "模板和风格文件",
   script: "讲稿",
   cues: "镜头表",
+  page: "页面内容（版式、文字、卡片或镜头动作）",
   figure: "原图",
   diagram: "示意图",
   theme: "所选风格",
   voice: "配音声音",
   rate: "语速",
   timing: "配音时间",
-  fonts: "字体",
+  fonts: "实际用到的字体",
+  browser: "浏览器版本",
 };
 
 async function main() {
@@ -86,41 +90,43 @@ async function main() {
   const browser = await launchBrowser();
   try {
     const page = await browser.newPage({ viewport: VIEWPORT, deviceScaleFactor: 1 });
-    record.fonts = null;
     for (const slide of chosen) {
       const timing = narration.pages[slides.indexOf(slide)];
       const schedule = timed.schedules.get(slide.number);
-      const entry = await previewPage(page, slide, { timing, schedule, previewDir, options, episodeDir });
+      const entry = await previewPage(page, slide, { cuePage: cues.get(slide.number), timing, schedule, previewDir, options, episodeDir });
       record.pages[slide.number] = entry;
-      record.fonts ??= entry.fonts;
       console.log(`  第 ${slide.number} 页：${record.pages[slide.number].moments.length} 张`);
     }
   } finally {
     await browser.close();
   }
-  record.episode = path.basename(episodeDir);
+  const { environment, missingFonts } = record.pages[chosen[0].number];
+  Object.assign(record, { episode: path.basename(episodeDir), made: new Date().toISOString(), environment });
   fs.writeFileSync(path.join(previewDir, RECORD_FILE), JSON.stringify(record, null, 2));
+  const status = previewStatus(episodeDir, slides, cues, options.theme, { voice: options.voice, rate: options.rate, narration, environment }, { allPages: true });
   const indexFile = path.join(previewDir, "index.html");
-  fs.writeFileSync(indexFile, indexPage(record, slides, episodeDir, { ...options, narration, fonts: record.fonts }));
+  fs.writeFileSync(indexFile, indexPage(record, slides, status, { ...options, missingFonts }));
 
   if (options.clip) {
     console.log(`[3/3] 第 ${options.page} 页的短片`);
     const clip = await makeClip(chosen[0], narration.pages[slides.indexOf(chosen[0])], timed.schedules, { workDir, previewDir, theme: options.theme });
     console.log(`  短片：${clip}`);
   }
-  record.fonts.forEach((warning) => console.warn(`⚠️  ${warning}`));
+  missingFonts.forEach((warning) => console.warn(`⚠️  ${warning}`));
+  status.problems.forEach((problem) => console.warn(`⚠️  ${problem}`));
   console.log(`\n完成！打开 ${indexFile} 看预览`);
 }
 
 /** Take the stills of one page; returns its entry for preview.json. */
-async function previewPage(page, slide, { timing, schedule, previewDir, options, episodeDir }) {
+async function previewPage(page, slide, { cuePage, timing, schedule, previewDir, options, episodeDir }) {
   const order = String(slide.number).padStart(2, "0");
   for (const file of fs.readdirSync(previewDir).filter((name) => name.startsWith(`p${order}-`))) fs.rmSync(path.join(previewDir, file));
 
   const htmlFile = path.join(previewDir, `page${order}.html`);
   const { turn, cameraWindows } = await setUpSlide(page, slide, { htmlFile, theme: options.theme, timing, animate: true, schedule });
   fs.rmSync(htmlFile, { force: true });
-  const fonts = await fontWarnings(page, options.theme);
+  const missingFonts = await fontWarnings(page, options.theme);
+  const environment = await renderEnvironment(page);
   const duration = timing.end - timing.start;
   const moments = previewMoments(schedule?.tracks ?? [], turn, duration);
   const lineAt = (time) => timing.lines.findLastIndex((line) => line.start - timing.start <= time + 1e-9);
@@ -141,8 +147,9 @@ async function previewPage(page, slide, { timing, schedule, previewDir, options,
     layout: slide.layout,
     duration,
     made: new Date().toISOString(),
-    inputs: { ...staticInputs(episodeDir, slide, options.theme), ...timedInputs({ ...options, fonts }, timing) },
-    fonts,
+    inputs: previewInputs(episodeDir, slide, cuePage, options.theme, { voice: options.voice, rate: options.rate, timing, environment }),
+    environment,
+    missingFonts,
     actions,
     moments,
   };
@@ -239,57 +246,71 @@ function round(number) {
 
 // ---- What the preview depends on ----
 
-/** The inputs of a page's preview that npm run check can see without a voice-over or a browser. */
-export function staticInputs(episodeDir, slide, theme) {
-  return {
-    code: hashFiles(CODE_FILES),
+/**
+ * Everything a page's preview depends on, as short hashes (T65; T66 R2): all of the code and the
+ * locked dependency versions, the templates and themes, the script and cue table, what the page
+ * actually shows (its slide after layout mapping, and its cue actions), its figure and diagram,
+ * and the theme. With `timed` also what only a voice-over and a browser know: voice, rate, the
+ * page's line times, the fonts really used and the browser version. Without it, only what
+ * npm run check can see.
+ * @param {{ voice, rate, timing, environment } | null} timed  timing: the page in narration.json;
+ *   environment: renderEnvironment() of frames.js
+ */
+export function previewInputs(episodeDir, slide, cuePage, theme, timed = null) {
+  const inputs = {
+    code: hashFiles([...listFiles(SRC_DIR).filter((file) => file.endsWith(".js")), LOCK_FILE]),
     templates: hashFiles(listFiles(TEMPLATES_DIR).filter((file) => /\.(html|css)$/.test(file))),
     script: hashFiles([path.join(episodeDir, "script.md")]),
     cues: hashFiles([path.join(episodeDir, CUES_FILE)]),
+    page: hash(JSON.stringify({ slide, cues: cuePage ?? null })),
     figure: hashFiles(slide.values.figure_image_path ? [fileURLToPath(slide.values.figure_image_path)] : []),
     diagram: hashFiles(slide.values.diagram_image_path ? [fileURLToPath(slide.values.diagram_image_path)] : []),
     theme,
   };
-}
-
-/** The inputs only a voice-over and a browser know: voice, rate, the page's line times, missing fonts. */
-function timedInputs({ voice, rate, fonts }, timing) {
+  if (!timed) return inputs;
+  const { timing, environment } = timed;
   const times = [timing.start, timing.end, ...timing.lines.map((line) => line.start)].map((time) => time.toFixed(3));
-  return { voice, rate, timing: hash(times.join(",")), fonts: hash(fonts.join("|")) };
+  return {
+    ...inputs,
+    voice: timed.voice,
+    rate: timed.rate,
+    timing: hash(times.join(",")),
+    fonts: hash(environment.fonts.join("\n")),
+    browser: environment.browser,
+  };
 }
 
 /**
- * Why the preview of pages with cue actions cannot be trusted: missing, or made from other inputs.
- * Without `timed` only what npm run check can see is compared; npm run render passes
- * { voice, rate, narration, fonts } too.
- * @returns {string[]} warnings
+ * Whether the previews can be trusted: pages with cue actions that have no preview, or whose
+ * preview was made from other inputs (previewInputs). Without `timed` only what npm run check can
+ * see is compared; npm run render and npm run preview pass { voice, rate, narration, environment }.
+ * The index page is only a snapshot: this is the live check (T66 R2).
+ * @returns {{ problems: string[], fresh: number[], stale: Map<number, string[]> }}
+ *   warnings; the pages whose preview is up to date; for each out-of-date page, what changed
  */
-export function previewProblems(episodeDir, slides, cues, theme, timed = null) {
-  const pages = slides.filter((slide) => cues.get(slide.number)?.actions.length > 0);
-  if (pages.length === 0) return [];
+export function previewStatus(episodeDir, slides, cues, theme, timed = null, { allPages = false } = {}) {
+  const pages = slides.filter((slide) => allPages || cues.get(slide.number)?.actions.length > 0);
   const record = readRecord(path.join(episodeDir, "output", "preview"));
   const problems = [];
   const missing = pages.filter((slide) => !record.pages[slide.number]).map((slide) => slide.number);
-  if (missing.length > 0) problems.push(`第 ${missing.join("、")} 页有镜头表，但还没有预览（npm run preview），位置和时间还没核对过`);
-  // Pages out of date for the same reasons share one warning.
+  if (missing.length > 0 && !allPages) problems.push(`第 ${missing.join("、")} 页有镜头表，但还没有预览（npm run preview），位置和时间还没核对过`);
+
+  const fresh = [];
   const stale = new Map();
   for (const slide of pages.filter((item) => record.pages[item.number])) {
-    const changed = changedInputs(record.pages[slide.number], episodeDir, slides, slide, theme, timed);
-    if (changed.length === 0) continue;
-    const reasons = changed.map((key) => INPUT_NAMES[key] ?? key).join("、");
-    stale.set(reasons, [...(stale.get(reasons) ?? []), slide.number]);
+    const pageTimed = timed && { ...timed, timing: timed.narration.pages[slides.indexOf(slide)] };
+    const now = previewInputs(episodeDir, slide, cues.get(slide.number), theme, pageTimed);
+    const changed = Object.keys(now).filter((key) => record.pages[slide.number].inputs[key] !== now[key]);
+    if (changed.length === 0) fresh.push(slide.number);
+    else stale.set(slide.number, changed.map((key) => INPUT_NAMES[key] ?? key));
   }
-  for (const [reasons, numbers] of stale) {
+  // Pages out of date for the same reasons share one warning.
+  const byReasons = new Map();
+  for (const [number, reasons] of stale) byReasons.set(reasons.join("、"), [...(byReasons.get(reasons.join("、")) ?? []), number]);
+  for (const [reasons, numbers] of byReasons) {
     problems.push(`第 ${numbers.join("、")} 页的预览过期了（变了：${reasons}），重新运行 npm run preview 核对`);
   }
-  return problems;
-}
-
-/** The names of the inputs that differ from those the page's preview was made from. */
-function changedInputs(entry, episodeDir, slides, slide, theme, timed) {
-  const now = { ...staticInputs(episodeDir, slide, theme) };
-  if (timed) Object.assign(now, timedInputs(timed, timed.narration.pages[slides.indexOf(slide)]));
-  return Object.keys(now).filter((key) => entry.inputs[key] !== now[key]);
+  return { problems, fresh, stale };
 }
 
 function readRecord(previewDir) {
@@ -324,11 +345,12 @@ function listFiles(dir) {
 
 // ---- The index page ----
 
-function indexPage(record, slides, episodeDir, options) {
+/** The index of the stills; `status` is previewStatus() right after they were taken. */
+function indexPage(record, slides, status, options) {
   const pages = slides.filter((slide) => record.pages[slide.number]);
   const sections = pages.map((slide) => {
     const entry = record.pages[slide.number];
-    const fresh = changedInputs(entry, episodeDir, slides, slide, options.theme, options).length === 0;
+    const stale = status.stale.get(slide.number);
     const actions = entry.actions.length
       ? `<table><tr><th>动作</th><th>位置</th><th>时间（本页）</th><th>说明</th></tr>${entry.actions
           .map((action) => {
@@ -347,7 +369,7 @@ function indexPage(record, slides, episodeDir, options) {
 <q>${escape(slide.narration[moment.line] ?? "（还没开口）")}</q></figcaption></figure>`,
       )
       .join("\n");
-    const state = fresh ? "" : '<span class="stale">已过期，重新运行 npm run preview</span>';
+    const state = stale ? `<span class="stale">生成时就已过期（变了：${escape(stale.join("、"))}），重新运行 npm run preview</span>` : "";
     return `<section id="p${slide.number}"><h2>第 ${slide.number} 页 · ${escape(entry.topic)} <span class="quiet">${entry.layout} · ${seconds(entry.duration)}</span>${state}</h2>
 ${actions}<div class="grid">${shots}</div></section>`;
   });
@@ -358,6 +380,7 @@ ${actions}<div class="grid">${shots}</div></section>`;
   h2 { font-family: "Noto Serif SC", serif; margin: 36px 0 12px; border-top: 1px solid #ded6c6; padding-top: 20px; }
   .quiet { color: #6b6457; font-weight: normal; font-size: 0.85em; }
   .stale { margin-left: 12px; padding: 2px 10px; border-radius: 6px; background: #b91c1c; color: #fff; font-size: 0.7em; }
+  .snapshot { padding: 10px 14px; border-left: 4px solid #c2410c; background: #fffdf8; line-height: 1.6; }
   nav a { margin-right: 10px; }
   table { border-collapse: collapse; margin: 8px 0 16px; background: #fffdf8; font-size: 14px; }
   td, th { border: 1px solid #ded6c6; padding: 6px 10px; text-align: left; vertical-align: top; }
@@ -369,9 +392,11 @@ ${actions}<div class="grid">${shots}</div></section>`;
   q { color: #4b4639; }
 </style></head><body>
 <h1>预览 · ${escape(record.episode)}</h1>
-<p class="quiet">风格 ${escape(options.theme)} · 配音 ${escape(options.voice)} ${escape(options.rate)} · 每张缩图是手机上的大小（640×360），点开看原尺寸。
-讲稿、配音、原图、镜头表、示意图、模板和风格、字体或动作代码一变，这份预览就过期了（npm run check 会提醒），不能拿来核对。声音要另外听。</p>
-${record.fonts?.length ? `<p class="stale">${record.fonts.map(escape).join("<br>")}</p>` : ""}
+<p class="snapshot">这是 ${escape(new Date(record.made).toLocaleString("zh-CN", { hour12: false }))} 生成时的快照，打开它不会重新检查。审核前先运行 <code>npm run check -- episodes/${escape(record.episode)}</code>：
+它会实时比对讲稿、镜头表、原图、示意图、页面内容、模板和风格、代码和依赖版本；看到「预览是最新的」，再拿这里的图核对。
+配音时间、实际字体和浏览器版本只有 <code>npm run render</code> 和 <code>npm run preview</code> 才查得到，它们发现过期也会提醒。</p>
+<p class="quiet">风格 ${escape(options.theme)} · 配音 ${escape(options.voice)} ${escape(options.rate)} · 浏览器 ${escape(record.environment?.browser)} · 每张缩图是手机上的大小（640×360），点开看原尺寸。声音要另外听。</p>
+${options.missingFonts?.length ? `<p class="stale">${options.missingFonts.map(escape).join("<br>")}</p>` : ""}
 <nav>${pages.map((slide) => `<a href="#p${slide.number}">第 ${slide.number} 页</a>`).join("")}</nav>
 ${sections.join("\n")}
 </body></html>`;

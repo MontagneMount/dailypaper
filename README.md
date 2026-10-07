@@ -46,7 +46,7 @@ npm run check -- episodes/<本期文件夹>
 npm run preview -- episodes/<本期文件夹>
 ```
 
-它用实际配音的时间，给每个动作截「之前、进场中、稳定、之后」几张图，生成 `output/preview/index.html`（带手机尺寸的缩图）；加页码和 `--clip`（如 `npm run preview -- episodes/<本期文件夹> 3 --clip`）把这一页做成带声音的短片。讲稿、原图、镜头表等一改，预览就过期，`npm run check` 会提醒。
+它用实际配音的时间，给每个动作截「之前、进场中、稳定、之后」几张图，生成 `output/preview/index.html`（带手机尺寸的缩图）；加页码和 `--clip`（如 `npm run preview -- episodes/<本期文件夹> 3 --clip`）把这一页做成带声音的短片。讲稿、原图、镜头表、代码等一改，预览就过期；`index.html` 只是生成时的快照，审核前先运行 `npm run check`，看到「预览是最新的」再用。
 
 已经记进 `episodes/published.json` 的期，`npm run render` 不会再生成，免得覆盖发布用的视频和封面；确实要重做时加 `--force`。
 

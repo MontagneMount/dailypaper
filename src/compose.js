@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { FPS } from "./animation.js";
 import { runFfmpeg } from "./ffmpeg.js";
 
 const FADE_OUT_SECONDS = 0.8;
@@ -14,7 +15,7 @@ export async function composeVideo({ frames, audioFile, outFile, workDir, durati
     "-y",
     "-f", "concat", "-safe", "0", "-i", listFile,
     "-i", audioFile,
-    "-vf", `fps=30,format=yuv420p,fade=t=out:st=${Math.max(0, duration - FADE_OUT_SECONDS).toFixed(3)}:d=${FADE_OUT_SECONDS}`,
+    "-vf", `fps=${FPS},format=yuv420p,fade=t=out:st=${Math.max(0, duration - FADE_OUT_SECONDS).toFixed(3)}:d=${FADE_OUT_SECONDS}`,
     "-c:v", "libx264", "-preset", "medium", "-crf", "20",
     "-c:a", "aac", "-b:a", "160k",
     "-shortest", "-movflags", "+faststart",
@@ -24,15 +25,18 @@ export async function composeVideo({ frames, audioFile, outFile, workDir, durati
 
 /**
  * The ffconcat list: each screenshot and how long it stays on screen. Durations keep microseconds,
- * so hundreds of 1/30-second animation frames do not add up to a visible drift.
+ * so hundreds of 1/30-second animation frames do not add up to a visible drift. Each image is also
+ * opened at the video's frame rate: FFmpeg reads a single image at 25 fps by default, which rounds
+ * the times to 1/25 second and makes 1/30-second frames drop or repeat (T66 R1).
  */
 export function concatList(frames) {
   const lines = ["ffconcat version 1.0"];
+  const image = (file) => [`file '${toFfmpegPath(file)}'`, `option framerate ${FPS}`];
   for (const frame of frames) {
-    lines.push(`file '${toFfmpegPath(frame.file)}'`, `duration ${frame.duration.toFixed(6)}`);
+    lines.push(...image(frame.file), `duration ${frame.duration.toFixed(6)}`);
   }
   // The concat demuxer only honours the last duration if the last file is listed again.
-  lines.push(`file '${toFfmpegPath(frames.at(-1).file)}'`);
+  lines.push(...image(frames.at(-1).file));
   return lines.join("\n");
 }
 

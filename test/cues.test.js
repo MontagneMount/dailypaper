@@ -18,12 +18,13 @@ import { pageTurn } from "../src/animation.js";
 const EXAMPLE_DIR = fileURLToPath(new URL("../episodes/example/", import.meta.url));
 const EXAMPLE_CUES = fs.readFileSync(path.join(EXAMPLE_DIR, "cues.md"), "utf8").replace(/\r\n/g, "\n");
 
-/** Check the demo episode with another cue table, in a temporary copy. */
-function checkWith(cues) {
+/** Check the demo episode with another cue table, in a temporary copy; `prepare` may change its files. */
+function checkWith(cues, prepare = () => {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dailypaper-cues-"));
   try {
     fs.cpSync(EXAMPLE_DIR, dir, { recursive: true, filter: (source) => path.basename(source) !== "output" });
     fs.writeFileSync(path.join(dir, "cues.md"), cues);
+    prepare(dir);
     const script = parseScript(fs.readFileSync(path.join(dir, "script.md"), "utf8"));
     return buildSlides(script, dir);
   } finally {
@@ -129,6 +130,23 @@ test("镜头表：没有原图的页不能框，示意图里没有的部件不�
   assertError(checkWith(withPage(2, `${TABLE}\n| FastAttn 的思路很简单 | | 出现 | #step1 | | |`)), "这一页没有 SVG 示意图");
 });
 
+test("T66 R4 没写「示意图」那一行，也会查出重复的部件 id，并要求补上这一行", () => {
+  const duplicate = (dir) => {
+    const file = path.join(dir, "diagrams", "page6.svg");
+    fs.writeFileSync(file, fs.readFileSync(file, "utf8").replace("</svg>", '  <g id="step1"></g>\n</svg>'));
+  };
+  const withoutLine = withPage(6, `${TABLE}\n| 最后用一张示意图 | | 出现 | #step1 | | |`);
+  const result = checkWith(withoutLine, duplicate);
+  assertError(result, "示意图里有两个部件都叫「step1」，id 不能重复");
+  assertError(result, "要先写「- 示意图：」这一行");
+  // With the line written, the duplicate is still reported; without a duplicate, only the line is asked for.
+  const withLine = withPage(6, `- 示意图：diagrams/page6.svg（部件：step1）\n\n${TABLE}\n| 最后用一张示意图 | | 出现 | #step1 | | |`);
+  assertError(checkWith(withLine, duplicate), "id 不能重复");
+  const plain = checkWith(withoutLine);
+  assert.deepEqual(plain.errors.filter((error) => error.includes("id 不能重复")), []);
+  assertError(plain, "要先写「- 示意图：」这一行");
+});
+
 test("镜头表：页码重复、表头写错都会报错", () => {
   const { errors } = parseCues(`## 第 2 页\n\n${TABLE}\n\n## 第 2 页\n\n| 从哪里 | 到哪句 | 动作 | 目标 | 位置 | 说明 |\n|---|---|---|---|---|---|`);
   assert.ok(errors.some((error) => error.includes("「第 2 页」写了两次")), errors.join("\n"));
@@ -160,6 +178,19 @@ test("时间：框到最后一句时随翻页淡出，不另算退场", () => {
   assert.deepEqual(errors, []);
   assert.equal(tracks[0].end, 8);
   assert.deepEqual(moves, [[4, 4 + CUE_TIMING.box[0]]]);
+});
+
+test("T66 R3 到最后一句的框和聚光也要在翻页淡出前进完场，正好赶上的可以，并随翻页淡出", () => {
+  // An 8-second page whose last line starts at 7.6 s; it starts fading out at 7.65 s.
+  const late = { number: 3, start: 10, end: 18, lines: [{ start: 10.3 }, { start: 12 }, { start: 17.6 }] };
+  const run = (timing, kind) => scheduleCues({ number: 3, actions: [action(7, kind, 2, 2, { box })], readable: [] }, timing, FADE_OUT);
+  assert.match(run(late, "box").errors[0], /「框」的进场要到第 7\.95 秒才做完，可本页在第 7\.65 秒就开始翻页了/);
+  assert.match(run(late, "spotlight").errors[0], /「聚光」的进场要到第 8\.00 秒才做完/);
+  // Fully in exactly when the fade-out starts: fine, and it leaves with the page.
+  const justInTime = { ...late, lines: [{ start: 10.3 }, { start: 12 }, { start: 17.3 }] };
+  const box1 = run(justInTime, "box");
+  assert.deepEqual(box1.errors, []);
+  assert.equal(box1.tracks[0].end, 8);
 });
 
 test("时间：镜头要在页末前 1 秒拉回，拉回到最后一句就报错", () => {

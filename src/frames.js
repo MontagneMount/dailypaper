@@ -27,8 +27,10 @@ const WIDE_VARIANTS = { figure_text: "figure_text_wide" };
 /**
  * With `animate: false` (npm run render -- --static) nothing moves: one screenshot per subtitle line.
  * `schedules` are the cue table's actions per page number (scheduleAll in cues.js).
- * @returns {Promise<{ frames: Array<{ file: string, duration: number }>, warnings: string[], fonts: string[] }>}
- *   fonts: warnings for the theme's fonts missing on this computer
+ * @returns {Promise<{ frames: Array<{ file: string, duration: number }>, warnings: string[], fonts: string[],
+ *   environment: { browser: string, fonts: string[] } }>}
+ *   fonts: warnings for the theme's fonts missing on this computer; environment: what the
+ *   computer renders with (renderEnvironment), which the preview's inputs are compared against
  */
 export async function renderFrames(slides, narration, workDir, { theme = DEFAULT_THEME, animate = true, schedules = new Map() } = {}) {
   const pagesDir = path.join(workDir, "pages");
@@ -40,7 +42,8 @@ export async function renderFrames(slides, narration, workDir, { theme = DEFAULT
 
   const frames = [];
   const warnings = [];
-  const fonts = []; // missing fonts, also an input of the preview
+  const fonts = []; // warnings for missing fonts
+  let environment = null;
   const browser = await launchBrowser();
 
   try {
@@ -55,7 +58,10 @@ export async function renderFrames(slides, narration, workDir, { theme = DEFAULT
       const schedule = schedules.get(slide.number);
       const { template, problems, moves } = await setUpSlide(page, slide, { htmlFile, theme, timing, animate, schedule });
       problems.forEach((problem) => warnings.push(`第 ${slide.number} 页：${problem}`));
-      if (slideIndex === 0) fonts.push(...(await fontWarnings(page, theme)));
+      if (slideIndex === 0) {
+        fonts.push(...(await fontWarnings(page, theme)));
+        environment = await renderEnvironment(page);
+      }
 
       // Before the first sentence no subtitle shows, so text never appears ahead of the voice;
       // the last line stays up through the pause after it.
@@ -74,7 +80,7 @@ export async function renderFrames(slides, narration, workDir, { theme = DEFAULT
     await browser.close();
   }
 
-  return { frames, warnings, fonts };
+  return { frames, warnings, fonts, environment };
 }
 
 /**
@@ -176,6 +182,38 @@ export function cueSetup(schedule, slide) {
     // The same selectors that keep the right number of cards, in the order the cue table counts them.
     cardSelectors: Object.keys(slide.cardCounts),
   };
+}
+
+/**
+ * What this computer renders with (T66 R2): the browser version and, for each of the theme's font
+ * stacks, the fonts Chrome really draws text with, fallbacks included (CSS.getPlatformFontsForNode).
+ * A font installed, removed or renamed, or a browser update, changes it. Measured in the open page.
+ * @returns {Promise<{ browser: string, fonts: string[] }>}
+ */
+export async function renderEnvironment(page) {
+  const probes = await page.evaluate(placeFontProbes);
+  const client = await page.context().newCDPSession(page);
+  try {
+    await client.send("DOM.enable");
+    await client.send("CSS.enable");
+    const { root } = await client.send("DOM.getDocument");
+    const fonts = [];
+    for (const probe of probes) {
+      const { nodeId } = await client.send("DOM.querySelector", { nodeId: root.nodeId, selector: `#${probe}` });
+      // Chrome answers with nothing until the text has been laid out; never record that as "no font".
+      let used = [];
+      for (let attempt = 0; attempt < 20 && used.length === 0; attempt++) {
+        if (attempt > 0) await page.waitForTimeout(50);
+        ({ fonts: used } = await client.send("CSS.getPlatformFontsForNode", { nodeId }));
+      }
+      if (used.length === 0) throw new Error(`读不出风格字体（${probe}）实际用的是哪个字体，再运行一次试试`);
+      fonts.push(`${probe}: ${used.map((font) => font.postScriptName || font.familyName).sort().join(", ")}`);
+    }
+    return { browser: page.context().browser().version(), fonts };
+  } finally {
+    await client.detach().catch(() => {});
+    await page.evaluate(() => document.querySelectorAll(".dp-font-probe").forEach((probe) => probe.remove()));
+  }
 }
 
 /** A warning for each font the theme asks for that this computer does not have (checked in the open page). */
@@ -329,6 +367,27 @@ async function figureRatio() {
   if (!image) return 0;
   await image.decode().catch(() => {});
   return image.naturalHeight > 0 ? image.naturalWidth / image.naturalHeight : 0;
+}
+
+/** One line of sample text, out of sight, per theme font stack and weight, laid out; returns their ids. */
+async function placeFontProbes() {
+  const probes = [];
+  for (const stack of ["--font-body", "--font-heading", "--font-subtitle", "--font-mono"]) {
+    for (const weight of [400, 700]) {
+      const probe = document.createElement("span");
+      probe.id = `dp-font${stack.slice("--font".length)}-${weight}`;
+      probe.className = "dp-font-probe";
+      probe.textContent = "DailyPaper 每日论文 0123456789 ↑↓% FastAttn";
+      Object.assign(probe.style, { position: "absolute", left: "-10000px", top: "0", whiteSpace: "nowrap", fontFamily: `var(${stack})`, fontWeight: String(weight) });
+      document.body.appendChild(probe);
+      probes.push(probe.id);
+    }
+  }
+  // Lay the text out and let two frames pass, so the fonts have been chosen when Chrome is asked.
+  for (const id of probes) document.getElementById(id).getBoundingClientRect();
+  await document.fonts.ready;
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  return probes;
 }
 
 /**

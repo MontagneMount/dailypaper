@@ -176,18 +176,23 @@ export function parsePosition(text, report) {
 function checkPage(page, slide, episodeDir, report) {
   const figureFile = slide.values.figure_image_path ? fileURLToPath(slide.values.figure_image_path) : null;
   const diagramFile = slide.values.diagram_image_path ? fileURLToPath(slide.values.diagram_image_path) : null;
-  const diagramIds = page.diagram || page.actions.some((row) => row.target.includes("#")) ? readSvgIds(diagramFile) : null;
+  const usesParts = page.actions.some((row) => row.target.includes("#"));
+  const diagramIds = page.diagram || usesParts ? readSvgIds(diagramFile) : null;
 
   if (page.figure) checkFigure(page.figure, figureFile, episodeDir, report);
   if (page.diagram) {
     const named = path.resolve(episodeDir, page.diagram.file);
     if (!diagramFile) report("这一页没有示意图", page.diagram.lineNo);
     else if (named !== diagramFile) report(`「示意图」写的是 ${page.diagram.file}，这一页用的是 ${relative(episodeDir, diagramFile)}`, page.diagram.lineNo);
-    for (const id of diagramIds?.duplicates ?? []) report(`示意图里有两个部件都叫「${id}」，id 不能重复`, page.diagram.lineNo);
     for (const part of page.diagram.parts) {
       if (diagramIds && !diagramIds.ids.has(part)) report(`示意图里没有「${part}」这个部件`, page.diagram.lineNo);
     }
+  } else if (usesParts && diagramFile) {
+    report("用到示意图部件（#id）的页，要先写「- 示意图：」这一行（文件和部件）");
   }
+  // Checked whenever parts are used, with or without the line above (T66 R4): the page would only
+  // ever find one of two parts with the same id, and the other would never be hidden.
+  for (const id of diagramIds?.duplicates ?? []) report(`示意图里有两个部件都叫「${id}」，id 不能重复`, page.diagram?.lineNo ?? page.lineNo);
   if (page.readable.length > 0 && !page.figure) report("写了「始终可读」，但没写「原图」", page.readable[0].lineNo);
 
   const lines = slide.narration;
@@ -454,7 +459,9 @@ export function scheduleCues(page, timing, fadeOut) {
         end: leavesWithPage ? duration : holdEnd + leave,
       };
       if (track.shown > holdEnd + 1e-9) report(action, `「${action.label}」进场要 ${enter} 秒，这几句只有 ${(holdEnd - start).toFixed(2)} 秒；多写几句（到哪句）`);
-      if (action.kind === "camera" && track.end > duration - CUE_TIMING.cameraClear + 1e-9) {
+      // Even one that leaves with the page has to be fully in before the page starts fading out (T66 R3).
+      if (track.shown > latest + 1e-9) late(action, `「${action.label}」的进场`, track.shown);
+      else if (action.kind === "camera" && track.end > duration - CUE_TIMING.cameraClear + 1e-9) {
         report(action, `镜头要在本页最后 ${CUE_TIMING.cameraClear} 秒之前拉回全图（拉回要 ${leave} 秒），现在要到第 ${track.end.toFixed(2)} 秒，本页共 ${duration.toFixed(2)} 秒；提前结束镜头`);
       } else if (!leavesWithPage && track.end > latest + 1e-9) {
         late(action, `「${action.label}」的退场`, track.end);

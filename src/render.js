@@ -11,7 +11,7 @@ import { DEFAULT_THEME, listThemes, renderCover, renderFrames } from "./frames.j
 import { composeVideo, writeChapters, writeSrt } from "./compose.js";
 import { assertCanRender, episodeNumberProblem, readPublished } from "./episodes.js";
 import { scheduleAll } from "./cues.js";
-import { previewProblems } from "./preview.js";
+import { previewStatus } from "./preview.js";
 
 const USAGE = `用法：
   npm run render -- <本期文件夹> [--theme ${DEFAULT_THEME}|dark] [--static] [--force] [--voice ${DEFAULT_VOICE}] [--rate ${DEFAULT_RATE}]
@@ -67,7 +67,9 @@ async function main() {
       console.log("\n（镜头表的时间要按配音检查：运行 npm run preview 时会查）");
     }
     // The cue table is reviewed with its preview, which must have been made from the current inputs.
-    previewProblems(episodeDir, slides, cues, options.theme).forEach((problem) => console.warn(`⚠️  ${problem}`));
+    const status = previewStatus(episodeDir, slides, cues, options.theme);
+    status.problems.forEach((problem) => console.warn(`⚠️  ${problem}`));
+    if (status.problems.length === 0 && status.fresh.length > 0) console.log(`\n预览是最新的（第 ${status.fresh.join("、")} 页），可以拿 output/preview/index.html 核对`);
     console.log("\n检查通过。");
     return;
   }
@@ -95,15 +97,15 @@ async function main() {
   }
 
   console.log(`[2/4] 渲染画面（风格：${options.theme}${options.static ? "，静态" : ""}）`);
-  const { frames, warnings: frameWarnings, fonts } = await renderFrames(slides, narration, workDir, {
+  const { frames, warnings: frameWarnings, fonts, environment } = await renderFrames(slides, narration, workDir, {
     theme: options.theme,
     animate: !options.static,
     schedules: timed.schedules,
   });
   [...frameWarnings, ...fonts].forEach((warning) => console.warn(`⚠️  ${warning}`));
   if (!options.static) {
-    const stale = previewProblems(episodeDir, slides, cues, options.theme, { voice: options.voice, rate: options.rate, narration, fonts });
-    stale.forEach((problem) => console.warn(`⚠️  ${problem}`));
+    const status = previewStatus(episodeDir, slides, cues, options.theme, { voice: options.voice, rate: options.rate, narration, environment });
+    status.problems.forEach((problem) => console.warn(`⚠️  ${problem}`));
   }
 
   console.log("[3/4] 合成视频");

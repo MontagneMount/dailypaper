@@ -75,5 +75,8 @@ test("几百张 1/30 秒的截图连起来，时长不会累积出误差", () =>
   const list = concatList(frames);
   const total = [...list.matchAll(/^duration ([\d.]+)$/gm)].reduce((sum, match) => sum + Number(match[1]), 0);
   assert.ok(Math.abs(total - 30) < 0.001, `900 帧加起来是 ${total} 秒`);
-  assert.ok(list.endsWith("file 'D:/frames/p01-899.png'"), "最后一张要再写一次，最后的时长才算数");
+  assert.ok(list.endsWith("file 'D:/frames/p01-899.png'\noption framerate 30"), "最后一张要再写一次，最后的时长才算数");
+  // T66 R1: every image is opened at 30 fps, or FFmpeg rounds the times to 1/25 second.
+  const files = list.match(/^file .*$/gm).length;
+  assert.equal(list.match(/^file .*\noption framerate 30$/gm).length, files);
 });

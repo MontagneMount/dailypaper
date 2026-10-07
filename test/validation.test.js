@@ -172,6 +172,37 @@ test("T24 封面大字太长会提醒", () => {
   );
 });
 
+test("视频标题要以「【每日论文 #期数】」开头", () => {
+  const result = check((t) =>
+    replaceOnce(t, "- 视频标题：【每日论文 #0】FastAttn", "- 视频标题：FastAttn"),
+  );
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("【每日论文 #期数】")),
+    `应该提醒加上系列标识，实际：${result.warnings.join("\n") || "（没有警告）"}`,
+  );
+});
+
+test("视频标题超过 40 字会提醒", () => {
+  const result = check((t) =>
+    replaceOnce(t, "一种虚构的注意力加速方法（示例）", "一种虚构的注意力加速方法，让长文本推理又快又省显存（示例）"),
+  );
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("「视频标题」有") && warning.includes("不超过 40")),
+    `应该提醒标题太长，实际：${result.warnings.join("\n") || "（没有警告）"}`,
+  );
+});
+
+test("机构和作者相同时，第一页只写一次", () => {
+  const same = check((t) => replaceOnce(t, "- 机构：示例大学", "- 机构：示例作者 A、示例作者 B"));
+  assert.ok(same.slides[0].hidden.includes(".affiliations"), "机构和作者相同，应该隐藏机构");
+  assert.ok(!check().slides[0].hidden.includes(".affiliations"), "机构和作者不同，应该显示机构");
+});
+
+test("视频第一页的标题去掉系列标识", () => {
+  const { slides } = check();
+  assert.equal(slides[0].values.video_title, "FastAttn｜一种虚构的注意力加速方法（示例）");
+});
+
 test("T27 核对表写 v10、开头是 v1 时会给出警告", () => {
   const result = check((t) => replaceOnce(t, "| v1 | Table 2 |", "| v10 | Table 2 |"));
   assert.ok(

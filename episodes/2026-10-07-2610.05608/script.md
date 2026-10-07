@@ -4,7 +4,7 @@
 
 ## 开头
 
-- 视频标题：Kandinsky 6.0：画面和声音怎样一起生成？
+- 视频标题：【每日论文 #1】Kandinsky 6.0 Video｜画面和声音一起生成
 - 封面大字：画面声音一起生成
 - 封面副标题：Kandinsky 6.0 音画生成
 - 封面卖点：双流协同生成
@@ -13,7 +13,7 @@
 - 领域：AI · 视频生成
 - 论文标题：Kandinsky 6.0 Video: Foundation Models for Synchronized Video and Audio Generation
 - 作者：Kandinsky Lab
-- 机构：Kandinsky Lab（论文署名团队）
+- 机构：Kandinsky Lab
 - arXiv：2610.05608v1
 - 状态：预印本
 - 会议或期刊：无

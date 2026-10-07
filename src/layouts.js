@@ -29,6 +29,10 @@ const PAPER_STATUSES = ["预印本", "已接收"];
 const COVER_TEXT_LIMITS = { 封面大字: 12, 封面副标题: 24, 封面卖点: 10, 封面指标: 8 };
 export const BRAND_TEXT = "DailyPaper · 每日论文";
 
+// The upload title is "【每日论文 #1】论文简称｜看点", at most 40 characters (docs/script-format.md).
+const SERIES_TAG = /^【每日论文 #\d+】\s*/;
+const TITLE_LIMIT = 40;
+
 /*
  * The fields of each layout.
  *   text:  a single value
@@ -123,6 +127,7 @@ function checkHeader(fields, errors, warnings) {
     if (!header[key] && !OPTIONAL_HEADER_KEYS.includes(key)) report(`缺少「${key}」`);
   }
   checkCoverText(header, lineOf, report, warnings);
+  checkVideoTitle(header["视频标题"], lineOf["视频标题"], warnings);
 
   const id = header["arXiv"];
   const status = header["状态"];
@@ -149,6 +154,17 @@ function checkHeader(fields, errors, warnings) {
 function isArxivLink(link, id) {
   const escapedId = id.replace(/\./g, "\\.");
   return new RegExp(`^https?://arxiv\\.org/(abs|pdf)/${escapedId}(\\.pdf)?/?$`).test(link);
+}
+
+/** The episode is part of a series, so the title starts with the series tag and stays short. */
+function checkVideoTitle(title, lineNo, warnings) {
+  if (!title) return;
+  const where = `开头（第 ${lineNo} 行）`;
+  if (!SERIES_TAG.test(title)) {
+    warnings.push(`${where}：「视频标题」要以「【每日论文 #期数】」开头，写成「【每日论文 #1】论文简称｜看点」`);
+  }
+  const length = [...title].length;
+  if (length > TITLE_LIMIT) warnings.push(`${where}：「视频标题」有 ${length} 个字，建议不超过 ${TITLE_LIMIT} 个字`);
 }
 
 /** The cover fields go straight onto the cover, so notes and placeholders must not slip through. */
@@ -347,13 +363,18 @@ const builders = {
         paper_status: header["状态"] ?? "",
         arxiv_id: header["arXiv"] ?? "",
         conference_or_journal: header["会议或期刊"] ?? "",
-        video_title: header["视频标题"] ?? "",
+        // The top bar already shows the series name, so the series tag is left out here.
+        video_title: (header["视频标题"] ?? "").replace(SERIES_TAG, ""),
         paper_original_title: header["论文标题"] ?? "",
         authors_team: header["作者"] ?? "",
         affiliations: header["机构"] ?? "",
         core_highlight: data["核心突破"],
       },
-      hideWhenEmpty: { ".badge-bar .source-badge:nth-of-type(2)": header["会议或期刊"] },
+      hideWhenEmpty: {
+        ".badge-bar .source-badge:nth-of-type(2)": header["会议或期刊"],
+        // "Kandinsky Lab (Kandinsky Lab)" says the same name twice.
+        ".affiliations": header["机构"] === header["作者"] ? "" : header["机构"],
+      },
     };
   },
 

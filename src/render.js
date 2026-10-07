@@ -9,6 +9,7 @@ import { buildSlides } from "./layouts.js";
 import { createNarration, DEFAULT_RATE, DEFAULT_VOICE } from "./tts.js";
 import { renderCover, renderFrames } from "./frames.js";
 import { composeVideo, writeChapters, writeSrt } from "./compose.js";
+import { episodeNumberProblem, readPublished } from "./episodes.js";
 
 const USAGE = `用法：
   npm run render -- <本期文件夹> [--voice ${DEFAULT_VOICE}] [--rate ${DEFAULT_RATE}]
@@ -28,6 +29,10 @@ async function main() {
 
   const script = parseScript(fs.readFileSync(scriptFile, "utf8"));
   const { slides, cover, errors, warnings } = buildSlides(script, episodeDir);
+  // The number in the title follows the publishing order kept in episodes/published.json.
+  const titleField = script.headerFields.find((field) => field.key === "视频标题");
+  const numberProblem = episodeNumberProblem(path.basename(episodeDir), titleField?.value, readPublished());
+  if (numberProblem) warnings.push(`开头（第 ${titleField.lineNo} 行）：「视频标题」的期数不对：${numberProblem}`);
   warnings.forEach((warning) => console.warn(`⚠️  ${warning}`));
   if (errors.length > 0) {
     console.error(`讲解稿有 ${errors.length} 个问题，改好之后再生成：`);

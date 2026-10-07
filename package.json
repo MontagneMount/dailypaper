@@ -9,6 +9,8 @@
     "check": "node src/render.js --check",
     "assets": "node src/export-assets.js",
     "figure": "node src/crop-figure.js",
+    "topics": "node src/topics.js",
+    "new": "node src/new-episode.js",
     "test": "node --test"
   },
   "engines": {

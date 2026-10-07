@@ -182,6 +182,16 @@ test("视频标题要以「【每日论文 #期数】」开头", () => {
   );
 });
 
+test("视频标题里没换掉的「看点」会提醒", () => {
+  const result = check((t) =>
+    replaceOnce(t, "FastAttn｜一种虚构的注意力加速方法（示例）", "FastAttn｜看点"),
+  );
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("没换掉")),
+    `应该提醒占位文字，实际：${result.warnings.join("\n") || "（没有警告）"}`,
+  );
+});
+
 test("视频标题超过 40 字会提醒", () => {
   const result = check((t) =>
     replaceOnce(t, "一种虚构的注意力加速方法（示例）", "一种虚构的注意力加速方法，让长文本推理又快又省显存（示例）"),

@@ -2,7 +2,7 @@
 
 每天挑选一篇热门的前沿论文，生成中文讲解稿，做成视频发布到 B 站（栏目名「DailyPaper 每日论文」）。先做 AI，之后扩展到经济、材料、化学、数学、物理。
 
-> **状态：✅ M1 完成**：第一期已发布（[【每日论文 #1】Kandinsky 6.0 Video](https://www.bilibili.com/video/BV1PdpN6SEk7/)，2026-10-07）。下一步是 M2 辅助脚本。
+> **状态：✅ M1 完成**：第一期已发布（[【每日论文 #1】Kandinsky 6.0 Video](https://www.bilibili.com/video/BV1PdpN6SEk7/)，2026-10-07）。M2 的选题和开工脚本已做好，下一步做第二期。
 
 ## 快速开始
 
@@ -15,12 +15,21 @@ npm run render -- episodes/example
 
 生成的视频在 `episodes/example/output/video.mp4`，同一个文件夹里还有 SRT 字幕 `subtitles.srt` 和 B 站封面 `cover.png`。
 
-**做新的一期**：新建 `episodes/<日期>-<arXiv 编号>/`，放进这些文件（可以照着 `episodes/example/` 写）：
+**做新的一期**：
 
-- `<arXiv 编号>v<版本>.pdf`：论文 PDF，如 `2610.05608v1.pdf`，每期开始时由 Claude 或 ChatGPT 先下载（不提交到仓库）
+```bash
+npm run topics
+npm run new -- <arXiv 编号>
+```
+
+`npm run topics` 列出 Hugging Face 日榜的候选论文，按点赞数排序，已发布和制作中的会标出来（`-- --date 2026-10-06` 看某一天）。选好后运行 `npm run new`，它会查 arXiv（核对返回的确实是这篇、这个版本，标题、作者、日期齐全），下载论文 PDF，再建好 `episodes/<日期>-<arXiv 编号>/`，生成填好论文信息的 `script.md` 开头，同时显示论文的许可证。中途出错不会留下半成品，已经有的文件夹也不会被改动。本期文件夹里有这些文件：
+
+- `<arXiv 编号>v<版本>.pdf`：论文 PDF，如 `2610.05608v1.pdf`（不提交到仓库）
 - `script.md`：讲解稿，格式见 [docs/script-format.md](docs/script-format.md)
 - `figures/`：论文原图，如 `figure2.png`（有版权，不提交到仓库）。由 Claude 用 `npm run figure` 从 PDF 原样截取：先 `npm run figure -- <本期文件夹> <页码>` 渲染整页找到图，再 `npm run figure -- <本期文件夹> <页码> <名字> <上,左,下,右>` 截出来（范围是 0～1 的小数，白边会自动裁掉）
 - `diagrams/`：示意图，如 `page5.svg`（Claude 按稿子画，优先写成 SVG）
+
+**期数和发布记录**：已发布的视频记在 [episodes/published.json](episodes/published.json)（期数、文件夹、标题、B 站链接、发布日期）。用户发布后把链接发给 Claude，由 Claude 记上。新一期的期数按这个记录往下排，不按文件夹数；同时有几期在做时，哪一期先发布就用这个号，`npm run check` 会提醒其他期改号。
 
 生成之前，可以先只检查稿子：
 
@@ -44,14 +53,14 @@ npm run check -- episodes/<本期文件夹>
 
 | 步骤 | 负责 | 做什么 |
 |---|---|---|
-| ① 选题 | 用户 | 按「选题与受众」里的来源挑一篇论文，定好目标时长（M2 之后由脚本先列出候选） |
-| ② 准备材料 | Claude 或 ChatGPT | 先把论文 PDF 下载到本期文件夹；整理论文信息和正文，生成给 ChatGPT 的写稿材料包（M2 之后由 Claude 的脚本做） |
+| ① 选题 | 用户 | 用 `npm run topics` 看 Hugging Face 日榜的候选，或按「选题与受众」里的其他来源挑一篇论文，定好目标时长 |
+| ② 准备材料 | Claude 或 ChatGPT | 运行 `npm run new -- <arXiv 编号>`：建好本期文件夹、下载论文 PDF、填好稿件开头的论文信息；整理论文信息和正文，生成给 ChatGPT 的写稿材料包（M2 之后由 Claude 的脚本做） |
 | ③ 写稿 | ChatGPT | 先判断这篇适合科普向还是专业向，再按[讲解稿格式](docs/script-format.md)写稿，附标题、简介、标签 |
 | ④ 审稿 | ChatGPT → 用户 | ChatGPT 开一个新对话，逐条核对数字和结论是否出自原文；用户最终确认 |
 | ⑤ 画面素材 | Claude | 按稿子从 PDF 截取论文原图（`npm run figure`）、画示意图（优先写成 SVG，中文不会写错）；用到红框的页，看原图给出红框位置，用户确认。视频模板和封面模板（HTML/CSS）也由 Claude 维护 |
 | ⑥ 合成视频 | Claude 的脚本 | 按定稿生成每页画面、TTS 配音和字幕，用 FFmpeg 合成 MP4；B 站封面也由脚本按模板生成 |
 | ⑦ 审核成片 | Claude → 用户 | Claude 先检查画面和时间轴（逐页截图、字幕和配音的时间、超出版面的提醒），列出带时间点的问题；用户听声音（读错的词、停顿是否自然）并最终确认 |
-| ⑧ 发布 | 用户 | 上传 B 站，声明含 AI 生成内容，注明论文出处 |
+| ⑧ 发布 | 用户 | 上传 B 站，声明含 AI 生成内容，注明论文出处；把视频链接发给 Claude，记进 `episodes/published.json` |
 | ⑨ 归档 | Claude 的脚本 | 保存讲解稿、审稿记录和发布信息，避免重复选题 |
 
 M1 阶段先只写⑥的合成脚本，②和⑨先手动完成。
@@ -73,7 +82,7 @@ M1 阶段先只写⑥的合成脚本，②和⑨先手动完成。
 ## 里程碑
 
 - [x] **M1 跑通第一条视频**（2026-10-07 发布第一期）：Claude 写最小版合成脚本（讲解稿 → 画面 → 配音 → 字幕 → MP4），Gemini 设计视频模板；从 Hugging Face 日榜选一篇 AI 论文 → ChatGPT 写稿 → ChatGPT 审稿 → 用户确认 → 脚本合成视频 → 用户审核成片 → 发布。记下每一步遇到的问题
-- [ ] **M2 辅助脚本**：Claude 开发选题候选（先接 Hugging Face 日榜）、材料整理和归档脚本，把 M1 里最费时的手工步骤自动化；ChatGPT 审核代码
+- [ ] **M2 辅助脚本**：Claude 开发选题候选（先接 Hugging Face 日榜）、材料整理和归档脚本（`npm run topics`、`npm run new` 已完成，T52 复审通过；归档待做），把 M1 里最费时的手工步骤自动化；ChatGPT 审核代码
 - [ ] **M3 连续发布 10 条**：固定流程和模板，看播放量、完播率、评论
 - [ ] **M4 逐步自动化**：把成熟的步骤改成程序调用 API，最后加定时运行
 - [ ] **M5 扩展方向**：流程稳定后，逐步加入经济、材料、化学、数学、物理

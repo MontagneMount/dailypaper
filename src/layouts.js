@@ -163,6 +163,10 @@ function checkVideoTitle(title, lineNo, warnings) {
   if (!SERIES_TAG.test(title)) {
     warnings.push(`${where}：「视频标题」要以「【每日论文 #期数】」开头，写成「【每日论文 #1】论文简称｜看点」`);
   }
+  // npm run new leaves these words in the title for the script writer to replace.
+  if (title.includes("论文简称") || title.endsWith("｜看点")) {
+    warnings.push(`${where}：「视频标题」里还有没换掉的「论文简称」或「看点」`);
+  }
   const length = [...title].length;
   if (length > TITLE_LIMIT) warnings.push(`${where}：「视频标题」有 ${length} 个字，建议不超过 ${TITLE_LIMIT} 个字`);
 }

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Bilibili 视频封面模板 - DailyPaper</title>
+  <link rel="stylesheet" href="themes/academic.css">
   <!--
     【B 站视频封面推荐尺寸与规范说明】
     1. 推荐尺寸：1920 × 1080 像素（16:9 标准横版比例，与 1080P 视频画幅点对点对应）。
@@ -21,16 +22,16 @@
       width: 1920px;
       height: 1080px;
       overflow: hidden;
-      background: #070a13;
+      background: var(--page-bg);
       background-image: 
-        radial-gradient(circle at 85% 25%, rgba(59, 130, 246, 0.28) 0%, transparent 50%),
-        radial-gradient(circle at 15% 75%, rgba(16, 185, 129, 0.18) 0%, transparent 45%),
-        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.12) 0%, transparent 60%),
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        radial-gradient(circle at 85% 25%, color-mix(in srgb, var(--accent) calc(28% * var(--glow)), transparent) 0%, transparent 50%),
+        radial-gradient(circle at 15% 75%, color-mix(in srgb, var(--positive) calc(18% * var(--glow)), transparent) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--special) calc(12% * var(--glow)), transparent) 0%, transparent 60%),
+        linear-gradient(color-mix(in srgb, var(--ink) calc(3% * var(--grid)), transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--ink) calc(3% * var(--grid)), transparent) 1px, transparent 1px);
       background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
-      color: #ffffff;
+      font-family: var(--font-body);
+      color: var(--text-strong);
       position: relative;
     }
 
@@ -50,23 +51,24 @@
     .brand-icon {
       width: 52px;
       height: 52px;
-      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      background: var(--logo-bg);
       border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 26px;
       font-weight: 900;
-      color: #ffffff;
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+      color: var(--on-accent);
+      box-shadow: 0 6px 20px color-mix(in srgb, var(--accent-deep) calc(50% * var(--glow)), transparent);
     }
     .brand-title {
       font-size: 32px;
       font-weight: 800;
       letter-spacing: 1.5px;
-      background: linear-gradient(90deg, #ffffff, #94a3b8);
+      background: linear-gradient(90deg, var(--text-strong), color-mix(in srgb, var(--text-muted) calc(100% * var(--text-gradient)), var(--text-strong)));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      font-family: var(--font-heading);
     }
     .tags-group {
       display: flex;
@@ -81,14 +83,14 @@
       letter-spacing: 1px;
     }
     .tag-field {
-      background: rgba(37, 99, 235, 0.25);
-      border: 2px solid #3b82f6;
-      color: #60a5fa;
+      background: color-mix(in srgb, var(--accent-deep) 25%, var(--tint-base));
+      border: 2px solid var(--accent);
+      color: var(--accent-text);
     }
     .tag-status {
-      background: rgba(16, 185, 129, 0.25);
-      border: 2px solid #10b981;
-      color: #34d399;
+      background: color-mix(in srgb, var(--positive) 25%, var(--tint-base));
+      border: 2px solid var(--positive);
+      color: var(--positive-text);
     }
 
     /* 核心视觉展示区（左侧为主、上浮排版） */
@@ -109,19 +111,19 @@
       display: inline-flex;
       align-items: center;
       gap: 12px;
-      background: linear-gradient(90deg, rgba(239, 68, 68, 0.25), rgba(245, 158, 11, 0.15));
-      border: 2px solid #f59e0b;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--negative) 25%, var(--tint-base)), color-mix(in srgb, var(--highlight) 15%, var(--tint-base)));
+      border: 2px solid var(--highlight);
       padding: 10px 26px;
       border-radius: 12px;
       font-size: 26px;
       font-weight: 800;
-      color: #fbbf24;
+      color: var(--highlight-text);
       margin-bottom: 28px;
-      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
+      box-shadow: 0 4px 20px color-mix(in srgb, var(--highlight) calc(25% * var(--glow)), transparent);
     }
     .highlight-pill::before {
       content: "★";
-      color: #f59e0b;
+      color: var(--highlight);
       font-size: 22px;
     }
 
@@ -131,18 +133,19 @@
       font-weight: 900;
       line-height: 1.15;
       letter-spacing: -2px;
-      color: #ffffff;
+      color: var(--text-strong);
       margin-bottom: 34px;
-      text-shadow: 0 6px 30px rgba(0, 0, 0, 0.8), 0 0 50px rgba(56, 189, 248, 0.3);
+      text-shadow: 0 6px 30px color-mix(in srgb, var(--shadow-color) calc(80% * var(--text-shadow-strength)), transparent), 0 0 50px color-mix(in srgb, var(--info) calc(30% * var(--glow)), transparent);
       max-width: 1280px;
       word-break: break-word;
+      font-family: var(--font-heading);
     }
 
     /* 副标题 / 论文点睛短语 */
     .cover-sub {
       font-size: 38px;
       font-weight: 600;
-      color: #cbd5e1;
+      color: var(--text-soft);
       line-height: 1.4;
       max-width: 1200px;
       display: flex;
@@ -152,7 +155,7 @@
     .sub-bar {
       width: 6px;
       height: 38px;
-      background: #3b82f6;
+      background: var(--accent);
       border-radius: 3px;
       display: inline-block;
     }
@@ -165,35 +168,36 @@
       transform: translateY(-50%);
       width: 440px;
       height: 440px;
-      background: rgba(15, 23, 42, 0.75);
-      border: 2px solid rgba(255, 255, 255, 0.15);
+      background: var(--panel);
+      border: 2px solid var(--panel-border);
       border-radius: 32px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       backdrop-filter: blur(16px);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 20px 50px color-mix(in srgb, var(--shadow-color) calc(60% * var(--shadow-strength)), transparent);
       z-index: 5;
     }
     .hero-graphic svg {
       width: 180px;
       height: 180px;
       margin-bottom: 20px;
-      filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.5));
+      filter: drop-shadow(0 0 20px color-mix(in srgb, var(--info) calc(50% * var(--glow)), transparent));
     }
     .hero-metric-title {
       font-size: 20px;
       font-weight: 700;
-      color: #94a3b8;
+      color: var(--text-muted);
       margin-bottom: 8px;
       letter-spacing: 1px;
     }
     .hero-metric-val {
       font-size: 52px;
       font-weight: 900;
-      color: #34d399;
+      color: var(--positive-text);
       letter-spacing: -1px;
+      font-family: var(--font-heading);
     }
 
     /* 没写「封面指标」时，右侧卡片整个去掉：大字区占满宽度、字号放大，右边不空着（Claude 2026-10-07） */
@@ -211,7 +215,7 @@
       width: 100%;
       height: 120px;
       pointer-events: none;
-      background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.65) 100%);
+      background: linear-gradient(180deg, transparent 0%, var(--cover-shade) 100%);
     }
   </style>
 </head>
@@ -241,11 +245,11 @@
   <!-- 右侧纯代码矢量图表与突破性徽章（不放论文原图） -->
   <div class="hero-graphic">
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="18" y="14" width="48" height="64" rx="6" stroke="#38bdf8" stroke-width="4" fill="rgba(56,189,248,0.08)"/>
-      <path d="M30 32H54" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
-      <path d="M30 46H48" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
-      <path d="M30 60H42" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
-      <path d="M52 38L78 52L62 58L76 78L64 82L52 64L44 72L52 38Z" fill="#34d399" stroke="#059669" stroke-width="2"/>
+      <rect x="18" y="14" width="48" height="64" rx="6" stroke-width="4" style="stroke: var(--info); fill: color-mix(in srgb, var(--info) 8%, var(--tint-base))"/>
+      <path d="M30 32H54" stroke-width="4" stroke-linecap="round" style="stroke: var(--text-muted)"/>
+      <path d="M30 46H48" stroke-width="4" stroke-linecap="round" style="stroke: var(--text-muted)"/>
+      <path d="M30 60H42" stroke-width="4" stroke-linecap="round" style="stroke: var(--text-muted)"/>
+      <path d="M52 38L78 52L62 58L76 78L64 82L52 64L44 72L52 38Z" stroke-width="2" style="fill: var(--positive-text); stroke: var(--positive-deep)"/>
     </svg>
     <div class="hero-metric-title">CORE BREAKTHROUGH</div>
     <div class="hero-metric-val">{{metric_summary}}</div>

@@ -5,7 +5,7 @@ Gemini 设计（T15），2026-10-07 起由 Claude 维护。合成脚本把讲解
 ## 通用规格
 
 - 画面 1920×1080，底部 162px（15%）留给字幕
-- 纯 HTML/CSS，不依赖外部网络资源；字体用系统字体（Windows 上是微软雅黑）
+- 纯 HTML/CSS，不依赖外部网络资源；颜色和字体都从风格文件取（见下面「风格」），字体用电脑上装好的
 - 要填的内容用 `{{字段名}}` 占位符标出
 - 除 `cover` 外，每个模板都有 `{{page_topic}}`、`{{page_number}}`、`{{total_pages}}`
 
@@ -22,7 +22,55 @@ Gemini 设计（T15），2026-10-07 起由 Claude 维护。合成脚本把讲解
 
 **宽图版** `figure_text_wide`（Claude 照 figure_text 的样式做，2026-10-07）：原图在上面占满宽度，标题和要点卡片在下面排成一行，占位符和 `figure_text` 完全一样。讲解稿里不用写它：`figure_text` 页的原图宽度是高度的 2.2 倍以上时，脚本自动换用（结构图、流程图大多这么宽，放在左边会很小）。
 
+## 风格（T63，2026-10-07）
+
+模板里不写死颜色和字体，都用 `templates/themes/` 里风格文件的变量（CSS 变量）。每个模板都引用 `themes/academic.css`，单独打开模板也能看；生成视频时，脚本把这个链接换成所选的风格：
+
+- `academic.css`：浅色学术，默认（用户 2026-10-07 选定）。米白纸张底色，标题和字幕用宋体（Noto Serif SC），深蓝、砖红、深绿点缀
+- `dark.css`：深色，第一、二期的样子：`npm run render -- <本期文件夹> --theme dark`
+
+改风格只改风格文件。两个风格文件的变量要一一对应，模板里不能写死颜色，`npm test` 都会检查；风格要用的字体电脑上没有时，生成视频时会提醒。
+
+| 变量 | 含义 |
+|---|---|
+| `--font-body`、`--font-heading`、`--font-subtitle`、`--font-mono` | 正文、标题、字幕、等宽字体 |
+| `--page-bg`、`--glow`、`--grid` | 页面底色；背景光晕和网格线的强度（0 就是没有） |
+| `--text`、`--text-strong`、`--text-title`、`--text-soft`、`--text-muted`、`--text-faint` | 文字颜色，从正文到最淡 |
+| `--on-accent` | 彩色底上的文字 |
+| `--ink` | 叠加色：细线、浅底按比例从它调出来 |
+| `--panel`、`--panel-soft`、`--panel-border` | 大画板（放原图、示意图的框） |
+| `--card`、`--card-border`、`--inset` | 卡片，和卡片里的小块 |
+| `--figure-bg`、`--figure-frame` | 论文原图的底色和边框 |
+| `--shadow-color`、`--shadow-strength`、`--text-shadow-strength` | 阴影的颜色和强度 |
+| `--subtitle-band`、`--subtitle-color`、`--subtitle-shadow` | 字幕区的底色、字幕颜色和描边 |
+| `--cover-shade` | B 站封面底部的压暗 |
+| `--tint-base` | 彩色浅底兑什么调出来：浅色兑白色，深色兑透明 |
+| `--text-gradient` | 渐变字的强度，0 就是纯色 |
+| `--logo-bg`、`--metric-sign` | 「DP」标志的底色；大数字前面的 ↑ ↓ |
+| `--accent`、`--accent-deep`、`--accent-text`、`--accent-2`、`--info` | 主色（蓝）和信息色（原图出处标签等） |
+| `--positive…`、`--negative…`、`--highlight…`、`--special…` | 好（绿）、差（红）、提醒（橙）、特别（深色里是紫，浅色里是砖红），各有几档深浅 |
+
+写法：彩色浅底写成 `color-mix(in srgb, var(--accent) 20%, var(--tint-base))`；光晕、阴影乘上强度，如 `calc(30% * var(--glow))`。
+
+## 示意图怎么画（T63）
+
+`concept_diagram` 的示意图（本期的 `diagrams/page<页码>.svg`）由 Claude 画成 SVG。生成视频时，脚本把它嵌进页面，不是当图片贴上去，所以颜色和字体能跟着风格走，以后镜头表也能让部件逐个出现。规则：
+
+- **不写死颜色**：形状和文字都用类名上色。`npm run check` 发现写死的颜色（`fill="#…"`、`rgba(…)` 等）会提醒；`fill="none"` 可以写
+- **色调**：`tone-accent`（蓝）、`tone-positive`（绿）、`tone-negative`（红）、`tone-highlight`（橙）、`tone-special`（紫 / 砖红）、`tone-neutral`（灰，默认）。写在 `<g>` 上，里面的部件都用这个色调
+- **形状**：`box` 方框（浅色底加色调描边），`box solid` 实心方框（只配彩色色调，里面的字用 `on-solid`），`line` 线条和箭头
+- **文字**：`label` 色调色的小标题，`strong` 主要文字，`soft` 次要文字，`muted` 备注；不写类名的文字用正文颜色
+- **箭头**：在 `<defs>` 里定义一次 `<marker id="arrow">`，箭头尖写 `fill="context-stroke"`，颜色就和线条一样
+- **字体**：不写 `font-family`，跟着风格走；字号、粗细照常写成属性（`font-size="26" font-weight="700"`）
+- **部件**：一个部件（方框和里面的字）放进一个 `<g>`，起个英文 `id`（如 `step1`、`arrow1`），镜头表按 id 让它出现
+- **尺寸**：要写 `viewBox`，宽高比接近画板（如 1650×460、1400×420）；主要文字字号 26 以上，备注不小于 22
+
+示例见 `episodes/example/diagrams/page6.svg`。第二期的示意图是写死颜色的深色版，只适合 `--theme dark`。
+
 ## 渲染时脚本要处理的事（模板本身不改）
+
+- **风格**：把模板里 `themes/academic.css` 的链接换成所选风格的文件；检查风格要用的字体电脑上有没有。
+- **示意图**：`concept_diagram` 的 SVG 示意图嵌进页面，大小和原来的图片一样；没加载出来的照常报「图片加载失败」。
 
 - **字幕区**：隐藏提示文字「[底部 15% 字幕保留区 …]」和上方的虚线，换成真正的字幕。每页开头的停顿不显示字幕；字幕去掉行末的逗号、句号和冒号。
 - **百分号**：`big_metric` 的单位是 % 时，贴紧数字显示（40%，不是 40 %）。

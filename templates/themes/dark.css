@@ -1,0 +1,75 @@
+/* 深色科技：第一、二期用的样子。用户 2026-10-07 改用浅色学术后保留为可选：
+   npm run render -- <本期文件夹> --theme dark
+   模板里的颜色和字体都从这里取；换风格只改风格文件，不改模板。各变量的含义见 templates/README.md。 */
+:root {
+  /* 字体 */
+  --font-body: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-body);
+  --font-subtitle: var(--font-body);
+  --font-mono: monospace;
+
+  /* 页面：底色；背景光晕和网格线的强度（0 就是没有） */
+  --page-bg: #0b0f19;
+  --glow: 1;
+  --grid: 1;
+
+  /* 文字 */
+  --text: #f1f5f9;
+  --text-strong: #ffffff;
+  --text-title: #e2e8f0;
+  --text-soft: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
+  --on-accent: #ffffff;
+
+  /* 叠加色：细线、浅底都按比例从它调出来（深色里是白色） */
+  --ink: #ffffff;
+
+  /* 画板、卡片、论文原图 */
+  --panel: rgba(15, 23, 42, 0.85);
+  --panel-soft: rgba(15, 23, 42, 0.6);
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --card: rgba(255, 255, 255, 0.04);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --inset: rgba(0, 0, 0, 0.25);
+  --figure-bg: #ffffff;
+  --figure-frame: none;
+
+  /* 阴影：颜色和强度（0 就是没有）；文字阴影单独一个强度 */
+  --shadow-color: #000000;
+  --shadow-strength: 1;
+  --text-shadow-strength: 1;
+
+  /* 字幕 */
+  --subtitle-band: rgba(0, 0, 0, 0.25);
+  --subtitle-color: #ffffff;
+  --subtitle-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+
+  /* B 站封面底部的压暗，给播放量这些字垫底 */
+  --cover-shade: rgba(0, 0, 0, 0.65);
+
+  /* 细节 */
+  --tint-base: transparent;       /* 标签、卡片的彩色浅底兑什么调出来：兑透明就是半透明的彩色 */
+  --text-gradient: 1;             /* 大数字、标题的渐变字强度，0 就是纯色 */
+  --logo-bg: linear-gradient(135deg, var(--accent), var(--accent-2)); /* 「DP」标志的底色 */
+  --metric-sign: var(--info);     /* 大数字前面的 ↑ ↓ */
+
+  /* 强调色 */
+  --accent: #3b82f6;
+  --accent-deep: #2563eb;
+  --accent-text: #60a5fa;
+  --accent-2: #06b6d4;
+  --info: #38bdf8;
+  --positive: #10b981;
+  --positive-deep: #059669;
+  --positive-text: #34d399;
+  --positive-pale: #6ee7b7;
+  --positive-paler: #d1fae5;
+  --negative: #ef4444;
+  --negative-text: #f87171;
+  --negative-pale: #fca5a5;
+  --highlight: #f59e0b;
+  --highlight-text: #fbbf24;
+  --special: #8b5cf6;
+  --special-text: #c084fc;
+}

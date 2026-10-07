@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <title>DailyPaper - 自制概念示意图</title>
+  <link rel="stylesheet" href="themes/academic.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       width: 1920px;
       height: 1080px;
       overflow: hidden;
-      background: #090d16;
+      background: var(--page-bg);
       background-image: 
-        radial-gradient(circle at 50% 15%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        radial-gradient(circle at 50% 15%, color-mix(in srgb, var(--special) calc(15% * var(--glow)), transparent) 0%, transparent 50%),
+        linear-gradient(color-mix(in srgb, var(--ink) calc(2% * var(--grid)), transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--ink) calc(2% * var(--grid)), transparent) 1px, transparent 1px);
       background-size: 100% 100%, 48px 48px, 48px 48px;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
-      color: #f1f5f9;
+      font-family: var(--font-body);
+      color: var(--text);
       display: flex;
       flex-direction: column;
     }
@@ -27,7 +28,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
     }
     .header-left {
       display: flex;
@@ -35,9 +36,9 @@
       gap: 18px;
     }
     .badge-concept {
-      background: rgba(139, 92, 246, 0.2);
-      border: 1px solid rgba(139, 92, 246, 0.5);
-      color: #c084fc;
+      background: color-mix(in srgb, var(--special) 20%, var(--tint-base));
+      border: 1px solid color-mix(in srgb, var(--special) 50%, var(--tint-base));
+      color: var(--special-text);
       font-size: 16px;
       font-weight: 700;
       padding: 6px 14px;
@@ -46,12 +47,13 @@
     .section-title {
       font-size: 26px;
       font-weight: 700;
-      color: #e2e8f0;
+      color: var(--text-title);
+      font-family: var(--font-heading);
     }
     .page-index {
       font-size: 18px;
-      color: #64748b;
-      font-family: monospace;
+      color: var(--text-faint);
+      font-family: var(--font-mono);
       font-weight: 600;
     }
 
@@ -66,24 +68,25 @@
     .page-heading {
       font-size: 38px;
       font-weight: 900;
-      color: #ffffff;
+      color: var(--text-strong);
       margin-bottom: 20px;
       text-align: center;
+      font-family: var(--font-heading);
     }
 
     /* 示意图主体画板 */
     .diagram-board {
       width: 1760px;
       height: 520px;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
       border-radius: 20px;
       position: relative;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 16px 40px color-mix(in srgb, var(--shadow-color) calc(40% * var(--shadow-strength)), transparent);
       margin-bottom: 24px;
     }
     
@@ -92,16 +95,16 @@
       position: absolute;
       top: 18px;
       right: 24px;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1.5px solid #f59e0b;
-      color: #fbbf24;
+      background: color-mix(in srgb, var(--highlight) 15%, var(--tint-base));
+      border: 1.5px solid var(--highlight);
+      color: var(--highlight-text);
       font-size: 15px;
       font-weight: 800;
       letter-spacing: 1px;
       padding: 6px 16px;
       border-radius: 6px;
       z-index: 10;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--highlight) calc(20% * var(--glow)), transparent);
     }
 
     .diagram-graphic {
@@ -118,6 +121,31 @@
       object-fit: contain;
     }
 
+    /* SVG 示意图：脚本把 <img> 换成嵌在页面里的 SVG，颜色和字体跟着风格走。
+       类名的用法见 templates/README.md「示意图怎么画」；写死颜色的旧示意图照原样显示。 */
+    .diagram-svg {
+      font-family: var(--font-body);
+      font-weight: 400;
+      letter-spacing: normal;
+      line-height: normal;
+      fill: var(--text);
+    }
+    .diagram-svg svg { display: block; }
+    .diagram-svg svg, .diagram-svg .tone-neutral { --tone: var(--text-muted); --tone-text: var(--text-soft); }
+    .diagram-svg .tone-accent { --tone: var(--accent); --tone-text: var(--accent-text); }
+    .diagram-svg .tone-positive { --tone: var(--positive); --tone-text: var(--positive-text); }
+    .diagram-svg .tone-negative { --tone: var(--negative); --tone-text: var(--negative-text); }
+    .diagram-svg .tone-highlight { --tone: var(--highlight); --tone-text: var(--highlight-text); }
+    .diagram-svg .tone-special { --tone: var(--special); --tone-text: var(--special-text); }
+    .diagram-svg .box { fill: color-mix(in srgb, var(--tone) 10%, var(--tint-base)); stroke: var(--tone); }
+    .diagram-svg .box.solid { fill: var(--tone); }
+    .diagram-svg .line { fill: none; stroke: var(--tone); }
+    .diagram-svg .label { fill: var(--tone-text); }
+    .diagram-svg .strong { fill: var(--text-strong); }
+    .diagram-svg .soft { fill: var(--text-soft); }
+    .diagram-svg .muted { fill: var(--text-muted); }
+    .diagram-svg .on-solid { fill: var(--on-accent); }
+
     /* 下方三栏核心推演提炼 */
     .takeaway-grid {
       width: 1760px;
@@ -126,8 +154,8 @@
       gap: 24px;
     }
     .takeaway-card {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--card);
+      border: 1px solid var(--card-border);
       border-radius: 14px;
       padding: 16px 20px;
       display: flex;
@@ -137,23 +165,23 @@
     .step-num {
       width: 32px;
       height: 32px;
-      background: #8b5cf6;
+      background: var(--special);
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 16px;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--on-accent);
       flex-shrink: 0;
     }
     .takeaway-body {
       font-size: 17px;
       line-height: 1.45;
-      color: #cbd5e1;
+      color: var(--text-soft);
     }
     .takeaway-strong {
-      color: #ffffff;
+      color: var(--text-strong);
       font-weight: 700;
     }
 
@@ -161,15 +189,15 @@
     .subtitle-safe-area {
       height: 162px;
       width: 100%;
-      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      border-top: 1px dashed color-mix(in srgb, var(--ink) 12%, transparent);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.25);
+      background: var(--subtitle-band);
     }
     .subtitle-placeholder-tip {
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.25);
+      color: color-mix(in srgb, var(--ink) 25%, transparent);
       letter-spacing: 1px;
     }
   </style>

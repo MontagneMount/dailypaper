@@ -5,7 +5,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { splitParts } from "./parse-script.js";
 
 export const LAYOUT_NAMES = ["cover", "figure_text", "big_metric", "figure_annotated", "concept_diagram", "comparison"];
@@ -13,6 +13,11 @@ export const LAYOUT_NAMES = ["cover", "figure_text", "big_metric", "figure_annot
 const MAX_ITEMS = 3;
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".svg", ".webp"];
 const ITEM_HINT = "标题 | 一句话说明";
+
+// Diagrams take their colours from the theme through class names (templates/README.md). A colour
+// written into the SVG stays the same in every theme, and may be unreadable in another one.
+const FIXED_COLOUR = /\b(?:fill|stroke|stop-color)\s*[=:]\s*["']?\s*(#[0-9a-f]{3,8}\b|rgba?\([^)]*\)|hsla?\([^)]*\)|[a-z][a-z-]*)/gi;
+const NOT_A_COLOUR = new Set(["none", "transparent", "currentcolor", "context-stroke", "context-fill", "inherit", "url", "var"]);
 
 // The header fields, in the order of docs/script-format.md「开头」. All are required except
 // the optional cover fields.
@@ -99,6 +104,7 @@ export function buildSlides(script, episodeDir) {
   checkSourceTable(script.sourceRows, header, warnings);
 
   const slides = script.pages.map((page) => buildSlide(page, script.pages.length, header, episodeDir, errors));
+  checkDiagramColours(slides, warnings);
   return { slides, cover: buildCover(header), errors, warnings };
 }
 
@@ -215,6 +221,22 @@ function checkPronunciations(table, errors) {
   for (const { original, lineNo } of table) {
     if (seen.has(original)) errors.push(`发音替换表（第 ${lineNo} 行）：「${original}」写了不止一次`);
     seen.add(original);
+  }
+}
+
+/** A diagram still works with colours written into it, so this is a warning. */
+function checkDiagramColours(slides, warnings) {
+  for (const slide of slides) {
+    const url = slide.values.diagram_image_path;
+    if (!url?.endsWith(".svg")) continue;
+    const file = fileURLToPath(url);
+    const svg = fs.readFileSync(file, "utf8").replace(/<!--[\s\S]*?-->/g, "");
+    const colours = [...svg.matchAll(FIXED_COLOUR)].map((match) => match[1]).filter((colour) => !NOT_A_COLOUR.has(colour.toLowerCase()));
+    if (colours.length === 0) continue;
+    warnings.push(
+      `第 ${slide.number} 页：示意图 diagrams/${path.basename(file)} 里写死了 ${colours.length} 处颜色（如 ${colours[0]}），` +
+        "换风格时不会跟着变；改用类名，见 templates/README.md「示意图怎么画」",
+    );
   }
 }
 

@@ -1,0 +1,75 @@
+/* 浅色学术：频道默认风格（用户 2026-10-07 选定）。米白纸张底色，宋体标题和字幕，深蓝、砖红、深绿点缀。
+   模板里的颜色和字体都从这里取；换风格只改风格文件，不改模板。各变量的含义见 templates/README.md。
+   字体用电脑上已有的 Noto Serif SC、Noto Sans SC；没有时退回宋体、微软雅黑。 */
+:root {
+  /* 字体 */
+  --font-body: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --font-heading: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  --font-subtitle: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  --font-mono: "Cascadia Mono", Consolas, "Courier New", monospace;
+
+  /* 页面：纸张底色，不要光晕和网格 */
+  --page-bg: #f5f1e8;
+  --glow: 0;
+  --grid: 0;
+
+  /* 文字 */
+  --text: #1f2328;
+  --text-strong: #111827;
+  --text-title: #1f2328;
+  --text-soft: #4b4639;
+  --text-muted: #6b6457;
+  --text-faint: #8a8170;
+  --on-accent: #fffdf8;
+
+  /* 叠加色：细线、浅底都按比例从它调出来（浅色里是深褐） */
+  --ink: #3b3426;
+
+  /* 画板、卡片、论文原图：比纸张略亮，细边框 */
+  --panel: #fffdf8;
+  --panel-soft: #fffdf8;
+  --panel-border: #ded6c6;
+  --card: #fffdf8;
+  --card-border: #ded6c6;
+  --inset: rgba(255, 255, 255, 0.6);
+  --figure-bg: #ffffff;
+  --figure-frame: inset 0 0 0 1px #e7e0d2;
+
+  /* 阴影：暖色、很淡；标题不要文字阴影 */
+  --shadow-color: #5a4a2a;
+  --shadow-strength: 0.25;
+  --text-shadow-strength: 0;
+
+  /* 字幕：深色宋体，四周一圈纸色光晕，压在图上也看得清 */
+  --subtitle-band: transparent;
+  --subtitle-color: #111827;
+  --subtitle-shadow: 0 0 6px #f5f1e8, 0 0 12px #f5f1e8, 0 0 18px #f5f1e8;
+
+  /* B 站封面底部的压暗：浅色里不压，B 站自己会给播放量这些字加深色渐变 */
+  --cover-shade: transparent;
+
+  /* 细节 */
+  --tint-base: #ffffff;           /* 标签、卡片的彩色浅底兑白色调出来；兑透明会被米黄底色染灰 */
+  --text-gradient: 0;             /* 大数字、标题不用渐变字，0 就是纯色 */
+  --logo-bg: var(--accent);       /* 「DP」标志的底色 */
+  --metric-sign: var(--text-soft); /* 大数字前面的 ↑ ↓ */
+
+  /* 强调色：深蓝、砖红、深绿、赭橙 */
+  --accent: #1e3a8a;
+  --accent-deep: #1e3a8a;
+  --accent-text: #1e40af;
+  --accent-2: #7f1d1d;
+  --info: #7f1d1d;
+  --positive: #166534;
+  --positive-deep: #14532d;
+  --positive-text: #15803d;
+  --positive-pale: #166534;
+  --positive-paler: #2f4f3a;
+  --negative: #b91c1c;
+  --negative-text: #991b1b;
+  --negative-pale: #991b1b;
+  --highlight: #c2410c;
+  --highlight-text: #9a3412;
+  --special: #7f1d1d;
+  --special-text: #7f1d1d;
+}

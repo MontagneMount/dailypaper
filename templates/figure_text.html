@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <title>DailyPaper - 左侧论文原图 + 右侧要点</title>
+  <link rel="stylesheet" href="themes/academic.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       width: 1920px;
       height: 1080px;
       overflow: hidden;
-      background: #0b0f19;
+      background: var(--page-bg);
       background-image: 
-        radial-gradient(circle at 10% 10%, rgba(37, 99, 235, 0.12) 0%, transparent 40%),
-        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--accent-deep) calc(12% * var(--glow)), transparent) 0%, transparent 40%),
+        linear-gradient(color-mix(in srgb, var(--ink) calc(2.5% * var(--grid)), transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--ink) calc(2.5% * var(--grid)), transparent) 1px, transparent 1px);
       background-size: 100% 100%, 48px 48px, 48px 48px;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
-      color: #f1f5f9;
+      font-family: var(--font-body);
+      color: var(--text);
       display: flex;
       flex-direction: column;
     }
@@ -28,7 +29,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
     }
     .header-left {
       display: flex;
@@ -36,8 +37,8 @@
       gap: 18px;
     }
     .step-pill {
-      background: #2563eb;
-      color: #ffffff;
+      background: var(--accent-deep);
+      color: var(--on-accent);
       font-size: 16px;
       font-weight: 700;
       padding: 6px 14px;
@@ -46,12 +47,13 @@
     .section-title {
       font-size: 26px;
       font-weight: 700;
-      color: #e2e8f0;
+      color: var(--text-title);
+      font-family: var(--font-heading);
     }
     .page-index {
       font-size: 18px;
-      color: #64748b;
-      font-family: monospace;
+      color: var(--text-faint);
+      font-family: var(--font-mono);
       font-weight: 600;
     }
 
@@ -68,13 +70,13 @@
     /* 左侧：原图展示容器 */
     .figure-container {
       height: 740px;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
       border-radius: 20px;
       padding: 24px;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 16px 40px color-mix(in srgb, var(--shadow-color) calc(40% * var(--shadow-strength)), transparent);
     }
     .figure-header {
       display: flex;
@@ -82,30 +84,31 @@
       align-items: center;
       margin-bottom: 16px;
       padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
     }
     .figure-tag {
       font-size: 15px;
       font-weight: 700;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--info);
+      background: color-mix(in srgb, var(--info) 12%, var(--tint-base));
+      border: 1px solid color-mix(in srgb, var(--info) 30%, var(--tint-base));
       padding: 4px 12px;
       border-radius: 6px;
     }
     .source-hint {
       font-size: 14px;
-      color: #94a3b8;
+      color: var(--text-muted);
     }
     .image-wrapper {
       flex: 1;
       width: 100%;
-      background: #ffffff;
+      background: var(--figure-bg);
       border-radius: 12px;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: var(--figure-frame);
     }
     .image-wrapper img {
       max-width: 96%;
@@ -115,7 +118,7 @@
     .figure-caption {
       margin-top: 14px;
       font-size: 15px;
-      color: #94a3b8;
+      color: var(--text-muted);
       line-height: 1.4;
       text-align: center;
     }
@@ -129,10 +132,11 @@
     .main-heading {
       font-size: 42px;
       font-weight: 900;
-      color: #ffffff;
+      color: var(--text-strong);
       line-height: 1.25;
       margin-bottom: 34px;
       letter-spacing: -0.5px;
+      font-family: var(--font-heading);
     }
     .points-list {
       display: flex;
@@ -140,24 +144,24 @@
       gap: 20px;
     }
     .point-card {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-left: 6px solid #3b82f6;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-left: 6px solid var(--accent);
       border-radius: 14px;
       padding: 20px 24px;
       backdrop-filter: blur(8px);
     }
-    .point-card:nth-child(2) { border-left-color: #06b6d4; }
-    .point-card:nth-child(3) { border-left-color: #10b981; }
+    .point-card:nth-child(2) { border-left-color: var(--accent-2); }
+    .point-card:nth-child(3) { border-left-color: var(--positive); }
     .point-title {
       font-size: 22px;
       font-weight: 700;
-      color: #f8fafc;
+      color: var(--text);
       margin-bottom: 6px;
     }
     .point-desc {
       font-size: 18px;
-      color: #94a3b8;
+      color: var(--text-muted);
       line-height: 1.5;
     }
 
@@ -165,15 +169,15 @@
     .subtitle-safe-area {
       height: 162px;
       width: 100%;
-      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      border-top: 1px dashed color-mix(in srgb, var(--ink) 12%, transparent);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.25);
+      background: var(--subtitle-band);
     }
     .subtitle-placeholder-tip {
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.25);
+      color: color-mix(in srgb, var(--ink) 25%, transparent);
       letter-spacing: 1px;
     }
   </style>

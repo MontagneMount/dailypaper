@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <title>DailyPaper - 封面/导读</title>
+  <link rel="stylesheet" href="themes/academic.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       width: 1920px;
       height: 1080px;
       overflow: hidden;
-      background: #0b0f19;
+      background: var(--page-bg);
       background-image: 
-        radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.18) 0%, transparent 45%),
-        radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--accent-deep) calc(18% * var(--glow)), transparent) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, color-mix(in srgb, var(--positive) calc(12% * var(--glow)), transparent) 0%, transparent 45%),
+        linear-gradient(color-mix(in srgb, var(--ink) calc(3% * var(--grid)), transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--ink) calc(3% * var(--grid)), transparent) 1px, transparent 1px);
       background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
-      color: #f1f5f9;
+      font-family: var(--font-body);
+      color: var(--text);
       display: flex;
       flex-direction: column;
     }
@@ -29,7 +30,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
     }
     .brand {
       display: flex;
@@ -39,23 +40,24 @@
     .brand-logo {
       width: 44px;
       height: 44px;
-      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      background: var(--logo-bg);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 900;
       font-size: 22px;
-      color: #ffffff;
-      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+      color: var(--on-accent);
+      box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) calc(40% * var(--glow)), transparent);
     }
     .brand-name {
       font-size: 28px;
       font-weight: 800;
       letter-spacing: 1px;
-      background: linear-gradient(to right, #ffffff, #94a3b8);
+      background: linear-gradient(to right, var(--text-strong), color-mix(in srgb, var(--text-muted) calc(100% * var(--text-gradient)), var(--text-strong)));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      font-family: var(--font-heading);
     }
     .meta-tags {
       display: flex;
@@ -69,14 +71,14 @@
       font-weight: 600;
     }
     .tag-category {
-      background: rgba(59, 130, 246, 0.2);
-      border: 1px solid rgba(59, 130, 246, 0.5);
-      color: #60a5fa;
+      background: color-mix(in srgb, var(--accent) 20%, var(--tint-base));
+      border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--tint-base));
+      color: var(--accent-text);
     }
     .tag-status {
-      background: rgba(16, 185, 129, 0.2);
-      border: 1px solid rgba(16, 185, 129, 0.5);
-      color: #34d399;
+      background: color-mix(in srgb, var(--positive) 20%, var(--tint-base));
+      border: 1px solid color-mix(in srgb, var(--positive) 50%, var(--tint-base));
+      color: var(--positive-text);
     }
 
     /* 核心导读区 (高 828px) */
@@ -95,28 +97,29 @@
     }
     .source-badge {
       font-size: 18px;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--info);
+      background: color-mix(in srgb, var(--info) 12%, var(--tint-base));
+      border: 1px solid color-mix(in srgb, var(--info) 30%, var(--tint-base));
       padding: 6px 16px;
       border-radius: 8px;
-      font-family: monospace;
+      font-family: var(--font-mono);
       font-weight: 600;
     }
     .title-cn {
       font-size: 56px;
       font-weight: 900;
       line-height: 1.25;
-      color: #ffffff;
+      color: var(--text-strong);
       margin-bottom: 22px;
       letter-spacing: -0.5px;
-      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      text-shadow: 0 4px 20px color-mix(in srgb, var(--shadow-color) calc(60% * var(--text-shadow-strength)), transparent);
       max-width: 1520px;
+      font-family: var(--font-heading);
     }
     .title-en {
       font-size: 26px;
       font-weight: 400;
-      color: #94a3b8;
+      color: var(--text-muted);
       line-height: 1.4;
       margin-bottom: 40px;
       max-width: 1400px;
@@ -126,8 +129,8 @@
       grid-template-columns: auto 1fr;
       row-gap: 16px;
       column-gap: 24px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--card);
+      border: 1px solid var(--card-border);
       border-radius: 20px;
       padding: 28px 40px;
       max-width: 1300px;
@@ -135,16 +138,16 @@
     }
     .meta-label {
       font-size: 20px;
-      color: #64748b;
+      color: var(--text-faint);
       font-weight: 600;
     }
     .meta-value {
       font-size: 20px;
-      color: #e2e8f0;
+      color: var(--text-title);
       font-weight: 500;
     }
     .authors-highlight {
-      color: #38bdf8;
+      color: var(--info);
       font-weight: 600;
     }
 
@@ -152,15 +155,15 @@
     .subtitle-safe-area {
       height: 162px;
       width: 100%;
-      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      border-top: 1px dashed color-mix(in srgb, var(--ink) 12%, transparent);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.25);
+      background: var(--subtitle-band);
     }
     .subtitle-placeholder-tip {
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.25);
+      color: color-mix(in srgb, var(--ink) 25%, transparent);
       letter-spacing: 1px;
     }
   </style>

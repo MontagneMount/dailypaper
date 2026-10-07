@@ -1,21 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" font-family="Microsoft YaHei, PingFang SC, sans-serif">
-  <!-- Placeholder concept diagram for the demo episode (fictional) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420">
+  <!-- 示例期第 6 页的示意图（虚构）。颜色和字体用类名，跟着风格走；部件分组并带 id，以后镜头表可以逐个出现。
+       画法见 templates/README.md「示意图怎么画」 -->
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="#c4b5fd"/>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
     </marker>
   </defs>
-  <g text-anchor="middle" font-size="44" fill="#ffffff">
-    <rect x="40" y="100" width="340" height="200" rx="20" fill="rgba(139,92,246,0.18)" stroke="#a78bfa" stroke-width="3"/>
-    <text x="210" y="216">① 切块</text>
-    <rect x="530" y="100" width="340" height="200" rx="20" fill="rgba(139,92,246,0.18)" stroke="#a78bfa" stroke-width="3"/>
-    <text x="700" y="216">② 计算</text>
-    <rect x="1020" y="100" width="340" height="200" rx="20" fill="rgba(139,92,246,0.18)" stroke="#a78bfa" stroke-width="3"/>
-    <text x="1190" y="216">③ 合并</text>
+
+  <g id="step1" class="tone-accent" text-anchor="middle">
+    <rect class="box" x="40" y="80" width="340" height="220" rx="20" stroke-width="3"/>
+    <text class="label" x="210" y="140" font-size="26" font-weight="700">第 1 步</text>
+    <text class="strong" x="210" y="208" font-size="48" font-weight="700">切块</text>
+    <text class="soft" x="210" y="260" font-size="26">分成固定大小的块</text>
   </g>
-  <g stroke="#c4b5fd" stroke-width="5" marker-end="url(#arrow)">
-    <line x1="390" y1="200" x2="518" y2="200"/>
-    <line x1="880" y1="200" x2="1008" y2="200"/>
+
+  <path id="arrow1" class="line tone-neutral" d="M392 190 H516" stroke-width="5" marker-end="url(#arrow)"/>
+
+  <g id="step2" class="tone-accent" text-anchor="middle">
+    <rect class="box" x="530" y="80" width="340" height="220" rx="20" stroke-width="3"/>
+    <text class="label" x="700" y="140" font-size="26" font-weight="700">第 2 步</text>
+    <text class="strong" x="700" y="208" font-size="48" font-weight="700">计算</text>
+    <text class="soft" x="700" y="260" font-size="26">每块单独算注意力</text>
   </g>
-  <text x="700" y="380" text-anchor="middle" font-size="22" fill="#94a3b8">示例示意图（虚构）</text>
+
+  <path id="arrow2" class="line tone-neutral" d="M882 190 H1006" stroke-width="5" marker-end="url(#arrow)"/>
+
+  <g id="step3" class="tone-positive" text-anchor="middle">
+    <rect class="box" x="1020" y="80" width="340" height="220" rx="20" stroke-width="3"/>
+    <text class="label" x="1190" y="140" font-size="26" font-weight="700">第 3 步</text>
+    <text class="strong" x="1190" y="208" font-size="48" font-weight="700">合并</text>
+    <text class="soft" x="1190" y="260" font-size="26">拼成完整输出</text>
+  </g>
+
+  <text id="note" class="muted" x="700" y="380" font-size="22" text-anchor="middle">示例示意图（虚构）</text>
 </svg>

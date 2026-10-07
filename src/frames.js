@@ -7,8 +7,14 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright";
 
 const TEMPLATES_DIR = fileURLToPath(new URL("../templates/", import.meta.url));
+const THEMES_DIR = path.join(TEMPLATES_DIR, "themes");
 const WIDTH = 1920;
 const HEIGHT = 1080;
+
+// Every template links the default theme, so it also looks right when opened on its own;
+// the filled-in page points that link at the chosen theme (templates/themes/<name>.css).
+export const DEFAULT_THEME = "academic";
+const THEME_LINK = 'href="themes/academic.css"';
 
 // A figure at least this many times wider than tall looks tiny next to the points, so the page
 // switches to the wide variant of its template: figure across the top, points below it.
@@ -18,7 +24,7 @@ const WIDE_VARIANTS = { figure_text: "figure_text_wide" };
 /**
  * @returns {Promise<{ frames: Array<{ file: string, duration: number }>, warnings: string[] }>}
  */
-export async function renderFrames(slides, narration, workDir) {
+export async function renderFrames(slides, narration, workDir, { theme = DEFAULT_THEME } = {}) {
   const pagesDir = path.join(workDir, "pages");
   const framesDir = path.join(workDir, "frames");
   for (const dir of [pagesDir, framesDir]) {
@@ -39,7 +45,9 @@ export async function renderFrames(slides, narration, workDir) {
       const timing = narration.pages[slideIndex];
       const order = pad(slideIndex + 1);
       const htmlFile = path.join(pagesDir, `page${order}.html`);
-      const template = await openSlide(page, slide, htmlFile);
+      const template = await openSlide(page, slide, htmlFile, theme);
+      const diagram = slide.values.diagram_image_path;
+      if (diagram?.endsWith(".svg")) await page.evaluate(inlineDiagram, fs.readFileSync(fileURLToPath(diagram), "utf8"));
 
       const problems = await page.evaluate(prepareSlide, {
         cardCounts: slide.cardCounts,
@@ -47,6 +55,7 @@ export async function renderFrames(slides, narration, workDir) {
         fitGrid: slide.fitGrid,
       });
       problems.forEach((problem) => warnings.push(`第 ${slide.number} 页：${problem}`));
+      if (slideIndex === 0) (await page.evaluate(missingFonts)).forEach((font) => warnings.push(missingFontWarning(font, theme)));
 
       // No subtitle during the pause before the first sentence, so text never shows up before the voice.
       const firstStart = timing.lines[0].start;
@@ -80,38 +89,58 @@ export async function renderFrames(slides, narration, workDir) {
  * Render the Bilibili cover (templates/bilibili-cover.html) as a 1920×1080 PNG.
  * @returns {Promise<{ file: string, warnings: string[] }>}
  */
-export async function renderCover(cover, workDir) {
+export async function renderCover(cover, workDir, { theme = DEFAULT_THEME } = {}) {
   const htmlFile = path.join(workDir, "cover.html");
   const file = path.join(workDir, "cover.png");
-  fs.writeFileSync(htmlFile, fillTemplate(cover));
+  fs.writeFileSync(htmlFile, fillTemplate(cover, theme));
 
   const browser = await launchBrowser();
   try {
     const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1 });
     await page.goto(pathToFileURL(htmlFile).href);
     const problems = await page.evaluate(prepareCover, cover.hidden);
+    const fonts = (await page.evaluate(missingFonts)).map((font) => missingFontWarning(font, theme));
     await page.screenshot({ path: file });
-    return { file, warnings: problems.map((problem) => `封面：${problem}`) };
+    return { file, warnings: [...problems.map((problem) => `封面：${problem}`), ...fonts] };
   } finally {
     await browser.close();
   }
 }
 
 /** Fill the slide's template and open it; switch to the wide variant for a very wide figure. */
-async function openSlide(page, slide, htmlFile) {
-  fs.writeFileSync(htmlFile, fillTemplate(slide));
+async function openSlide(page, slide, htmlFile, theme) {
+  fs.writeFileSync(htmlFile, fillTemplate(slide, theme));
   await page.goto(pathToFileURL(htmlFile).href);
 
   const variant = WIDE_VARIANTS[slide.layout];
   if (!variant || (await page.evaluate(figureRatio)) < WIDE_FIGURE_RATIO) return slide.layout;
-  fs.writeFileSync(htmlFile, fillTemplate({ ...slide, layout: variant }));
+  fs.writeFileSync(htmlFile, fillTemplate({ ...slide, layout: variant }, theme));
   await page.goto(pathToFileURL(htmlFile).href);
   return variant;
 }
 
-function fillTemplate({ layout, values }) {
+/** The theme names there are files for in templates/themes/, e.g. ["academic", "dark"]. */
+export function listThemes() {
+  return fs
+    .readdirSync(THEMES_DIR)
+    .filter((file) => file.endsWith(".css"))
+    .map((file) => file.slice(0, -".css".length))
+    .sort();
+}
+
+/** The template with its {{placeholders}} filled in and its theme link pointing at the chosen theme. */
+export function fillTemplate({ layout, values }, theme = DEFAULT_THEME) {
+  const themeFile = path.join(THEMES_DIR, `${theme}.css`);
+  if (!fs.existsSync(themeFile)) throw new Error(`没有「${theme}」这个风格，可选：${listThemes().join("、")}`);
   const template = fs.readFileSync(path.join(TEMPLATES_DIR, `${layout}.html`), "utf8");
-  return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, name) => escapeHtml(values[name] ?? ""));
+  if (!template.includes(THEME_LINK)) throw new Error(`模板 ${layout}.html 没有引用风格文件（${THEME_LINK}）`);
+  return template
+    .replace(/\{\{\s*(\w+)\s*\}\}/g, (_, name) => escapeHtml(values[name] ?? ""))
+    .replace(THEME_LINK, () => `href="${pathToFileURL(themeFile).href}"`);
+}
+
+function missingFontWarning(font, theme) {
+  return `风格「${theme}」要用的字体「${font}」这台电脑上没有，画面会退回别的字体`;
 }
 
 function escapeHtml(text) {
@@ -177,9 +206,10 @@ async function prepareSlide({ cardCounts, hidden, fitGrid }) {
       fontWeight: "600",
       lineHeight: "1.35",
       letterSpacing: "1px",
-      color: "#ffffff",
+      fontFamily: "var(--font-subtitle)",
+      color: "var(--subtitle-color)",
       textAlign: "center",
-      textShadow: "0 2px 8px rgba(0, 0, 0, 0.85)",
+      textShadow: "var(--subtitle-shadow)",
     });
     area.appendChild(subtitle);
   } else {
@@ -228,12 +258,58 @@ async function prepareSlide({ cardCounts, hidden, fitGrid }) {
   return problems;
 }
 
+/**
+ * Put the diagram's SVG into the page itself, at the size the <img> had, so the diagram can use
+ * the theme's colours and fonts (classes in templates/README.md) and its parts can be animated.
+ * A diagram that failed to load stays an <img>, so prepareSlide reports it.
+ */
+async function inlineDiagram(markup) {
+  const image = document.querySelector(".diagram-graphic img");
+  if (!image) return;
+  await image.decode().catch(() => {});
+  if (image.naturalWidth === 0) return;
+
+  const holder = document.createElement("div");
+  holder.className = "diagram-svg";
+  holder.innerHTML = markup;
+  const svg = holder.querySelector("svg");
+  if (!svg) return;
+  const { width, height } = image.getBoundingClientRect();
+  Object.assign(holder.style, { width: `${width}px`, height: `${height}px` });
+  if (!svg.hasAttribute("viewBox")) svg.setAttribute("viewBox", `0 0 ${image.naturalWidth} ${image.naturalHeight}`);
+  svg.setAttribute("width", "100%");
+  svg.setAttribute("height", "100%");
+  image.replaceWith(holder);
+}
+
 /** Width ÷ height of the paper figure on the page, or 0 when there is none or it failed to load. */
 async function figureRatio() {
   const image = document.querySelector(".image-wrapper img");
   if (!image) return 0;
   await image.decode().catch(() => {});
   return image.naturalHeight > 0 ? image.naturalWidth / image.naturalHeight : 0;
+}
+
+/**
+ * The fonts the theme names first (body, headings, subtitles) that this computer does not have.
+ * A missing font shows up as text measuring the same as in the plain fallback font.
+ */
+function missingFonts() {
+  const style = getComputedStyle(document.documentElement);
+  const firstFamilies = ["--font-body", "--font-heading", "--font-subtitle"]
+    .map((name) => style.getPropertyValue(name).split(",")[0].trim().replace(/^["']|["']$/g, ""))
+    .filter((family) => family && !family.startsWith("-") && !family.startsWith("var(") && !/^(serif|sans-serif|monospace)$/.test(family));
+  const probe = document.createElement("span");
+  probe.textContent = "mmmmmmmmmmwwwwwlliI1 字体";
+  Object.assign(probe.style, { position: "absolute", visibility: "hidden", fontSize: "48px", whiteSpace: "nowrap" });
+  document.body.appendChild(probe);
+  const widthIn = (family) => {
+    probe.style.fontFamily = family;
+    return probe.getBoundingClientRect().width;
+  };
+  const missing = [...new Set(firstFamilies)].filter((family) => widthIn(`"${family}", monospace`) === widthIn("monospace"));
+  probe.remove();
+  return missing;
 }
 
 function showSubtitle(text) {

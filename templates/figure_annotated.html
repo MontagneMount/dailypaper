@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <title>DailyPaper - 论文原图 + 独立分层标注</title>
+  <link rel="stylesheet" href="themes/academic.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       width: 1920px;
       height: 1080px;
       overflow: hidden;
-      background: #0b0f19;
+      background: var(--page-bg);
       background-image: 
-        radial-gradient(circle at 80% 20%, rgba(239, 68, 68, 0.12) 0%, transparent 45%),
-        radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.1) 0%, transparent 45%),
-        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--negative) calc(12% * var(--glow)), transparent) 0%, transparent 45%),
+        radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--accent-deep) calc(10% * var(--glow)), transparent) 0%, transparent 45%),
+        linear-gradient(color-mix(in srgb, var(--ink) calc(2.5% * var(--grid)), transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--ink) calc(2.5% * var(--grid)), transparent) 1px, transparent 1px);
       background-size: 100% 100%, 48px 48px, 48px 48px;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
-      color: #f1f5f9;
+      font-family: var(--font-body);
+      color: var(--text);
       display: flex;
       flex-direction: column;
     }
@@ -28,7 +29,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
     }
     .header-left {
       display: flex;
@@ -36,9 +37,9 @@
       gap: 18px;
     }
     .badge-annotated {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      color: #f87171;
+      background: color-mix(in srgb, var(--negative) 20%, var(--tint-base));
+      border: 1px solid color-mix(in srgb, var(--negative) 50%, var(--tint-base));
+      color: var(--negative-text);
       font-size: 16px;
       font-weight: 700;
       padding: 6px 14px;
@@ -47,12 +48,13 @@
     .section-title {
       font-size: 26px;
       font-weight: 700;
-      color: #e2e8f0;
+      color: var(--text-title);
+      font-family: var(--font-heading);
     }
     .page-index {
       font-size: 18px;
-      color: #64748b;
-      font-family: monospace;
+      color: var(--text-faint);
+      font-family: var(--font-mono);
       font-weight: 600;
     }
 
@@ -69,14 +71,14 @@
     /* 原图展示与分层标注容器 */
     .stage-canvas {
       height: 760px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
       border-radius: 20px;
       padding: 20px;
       display: flex;
       flex-direction: column;
       position: relative;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 16px 40px color-mix(in srgb, var(--shadow-color) calc(50% * var(--shadow-strength)), transparent);
     }
     .stage-header {
       display: flex;
@@ -84,33 +86,34 @@
       align-items: center;
       margin-bottom: 12px;
       padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
     }
     .stage-title {
       font-size: 16px;
       font-weight: 600;
-      color: #94a3b8;
+      color: var(--text-muted);
     }
     .layer-notice {
       font-size: 13px;
-      color: #ef4444;
-      background: rgba(239, 68, 68, 0.1);
+      color: var(--negative);
+      background: color-mix(in srgb, var(--negative) 10%, var(--tint-base));
       padding: 3px 10px;
       border-radius: 4px;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      border: 1px solid color-mix(in srgb, var(--negative) 30%, var(--tint-base));
     }
 
     /* 图像视口及绝对定位标注层 */
     .image-viewport {
       flex: 1;
       width: 100%;
-      background: #ffffff;
+      background: var(--figure-bg);
       border-radius: 12px;
       position: relative;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: var(--figure-frame);
     }
     .base-figure {
       max-width: 96%;
@@ -131,22 +134,22 @@
       left: var(--box-left, 45%);
       width: var(--box-width, 35%);
       height: var(--box-height, 40%);
-      border: 4px solid #ef4444;
+      border: 4px solid var(--negative);
       border-radius: 8px;
-      background: rgba(239, 68, 68, 0.15);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+      background: color-mix(in srgb, var(--negative) 15%, transparent);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--negative) calc(60% * var(--glow)), transparent);
     }
     .highlight-callout {
       position: absolute;
       top: -38px;
       left: -2px;
-      background: #ef4444;
-      color: #ffffff;
+      background: var(--negative);
+      color: var(--on-accent);
       font-size: 14px;
       font-weight: 700;
       padding: 4px 12px;
       border-radius: 4px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px color-mix(in srgb, var(--shadow-color) calc(30% * var(--shadow-strength)), transparent);
       white-space: nowrap;
     }
 
@@ -159,16 +162,17 @@
     .target-badge {
       font-size: 16px;
       font-weight: 700;
-      color: #ef4444;
+      color: var(--negative);
       margin-bottom: 12px;
       letter-spacing: 1px;
     }
     .panel-headline {
       font-size: 40px;
       font-weight: 900;
-      color: #ffffff;
+      color: var(--text-strong);
       line-height: 1.25;
       margin-bottom: 28px;
+      font-family: var(--font-heading);
     }
     .detail-cards {
       display: flex;
@@ -176,8 +180,8 @@
       gap: 18px;
     }
     .detail-card {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--card);
+      border: 1px solid var(--card-border);
       border-radius: 14px;
       padding: 20px 24px;
       backdrop-filter: blur(8px);
@@ -185,7 +189,7 @@
     .detail-title {
       font-size: 20px;
       font-weight: 700;
-      color: #38bdf8;
+      color: var(--info);
       margin-bottom: 6px;
       display: flex;
       align-items: center;
@@ -196,12 +200,12 @@
       display: inline-block;
       width: 8px;
       height: 8px;
-      background: #38bdf8;
+      background: var(--info);
       border-radius: 50%;
     }
     .detail-body {
       font-size: 17px;
-      color: #cbd5e1;
+      color: var(--text-soft);
       line-height: 1.5;
     }
 
@@ -209,15 +213,15 @@
     .subtitle-safe-area {
       height: 162px;
       width: 100%;
-      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      border-top: 1px dashed color-mix(in srgb, var(--ink) 12%, transparent);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.25);
+      background: var(--subtitle-band);
     }
     .subtitle-placeholder-tip {
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.25);
+      color: color-mix(in srgb, var(--ink) 25%, transparent);
       letter-spacing: 1px;
     }
   </style>

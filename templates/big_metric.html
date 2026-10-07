@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <title>DailyPaper - 全屏大字突出核心指标</title>
+  <link rel="stylesheet" href="themes/academic.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       width: 1920px;
       height: 1080px;
       overflow: hidden;
-      background: #090d16;
+      background: var(--page-bg);
       background-image: 
-        radial-gradient(circle at 50% 35%, rgba(59, 130, 246, 0.22) 0%, transparent 55%),
-        radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.15) 0%, transparent 40%),
-        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--accent) calc(22% * var(--glow)), transparent) 0%, transparent 55%),
+        radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--highlight) calc(15% * var(--glow)), transparent) 0%, transparent 40%),
+        linear-gradient(color-mix(in srgb, var(--ink) calc(2% * var(--grid)), transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--ink) calc(2% * var(--grid)), transparent) 1px, transparent 1px);
       background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", "Segoe UI", Roboto, sans-serif;
-      color: #f1f5f9;
+      font-family: var(--font-body);
+      color: var(--text);
       display: flex;
       flex-direction: column;
     }
@@ -28,7 +29,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
     }
     .header-left {
       display: flex;
@@ -36,9 +37,9 @@
       gap: 18px;
     }
     .tag-badge {
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid rgba(245, 158, 11, 0.6);
-      color: #fbbf24;
+      background: color-mix(in srgb, var(--highlight) 20%, var(--tint-base));
+      border: 1px solid color-mix(in srgb, var(--highlight) 60%, var(--tint-base));
+      color: var(--highlight-text);
       font-size: 16px;
       font-weight: 700;
       padding: 6px 14px;
@@ -47,12 +48,13 @@
     .section-title {
       font-size: 26px;
       font-weight: 700;
-      color: #e2e8f0;
+      color: var(--text-title);
+      font-family: var(--font-heading);
     }
     .page-index {
       font-size: 18px;
-      color: #64748b;
-      font-family: monospace;
+      color: var(--text-faint);
+      font-family: var(--font-mono);
       font-weight: 600;
     }
 
@@ -68,9 +70,9 @@
     }
     .topic-pill {
       font-size: 18px;
-      color: #94a3b8;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      background: color-mix(in srgb, var(--ink) 6%, transparent);
+      border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
       padding: 8px 24px;
       border-radius: 999px;
       margin-bottom: 20px;
@@ -78,11 +80,12 @@
     .headline {
       font-size: 48px;
       font-weight: 900;
-      color: #ffffff;
+      color: var(--text-strong);
       line-height: 1.25;
       margin-bottom: 36px;
       max-width: 1400px;
       letter-spacing: -0.5px;
+      font-family: var(--font-heading);
     }
 
     /* 指标卡片网格 */
@@ -97,28 +100,28 @@
     }
     .metric-card {
       flex: 1;
-      background: rgba(255, 255, 255, 0.035);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--card);
+      border: 1px solid var(--card-border);
       border-radius: 24px;
       padding: 34px 28px;
       display: flex;
       flex-direction: column;
       align-items: center;
       backdrop-filter: blur(12px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 12px 30px color-mix(in srgb, var(--shadow-color) calc(35% * var(--shadow-strength)), transparent);
     }
     .metric-card.primary {
-      border: 1px solid rgba(59, 130, 246, 0.4);
-      background: linear-gradient(180deg, rgba(59, 130, 246, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%);
+      border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--tint-base));
+      background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 12%, var(--tint-base)) 0%, var(--panel-soft) 100%);
     }
     .metric-card.accent {
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%);
+      border: 1px solid color-mix(in srgb, var(--positive) 40%, var(--tint-base));
+      background: linear-gradient(180deg, color-mix(in srgb, var(--positive) 12%, var(--tint-base)) 0%, var(--panel-soft) 100%);
     }
     .metric-label {
       font-size: 20px;
       font-weight: 600;
-      color: #94a3b8;
+      color: var(--text-muted);
       margin-bottom: 10px;
     }
     .metric-value-wrap {
@@ -131,35 +134,36 @@
     .metric-sign {
       font-size: 50px;
       font-weight: 800;
-      color: #38bdf8;
+      color: var(--metric-sign);
     }
     .metric-num {
       font-size: 92px;
       font-weight: 900;
       line-height: 1;
       letter-spacing: -2px;
-      background: linear-gradient(180deg, #ffffff 30%, #cbd5e1 100%);
+      background: linear-gradient(180deg, var(--text-strong) 30%, color-mix(in srgb, var(--text-soft) calc(100% * var(--text-gradient)), var(--text-strong)) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      font-family: var(--font-heading);
     }
     .metric-card.primary .metric-num {
-      background: linear-gradient(180deg, #60a5fa 30%, #38bdf8 100%);
+      background: linear-gradient(180deg, var(--accent-text) 30%, color-mix(in srgb, var(--info) calc(100% * var(--text-gradient)), var(--accent-text)) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .metric-card.accent .metric-num {
-      background: linear-gradient(180deg, #34d399 30%, #10b981 100%);
+      background: linear-gradient(180deg, var(--positive-text) 30%, color-mix(in srgb, var(--positive) calc(100% * var(--text-gradient)), var(--positive-text)) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .metric-unit {
       font-size: 28px;
       font-weight: 700;
-      color: #94a3b8;
+      color: var(--text-muted);
     }
     .metric-sub {
       font-size: 18px;
-      color: #cbd5e1;
+      color: var(--text-soft);
       line-height: 1.4;
       max-width: 90%;
     }
@@ -167,13 +171,13 @@
     /* 实验基准说明 */
     .benchmark-footer {
       font-size: 16px;
-      color: #64748b;
+      color: var(--text-faint);
       display: flex;
       align-items: center;
       gap: 12px;
     }
     .benchmark-footer span {
-      background: rgba(255, 255, 255, 0.05);
+      background: color-mix(in srgb, var(--ink) 5%, transparent);
       padding: 6px 14px;
       border-radius: 6px;
     }
@@ -182,15 +186,15 @@
     .subtitle-safe-area {
       height: 162px;
       width: 100%;
-      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      border-top: 1px dashed color-mix(in srgb, var(--ink) 12%, transparent);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.25);
+      background: var(--subtitle-band);
     }
     .subtitle-placeholder-tip {
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.25);
+      color: color-mix(in srgb, var(--ink) 25%, transparent);
       letter-spacing: 1px;
     }
   </style>

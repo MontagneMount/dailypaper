@@ -27,7 +27,7 @@ npm run new -- <arXiv 编号>
 - `<arXiv 编号>v<版本>.pdf`：论文 PDF，如 `2610.05608v1.pdf`（不提交到仓库）
 - `script.md`：讲解稿，格式见 [docs/script-format.md](docs/script-format.md)
 - `figures/`：论文原图，如 `figure2.png`（有版权，不提交到仓库）。由 Claude 用 `npm run figure` 从 PDF 原样截取：先 `npm run figure -- <本期文件夹> <页码>` 渲染整页找到图，再 `npm run figure -- <本期文件夹> <页码> <名字> <上,左,下,右>` 截出来（范围是 0～1 的小数，白边会自动裁掉）
-- `diagrams/`：示意图，如 `page5.svg`（Claude 按稿子画，优先写成 SVG）
+- `diagrams/`：示意图，如 `page5.svg`（Claude 按稿子画，优先写成 SVG；颜色用类名，跟着风格走，画法见 [templates/README.md](templates/README.md)「示意图怎么画」）
 
 **期数和发布记录**：已发布的视频记在 [episodes/published.json](episodes/published.json)（期数、文件夹、标题、B 站链接、发布日期）。用户发布后把链接发给 Claude，由 Claude 记上。新一期的期数按这个记录往下排，不按文件夹数；同时有几期在做时，哪一期先发布就用这个号，`npm run check` 会提醒其他期改号。
 
@@ -37,7 +37,7 @@ npm run new -- <arXiv 编号>
 npm run check -- episodes/<本期文件夹>
 ```
 
-可选参数：`--voice zh-CN-YunxiNeural` 换成男声（默认是女声「晓晓」）；`--rate +0%` 换回正常语速（默认是 `+25%`，也就是 1.25 倍）。
+可选参数：`--theme dark` 换成深色风格（默认是浅色学术，见 [templates/README.md](templates/README.md)「风格」）；`--voice zh-CN-YunxiNeural` 换成男声（默认是女声「晓晓」）；`--rate +0%` 换回正常语速（默认是 `+25%`，也就是 1.25 倍）。
 
 改了代码之后，运行 `npm test`，确认稿子的检查规则没有被改坏。
 

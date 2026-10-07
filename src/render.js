@@ -7,12 +7,12 @@ import path from "node:path";
 import { parseScript } from "./parse-script.js";
 import { buildSlides } from "./layouts.js";
 import { createNarration, DEFAULT_RATE, DEFAULT_VOICE } from "./tts.js";
-import { renderCover, renderFrames } from "./frames.js";
+import { DEFAULT_THEME, listThemes, renderCover, renderFrames } from "./frames.js";
 import { composeVideo, writeChapters, writeSrt } from "./compose.js";
 import { episodeNumberProblem, readPublished } from "./episodes.js";
 
 const USAGE = `用法：
-  npm run render -- <本期文件夹> [--voice ${DEFAULT_VOICE}] [--rate ${DEFAULT_RATE}]
+  npm run render -- <本期文件夹> [--theme ${DEFAULT_THEME}|dark] [--voice ${DEFAULT_VOICE}] [--rate ${DEFAULT_RATE}]
   npm run check -- <本期文件夹>`;
 
 async function main() {
@@ -21,6 +21,11 @@ async function main() {
     console.log(USAGE);
     process.exitCode = 1;
     return;
+  }
+  const themes = listThemes();
+  if (!themes.includes(options.theme)) {
+    const problem = options.theme ? `没有「${options.theme}」这个风格` : "--theme 后面要写风格名";
+    throw new Error(`${problem}，可选：${themes.join("、")}`);
   }
 
   const episodeDir = path.resolve(options.episodeDir);
@@ -58,8 +63,8 @@ async function main() {
     workDir,
   });
 
-  console.log("[2/4] 渲染画面");
-  const { frames, warnings: frameWarnings } = await renderFrames(slides, narration, workDir);
+  console.log(`[2/4] 渲染画面（风格：${options.theme}）`);
+  const { frames, warnings: frameWarnings } = await renderFrames(slides, narration, workDir, { theme: options.theme });
   frameWarnings.forEach((warning) => console.warn(`⚠️  ${warning}`));
 
   console.log("[3/4] 合成视频");
@@ -71,7 +76,7 @@ async function main() {
   writeChapters(slides.map((slide, index) => ({ start: narration.pages[index].start, title: slide.topic })), chaptersFile);
 
   console.log("[4/4] 生成 B 站封面");
-  const { file: coverFile, warnings: coverWarnings } = await renderCover(cover, workDir);
+  const { file: coverFile, warnings: coverWarnings } = await renderCover(cover, workDir, { theme: options.theme });
   coverWarnings.forEach((warning) => console.warn(`⚠️  ${warning}`));
 
   console.log(`\n完成！视频时长 ${formatDuration(narration.duration)}`);
@@ -82,10 +87,11 @@ async function main() {
 }
 
 function parseArgs(args) {
-  const options = { episodeDir: null, check: false, voice: DEFAULT_VOICE, rate: DEFAULT_RATE };
+  const options = { episodeDir: null, check: false, theme: DEFAULT_THEME, voice: DEFAULT_VOICE, rate: DEFAULT_RATE };
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "--check") options.check = true;
+    else if (arg === "--theme") options.theme = args[++i] ?? "";
     else if (arg === "--voice") options.voice = args[++i];
     else if (arg === "--rate") options.rate = args[++i];
     else if (!arg.startsWith("--")) options.episodeDir = arg;

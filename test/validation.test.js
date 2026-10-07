@@ -234,6 +234,23 @@ test("R5 发音替换只做一次，替换出的读法不会被再次替换", ()
   assert.equal(applyPronunciations("GPT-4 比 GPT 强", table), "GPT four 比 G P T 强");
 });
 
+test("T63 示意图里写死颜色会提醒，用类名和 none、context-stroke 不会", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dailypaper-test-"));
+  try {
+    fs.cpSync(EXAMPLE_DIR, tempDir, { recursive: true, filter: (source) => path.basename(source) !== "output" });
+    const diagram = path.join(tempDir, "diagrams", "page6.svg");
+    const svg = fs.readFileSync(diagram, "utf8");
+    assert.deepEqual(check(undefined, tempDir).warnings, []);
+
+    fs.writeFileSync(diagram, svg.replace('class="box"', 'class="box" fill="#dbeafe" style="stroke: rgba(59, 130, 246, 0.5)"'));
+    const warnings = check(undefined, tempDir).warnings;
+    assert.equal(warnings.length, 1, warnings.join("\n"));
+    assert.match(warnings[0], /第 6 页：示意图 diagrams\/page6\.svg 里写死了 2 处颜色（如 #dbeafe）/);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test("同一图号有两个图片文件会报错", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dailypaper-test-"));
   try {

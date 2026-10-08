@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第三期第 10 页：审核者怎样核查。依据 SafeLens 论文第 2 页 Web interface、Demonstration，只概括功能，不是界面截图；
+       只写字段名，不填标签、分数、理由或转录，灰线只是占位。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">流程示意，非实际预测</text>
+  <g id="footer" class="tone-highlight">
+    <text class="label" x="40" y="440" font-size="24" font-weight="700">模型输出仍需核查</text>
+  </g>
+
+  <g id="review" text-anchor="middle">
+    <g class="tone-neutral">
+      <text class="soft" x="40" y="110" font-size="22" text-anchor="start">视频时间轴</text>
+      <rect class="box" x="40" y="128" width="820" height="56" rx="10" stroke-width="2.5"/>
+      <path class="line" d="M160 128 V184 M290 128 V184 M400 128 V184 M520 128 V184 M640 128 V184 M760 128 V184" stroke-width="2"/>
+    </g>
+    <g class="tone-highlight">
+      <text class="label" x="460" y="104" font-size="24" font-weight="700">待核查片段</text>
+      <rect class="line" x="396" y="118" width="128" height="76" rx="8" stroke-width="4"/>
+      <path class="line" d="M460 198 V276" stroke-width="4" marker-end="url(#arrow)"/>
+    </g>
+    <g class="tone-accent">
+      <rect class="box" x="200" y="284" width="520" height="112" rx="14" stroke-width="2.5"/>
+      <text class="strong" x="460" y="324" font-size="28" font-weight="700">回看片段 + 同步转录</text>
+      <g class="tone-neutral">
+        <path class="line" d="M250 354 H610 M250 378 H500" stroke-width="6" stroke-linecap="round"/>
+      </g>
+    </g>
+  </g>
+
+  <g id="prediction" class="tone-accent">
+    <rect class="box" x="980" y="56" width="630" height="270" rx="18" stroke-width="2.5"/>
+    <text class="label" x="1010" y="100" font-size="26" font-weight="700">每个片段返回</text>
+    <text class="strong" x="1010" y="152" font-size="26">标签</text>
+    <text class="strong" x="1010" y="202" font-size="26">置信分数</text>
+    <text class="strong" x="1010" y="252" font-size="26">一句理由</text>
+    <text class="strong" x="1010" y="302" font-size="26">适用类别（若判为问题）</text>
+    <g class="tone-neutral">
+      <path class="line" d="M1330 143 H1570 M1330 193 H1570 M1330 243 H1570 M1330 293 H1570" stroke-width="6" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <g id="boundary" class="tone-highlight" text-anchor="middle">
+    <rect class="box" x="1060" y="356" width="550" height="76" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1335" y="404" font-size="26" font-weight="700">演示功能 ≠ 大规模可靠性验证</text>
+  </g>
+</svg>

@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第三期第 9 页：SafeLens 的流程。依据 SafeLens 论文第 1～2 页 System Overview，不是系统截图。
+       上方实线：切段借鉴 HateClipSeg；中间：处理每条视频；下方虚线：事先用 HateClipSeg 训练判断模型，不是处理视频时去查这个数据集。
+       画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">SafeLens 流程示意，非系统截图（AAAI-26 演示论文）</text>
+
+  <g id="segmentation" text-anchor="middle">
+    <g class="tone-highlight">
+      <rect class="box" x="20" y="52" width="330" height="62" rx="12" stroke-width="2.5"/>
+      <text class="strong" x="185" y="93" font-size="26" font-weight="700">HateClipSeg 切段策略</text>
+      <path class="line" d="M185 118 V164" stroke-width="4" marker-end="url(#arrow)"/>
+      <text class="label" x="202" y="150" font-size="22" font-weight="700" text-anchor="start">借鉴</text>
+    </g>
+    <g class="tone-accent">
+      <rect class="box" x="40" y="172" width="290" height="124" rx="16" stroke-width="2.5"/>
+      <text class="strong" x="185" y="245" font-size="30" font-weight="700">视频切段</text>
+    </g>
+  </g>
+
+  <g id="speech" class="tone-accent" text-anchor="middle">
+    <path class="line" d="M332 234 C366 234 366 168 396 168" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="400" y="140" width="230" height="56" rx="10" stroke-width="2.5"/>
+    <text class="strong" x="515" y="177" font-size="26" font-weight="700">Whisper</text>
+    <path class="line" d="M634 168 H692" stroke-width="3" marker-end="url(#arrow)"/>
+    <g class="tone-neutral">
+      <rect class="box" x="700" y="140" width="200" height="56" rx="10" stroke-width="2.5"/>
+      <text class="strong" x="800" y="177" font-size="26">语音转录</text>
+    </g>
+  </g>
+
+  <g id="ocr" class="tone-accent" text-anchor="middle">
+    <path class="line" d="M332 236 H396" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="400" y="208" width="230" height="56" rx="10" stroke-width="2.5"/>
+    <text class="strong" x="515" y="245" font-size="26" font-weight="700">EasyOCR</text>
+    <path class="line" d="M634 236 H692" stroke-width="3" marker-end="url(#arrow)"/>
+    <g class="tone-neutral">
+      <rect class="box" x="700" y="208" width="200" height="56" rx="10" stroke-width="2.5"/>
+      <text class="strong" x="800" y="245" font-size="26">画面文字</text>
+    </g>
+  </g>
+
+  <g id="vision" class="tone-accent" text-anchor="middle">
+    <path class="line" d="M332 238 C366 238 366 304 396 304" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="400" y="276" width="230" height="56" rx="10" stroke-width="2.5"/>
+    <text class="strong" x="515" y="313" font-size="26" font-weight="700">Qwen2.5-VL</text>
+    <path class="line" d="M634 304 H692" stroke-width="3" marker-end="url(#arrow)"/>
+    <g class="tone-neutral">
+      <rect class="box" x="700" y="276" width="200" height="56" rx="10" stroke-width="2.5"/>
+      <text class="strong" x="800" y="313" font-size="26">视觉描述</text>
+    </g>
+  </g>
+
+  <g id="decision" class="tone-accent" text-anchor="middle">
+    <path class="line" d="M904 168 C948 168 948 236 986 236" stroke-width="3"/>
+    <path class="line" d="M904 304 C948 304 948 236 986 236" stroke-width="3"/>
+    <path class="line" d="M904 236 H986" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="990" y="200" width="210" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1095" y="246" font-size="28" font-weight="700">汇总证据</text>
+    <path class="line" d="M1204 236 H1282" stroke-width="4" marker-end="url(#arrow)"/>
+  </g>
+
+  <g id="training" text-anchor="middle">
+    <g class="tone-accent">
+      <rect class="box solid" x="1290" y="180" width="320" height="112" rx="16"/>
+      <text class="on-solid" x="1450" y="229" font-size="30" font-weight="700">判断模型</text>
+      <text class="on-solid" x="1450" y="270" font-size="26">Llama3-8B</text>
+    </g>
+    <g class="tone-highlight">
+      <text class="label" x="780" y="416" font-size="26" font-weight="700" text-anchor="end">训练路径</text>
+      <rect class="box" x="800" y="378" width="290" height="58" rx="12" stroke-width="2.5"/>
+      <text class="strong" x="945" y="416" font-size="26" font-weight="700">HateClipSeg 数据集</text>
+      <path class="line" d="M1094 407 H1152" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrow)"/>
+      <rect class="box" x="1160" y="378" width="180" height="58" rx="12" stroke-width="2.5"/>
+      <text class="strong" x="1250" y="416" font-size="26" font-weight="700">LoRA 微调</text>
+      <path class="line" d="M1344 407 H1450 V300" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrow)"/>
+    </g>
+  </g>
+</svg>

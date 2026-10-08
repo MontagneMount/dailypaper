@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第三期第 8 页：采样流程和上下文。依据 HateClipSeg 第 2.1、4.3～4.4 节；上下两排各自独立，不是因果链；
+       方框大小不表示数量，不画按比例的漏斗。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">采样与上下文示意</text>
+
+  <g id="search" class="tone-accent" text-anchor="middle">
+    <text class="label" x="150" y="129" font-size="26" font-weight="700">采样流程</text>
+    <rect class="box" x="300" y="72" width="340" height="94" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="470" y="130" font-size="32" font-weight="700">关键词检索</text>
+  </g>
+
+  <g id="filter" class="tone-accent" text-anchor="middle">
+    <path class="line" d="M646 119 H722" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box" x="730" y="72" width="340" height="94" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="900" y="130" font-size="32" font-weight="700">模型筛选</text>
+  </g>
+
+  <g id="sample" class="tone-accent" text-anchor="middle">
+    <path class="line" d="M1076 119 H1152" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box solid" x="1160" y="72" width="340" height="94" rx="16"/>
+    <text class="on-solid" x="1330" y="130" font-size="32" font-weight="700">研究样本</text>
+  </g>
+
+  <g id="scope" class="tone-highlight" text-anchor="middle">
+    <text class="label" x="1330" y="212" font-size="26" font-weight="700">研究样本，不代表全网比例</text>
+  </g>
+
+  <path id="divider" class="line tone-neutral" d="M40 240 H1610" stroke-width="2" stroke-dasharray="8 10"/>
+
+  <g id="context" class="tone-neutral" text-anchor="middle">
+    <text class="label" x="150" y="333" font-size="26" font-weight="700">上下文</text>
+    <rect class="box" x="300" y="282" width="390" height="84" rx="10" stroke-width="2.5"/>
+    <text class="strong" x="495" y="334" font-size="28" font-weight="700">正常片段</text>
+    <g class="tone-highlight">
+      <rect class="box" x="700" y="282" width="390" height="84" rx="10" stroke-width="2.5"/>
+      <text class="strong" x="895" y="334" font-size="28" font-weight="700">问题片段</text>
+    </g>
+    <rect class="box" x="1100" y="282" width="390" height="84" rx="10" stroke-width="2.5"/>
+    <text class="strong" x="1295" y="334" font-size="28" font-weight="700">正常片段</text>
+    <path class="line" d="M300 380 V396 H1490 V380 M895 396 V410" stroke-width="3"/>
+    <text class="soft" x="895" y="444" font-size="26">理解可能需要前后文</text>
+  </g>
+</svg>

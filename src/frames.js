@@ -550,11 +550,13 @@ function setUpCues({ tracks, readable, cardSelectors }) {
   const appearing = of("appear").map((track) => {
     const element = track.target.type === "card" ? cards[track.target.index - 1] : document.getElementById(track.target.id);
     const parts = element instanceof SVGElement ? [element, ...element.querySelectorAll("*")] : [];
+    // A line with its own dash pattern (a dashed arrow) keeps it: it fades in with its part instead of being drawn.
     const lines = parts
       .filter((part) => part.classList.contains("line") && typeof part.getTotalLength === "function")
+      .filter((part) => getComputedStyle(part).strokeDasharray === "none")
       .map((part) => ({ part, length: part.getTotalLength(), marker: getComputedStyle(part).markerEnd !== "none" }));
     const shapes = parts.filter((part) => part instanceof SVGGeometryElement || part instanceof SVGTextElement);
-    const drawOnly = shapes.length > 0 && shapes.every((part) => part.classList.contains("line"));
+    const drawOnly = shapes.length > 0 && shapes.every((part) => lines.some((line) => line.part === part));
     return { ...track, element, lines, drawOnly };
   });
 

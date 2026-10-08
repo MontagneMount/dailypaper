@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第四期第 7 页：Evolution 的反馈集和留出集。依据第 3.2、4.3 节；左边是开发期间可见的反馈循环，右边是开发结束后才评估的
+       SWE-Pro 630 题，成绩不返回开发模型，所以没有回到左边的箭头。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">Evolution：代码框架</text>
+  <g id="phases" class="tone-neutral" text-anchor="middle">
+    <text class="label" x="560" y="30" font-size="24" font-weight="700">开发期间</text>
+    <text class="label" x="1390" y="30" font-size="24" font-weight="700">开发结束后</text>
+    <path class="line" d="M1130 48 V450" stroke-width="2" stroke-dasharray="10 8"/>
+  </g>
+
+  <g id="feedback" class="tone-accent" text-anchor="middle">
+    <rect class="line" x="160" y="304" width="680" height="104" rx="16" stroke-width="2"/>
+    <rect class="box" x="180" y="320" width="270" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="315" y="366" font-size="28" font-weight="700">SWE-Pro 100</text>
+    <rect class="box" x="490" y="320" width="330" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="655" y="366" font-size="28" font-weight="700">Terminal-Bench 89</text>
+    <text class="label" x="500" y="442" font-size="24" font-weight="700">开发可见反馈</text>
+  </g>
+
+  <g id="iterate" class="tone-accent" text-anchor="middle">
+    <rect class="box" x="40" y="96" width="200" height="76" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="140" y="144" font-size="26" font-weight="700">已有框架</text>
+    <path class="line" d="M244 134 H314" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box" x="320" y="96" width="200" height="76" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="420" y="144" font-size="26" font-weight="700">修改代码</text>
+    <path class="line" d="M524 134 H594" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box solid" x="600" y="96" width="200" height="76" rx="14"/>
+    <text class="on-solid" x="700" y="144" font-size="26" font-weight="700">冻结版本</text>
+    <path class="line" d="M700 176 V236 H600 V296" stroke-width="3" marker-end="url(#arrow)"/>
+    <text class="soft" x="712" y="222" font-size="22" text-anchor="start">两组正式测试</text>
+    <path class="line" d="M300 304 V262 H420 V178" stroke-width="3" marker-end="url(#arrow)"/>
+    <text class="soft" x="290" y="290" font-size="22" text-anchor="end">反馈</text>
+  </g>
+
+  <g id="heldout" class="tone-special" text-anchor="middle">
+    <path class="line" d="M804 134 H1166" stroke-width="4" marker-end="url(#arrow)"/>
+    <text class="soft" x="985" y="120" font-size="22">各正式版本</text>
+    <rect class="box" x="1172" y="80" width="450" height="290" rx="18" stroke-width="2.5"/>
+    <text class="strong" x="1397" y="142" font-size="32" font-weight="700">SWE-Pro 630 题</text>
+    <text class="soft" x="1397" y="198" font-size="24">与反馈用的 100 题不重叠</text>
+    <text class="soft" x="1397" y="246" font-size="24">开发结束后才评估</text>
+    <text class="soft" x="1397" y="294" font-size="24">成绩不返回开发模型</text>
+  </g>
+</svg>

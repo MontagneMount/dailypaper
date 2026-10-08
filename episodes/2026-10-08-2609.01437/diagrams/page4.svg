@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第四期第 4 页：Creation 的角色和隔离。依据第 3.1～3.5 节：开发模型在既定工作台写框架，冻结后由执行模型在隐藏任务上运行，
+       独立评分器验收；隐藏任务和成绩不回到开发区，所以没有往左的箭头。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">Creation 评估流程示意</text>
+
+  <g id="zones" class="tone-neutral">
+    <text class="label" x="40" y="88" font-size="24" font-weight="700">开发区</text>
+    <text class="label" x="760" y="88" font-size="24" font-weight="700">测试区</text>
+    <path class="line" d="M660 56 V448" stroke-width="2" stroke-dasharray="10 8"/>
+  </g>
+
+  <g id="creator" class="tone-accent" text-anchor="middle">
+    <rect class="box" x="40" y="130" width="480" height="130" rx="18" stroke-width="2.5"/>
+    <text class="strong" x="280" y="184" font-size="30" font-weight="700">开发模型</text>
+    <text class="soft" x="280" y="228" font-size="24">在既定工作台里写框架</text>
+    <path class="line" d="M280 316 V268" stroke-width="3" marker-end="url(#arrow)"/>
+    <g class="tone-neutral">
+      <rect class="box" x="160" y="320" width="240" height="64" rx="12" stroke-width="2.5"/>
+      <text class="strong" x="280" y="361" font-size="24">少量开发案例</text>
+    </g>
+  </g>
+
+  <g id="frozen" class="tone-highlight" text-anchor="middle">
+    <path class="line" d="M524 195 H582" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box" x="590" y="145" width="140" height="100" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="660" y="188" font-size="28" font-weight="700">冻结</text>
+    <text class="soft" x="660" y="224" font-size="22">框架版本</text>
+  </g>
+
+  <g id="executor" class="tone-accent" text-anchor="middle">
+    <path class="line" d="M734 195 H792" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box" x="800" y="140" width="400" height="110" rx="18" stroke-width="2.5"/>
+    <text class="strong" x="1000" y="186" font-size="28" font-weight="700">执行模型 + 冻结框架</text>
+    <text class="soft" x="1000" y="226" font-size="22">在框架里完成任务</text>
+    <path class="line" d="M1000 316 V258" stroke-width="3" marker-end="url(#arrow)"/>
+    <g class="tone-neutral">
+      <rect class="box" x="880" y="320" width="240" height="64" rx="12" stroke-width="2.5"/>
+      <text class="strong" x="1000" y="361" font-size="24">隐藏下游任务</text>
+    </g>
+  </g>
+
+  <g id="judge" class="tone-special" text-anchor="middle">
+    <path class="line" d="M1204 195 H1262" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box" x="1270" y="140" width="350" height="110" rx="18" stroke-width="2.5"/>
+    <text class="strong" x="1445" y="186" font-size="28" font-weight="700">独立评分器</text>
+    <text class="soft" x="1445" y="226" font-size="22">→ 实际任务成绩</text>
+    <text class="label" x="1445" y="288" font-size="22" font-weight="700">自报成功不计分</text>
+  </g>
+
+  <g id="cost" class="tone-highlight" text-anchor="middle">
+    <path class="line" d="M1204 232 C1236 232 1236 372 1264 372" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="1270" y="320" width="350" height="104" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="1445" y="362" font-size="26" font-weight="700">执行 token 计数</text>
+    <text class="label" x="1445" y="400" font-size="22" font-weight="700">不含开发 token</text>
+  </g>
+</svg>

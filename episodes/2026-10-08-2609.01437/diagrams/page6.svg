@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第四期第 6 页：代码里写了、接成了机制、运行时触发，三层分别核查。依据第 4.2 节 PDF 第 8～9 页；
+       不是逐级淘汰的漏斗，两项「1 份」分别统计，不一定是同一份框架。画法见 templates/README.md「示意图怎么画」 -->
+  <text id="title" class="muted" x="16" y="30" font-size="22">代码与运行证据示意</text>
+  <g id="caveat" class="tone-neutral">
+    <text class="label" x="1380" y="420" font-size="22" font-weight="700" text-anchor="middle">未观察到，不等于永远不能触发</text>
+  </g>
+
+  <g id="declared" class="tone-accent" text-anchor="middle">
+    <text class="label" x="280" y="92" font-size="26" font-weight="700">① 代码里写了</text>
+    <rect class="box" x="40" y="116" width="480" height="230" rx="18" stroke-width="2.5"/>
+    <text class="soft" x="280" y="190" font-size="26">18 份 Code 框架中</text>
+    <text class="strong" x="280" y="262" font-size="34" font-weight="700">11 份定义 State 类</text>
+  </g>
+
+  <g id="mechanisms" class="tone-highlight" text-anchor="middle">
+    <text class="label" x="830" y="92" font-size="26" font-weight="700">② 接成可用的机制</text>
+    <rect class="box" x="590" y="116" width="230" height="230" rx="18" stroke-width="2.5"/>
+    <text class="strong" x="705" y="186" font-size="26" font-weight="700">状态保存接口</text>
+    <text class="strong" x="705" y="266" font-size="44" font-weight="700">1 份</text>
+    <rect class="box" x="840" y="116" width="230" height="230" rx="18" stroke-width="2.5"/>
+    <text class="strong" x="955" y="186" font-size="26" font-weight="700">定期检查点</text>
+    <text class="strong" x="955" y="266" font-size="44" font-weight="700">1 份</text>
+    <text class="muted" x="830" y="390" font-size="22">两项分别统计，不一定是同一份</text>
+  </g>
+
+  <g id="trace" class="tone-special" text-anchor="middle">
+    <text class="label" x="1380" y="92" font-size="26" font-weight="700">③ 运行时触发了吗</text>
+    <rect class="box" x="1140" y="116" width="480" height="230" rx="18" stroke-width="2.5"/>
+    <text class="soft" x="1380" y="190" font-size="26">论文记录的任务轨迹里</text>
+    <text class="strong" x="1380" y="262" font-size="34" font-weight="700">未见检查点事件</text>
+  </g>
+</svg>

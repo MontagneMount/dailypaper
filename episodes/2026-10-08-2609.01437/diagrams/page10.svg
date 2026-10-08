@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第四期第 10 页：把修改变成可验证的改进。依据第 4.3、6.1～6.2 节和附录 I 的工程启示，不是论文提出的新算法或实测曲线；
+       验证后可能保留，也可能退步回退；「未来研究」单独用虚线框，不接进上面的流程。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">工程启示示意</text>
+  <g id="weights" class="tone-highlight">
+    <text class="label" x="180" y="30" font-size="22" font-weight="700">修改外部框架，模型权重不更新</text>
+  </g>
+
+  <g id="diagnose" class="tone-accent" text-anchor="middle">
+    <rect class="box" x="30" y="80" width="250" height="110" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="155" y="145" font-size="28" font-weight="700">找具体失败</text>
+    <path class="line" d="M284 135 H338" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box" x="344" y="80" width="250" height="110" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="469" y="145" font-size="28" font-weight="700">修改框架</text>
+  </g>
+
+  <g id="runtime" class="tone-accent" text-anchor="middle">
+    <path class="line" d="M598 135 H652" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box" x="658" y="80" width="330" height="110" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="823" y="128" font-size="26" font-weight="700">检查修改是否</text>
+    <text class="strong" x="823" y="164" font-size="26" font-weight="700">进入执行路径</text>
+  </g>
+
+  <g id="validate" class="tone-special" text-anchor="middle">
+    <path class="line" d="M992 135 H1046" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box" x="1052" y="80" width="270" height="110" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="1187" y="128" font-size="26" font-weight="700">冻结后</text>
+    <text class="strong" x="1187" y="164" font-size="26" font-weight="700">独立验证</text>
+    <path class="line" d="M1326 116 C1360 116 1360 92 1394 92" stroke-width="3" marker-end="url(#arrow)"/>
+    <path class="line" d="M1326 154 C1360 154 1360 180 1394 180" stroke-width="3" marker-end="url(#arrow)"/>
+    <g class="tone-neutral">
+      <rect class="box" x="1400" y="64" width="220" height="56" rx="12" stroke-width="2.5"/>
+      <text class="strong" x="1510" y="101" font-size="22" font-weight="700">有提升 → 保留</text>
+      <rect class="box" x="1400" y="152" width="220" height="56" rx="12" stroke-width="2.5"/>
+      <text class="strong" x="1510" y="189" font-size="22" font-weight="700">可能退步 → 回退</text>
+    </g>
+  </g>
+
+  <g id="limits" class="tone-neutral">
+    <rect class="box" x="30" y="270" width="760" height="150" rx="16" stroke-width="2.5"/>
+    <text class="label" x="60" y="312" font-size="24" font-weight="700">证据边界</text>
+    <text class="strong" x="60" y="356" font-size="26">每个开发者与执行者组合，一条演化轨迹</text>
+    <text class="strong" x="60" y="398" font-size="26">留出评估只覆盖 SWE-Pro</text>
+  </g>
+
+  <g id="future" class="tone-highlight" text-anchor="middle">
+    <rect class="line" x="850" y="270" width="770" height="150" rx="16" stroke-width="2.5" stroke-dasharray="12 9"/>
+    <text class="label" x="1235" y="320" font-size="24" font-weight="700">未来研究</text>
+    <text class="strong" x="1235" y="366" font-size="26" font-weight="700">演化后的框架，充当下一轮开发工作台</text>
+  </g>
+</svg>

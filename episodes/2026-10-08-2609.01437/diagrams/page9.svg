@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第四期第 9 页：两项选版统计。依据第 4.3 节 PDF 第 13 页；两张卡分母不同、互相独立，不连成漏斗；
+       右边是工程启示，不是论文的实验结果。画法见 templates/README.md「示意图怎么画」 -->
+  <text id="title" class="muted" x="16" y="30" font-size="22">单次实验轨迹统计</text>
+  <g id="scope" class="tone-highlight">
+    <text class="label" x="560" y="440" font-size="22" font-weight="700" text-anchor="middle">留出评估仅 SWE-Pro，开发结束后计算</text>
+  </g>
+  <g id="lesson" class="tone-neutral">
+    <text class="label" x="1385" y="92" font-size="24" font-weight="700" text-anchor="middle">工程启示</text>
+  </g>
+
+  <g id="switches" class="tone-accent" text-anchor="middle">
+    <rect class="box" x="40" y="60" width="500" height="330" rx="18" stroke-width="2.5"/>
+    <text class="label" x="290" y="112" font-size="26" font-weight="700">相邻正式版本切换</text>
+    <text class="strong" x="290" y="222" font-size="72" font-weight="700">34 / 64</text>
+    <text class="soft" x="290" y="282" font-size="26">反馈与留出成绩同向</text>
+    <text class="muted" x="290" y="334" font-size="22">论文报告 53.1%，约一半</text>
+  </g>
+
+  <g id="selection" class="tone-special" text-anchor="middle">
+    <rect class="box" x="580" y="60" width="500" height="330" rx="18" stroke-width="2.5"/>
+    <text class="label" x="830" y="112" font-size="26" font-weight="700">声明的最终版本</text>
+    <text class="strong" x="830" y="222" font-size="72" font-weight="700">2 / 9</text>
+    <text class="soft" x="830" y="282" font-size="26">条轨迹选中本轨迹留出最优版</text>
+    <text class="muted" x="830" y="334" font-size="22">按可见反馈选版</text>
+  </g>
+
+  <g id="versions" class="tone-neutral" text-anchor="middle">
+    <path class="box" d="M1180 120 H1560 L1590 150 V190 H1180 Z" stroke-width="2.5"/>
+    <path class="line" d="M1560 120 V150 H1590" stroke-width="2.5"/>
+    <text class="strong" x="1385" y="166" font-size="26" font-weight="700">保留版本</text>
+    <path class="box" d="M1180 210 H1560 L1590 240 V280 H1180 Z" stroke-width="2.5"/>
+    <path class="line" d="M1560 210 V240 H1590" stroke-width="2.5"/>
+    <text class="strong" x="1385" y="256" font-size="26" font-weight="700">复验</text>
+    <path class="box" d="M1180 300 H1560 L1590 330 V370 H1180 Z" stroke-width="2.5"/>
+    <path class="line" d="M1560 300 V330 H1590" stroke-width="2.5"/>
+    <text class="strong" x="1385" y="346" font-size="26" font-weight="700">可回退</text>
+  </g>
+</svg>

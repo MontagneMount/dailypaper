@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第四期第 2 页：模型和外部执行框架的分工。依据 HarnessDev 第 3.1 节、附录 C、E.1；概念分工，不是具体产品架构，
+       四个小块只表示职责，不代表本期生成的框架都实现了。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">概念分工，非具体产品架构</text>
+  <g id="weights" class="tone-highlight">
+    <text class="label" x="300" y="30" font-size="22" font-weight="700">模型权重不变</text>
+  </g>
+
+  <g id="boundary" class="tone-neutral">
+    <rect class="line" x="372" y="50" width="1258" height="400" rx="22" stroke-width="2" stroke-dasharray="10 8"/>
+    <text class="label" x="400" y="88" font-size="24" font-weight="700">外部执行框架（harness）</text>
+  </g>
+
+  <g id="loop" class="tone-accent" text-anchor="middle">
+    <rect class="box solid" x="40" y="150" width="270" height="170" rx="18"/>
+    <text class="on-solid" x="175" y="222" font-size="36" font-weight="700">模型</text>
+    <text class="on-solid" x="175" y="270" font-size="26">提出下一步</text>
+    <text class="soft" x="175" y="362" font-size="22">结果带回，继续下一轮</text>
+    <path class="line" d="M312 190 C370 190 370 154 426 154" stroke-width="4" marker-end="url(#arrow)"/>
+    <text class="soft" x="322" y="150" font-size="22" text-anchor="start">行动</text>
+    <rect class="box" x="432" y="118" width="250" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="557" y="164" font-size="28" font-weight="700">调用工具</text>
+    <path class="line" d="M557 194 V292" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect class="box" x="432" y="300" width="250" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="557" y="346" font-size="28" font-weight="700">观察结果</text>
+    <path class="line" d="M428 336 C370 336 370 286 316 286" stroke-width="4" marker-end="url(#arrow)"/>
+  </g>
+
+  <g id="context" class="tone-special" text-anchor="middle">
+    <path class="line" d="M756 336 H690" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="760" y="300" width="370" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="945" y="332" font-size="26" font-weight="700">上下文管理</text>
+    <text class="soft" x="945" y="361" font-size="22">整理过长的对话</text>
+  </g>
+
+  <g id="state" class="tone-special" text-anchor="middle">
+    <rect class="box" x="760" y="118" width="370" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="945" y="150" font-size="26" font-weight="700">状态记录</text>
+    <text class="soft" x="945" y="179" font-size="22">已尝试 / 进度</text>
+  </g>
+
+  <g id="recovery" class="tone-special" text-anchor="middle">
+    <rect class="box" x="1200" y="118" width="370" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1385" y="150" font-size="26" font-weight="700">失败处理</text>
+    <text class="soft" x="1385" y="179" font-size="22">重试 / 恢复</text>
+  </g>
+
+  <g id="verify" class="tone-special" text-anchor="middle">
+    <rect class="box" x="1200" y="300" width="370" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1385" y="332" font-size="26" font-weight="700">结果检查</text>
+    <text class="soft" x="1385" y="361" font-size="22">继续 / 结束</text>
+  </g>
+</svg>

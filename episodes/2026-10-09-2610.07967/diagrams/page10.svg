@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第五期第 10 页：边界和工程启示。依据第 2.2、2.4～2.5 节（PDF 第 4～6 页）、结论和伦理/可复现说明（第 9～10 页）：
+       左边是实验边界（虚构受控任务加研究者的诱导条件）和结果时效（被测模型和裁判的接口会更新）；
+       右边是从评估设计概括的工程启示：成功报告和执行证据来自不同来源，分开核对；也测试失败和目标冲突时的行为；
+       如实披露未完成用中性色，是允许的结果。这不是论文提出并验证过的防御算法。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">工程启示示意，非验证过的防御算法</text>
+  <g id="divider" class="tone-neutral">
+    <path class="line" d="M584 56 V444" stroke-width="2" stroke-dasharray="10 8"/>
+  </g>
+
+  <g id="scope" class="tone-neutral" text-anchor="middle">
+    <rect class="box" x="24" y="64" width="520" height="168" rx="18" stroke-width="2.5"/>
+    <text class="label" x="284" y="106" font-size="24" font-weight="700">实验边界</text>
+    <text class="strong" x="284" y="154" font-size="26" font-weight="700">虚构受控任务 + 研究者诱导条件</text>
+    <text class="soft" x="284" y="200" font-size="24">不等于现实工作的欺骗概率</text>
+  </g>
+
+  <g id="updates" class="tone-neutral" text-anchor="middle">
+    <rect class="box" x="24" y="260" width="520" height="168" rx="18" stroke-width="2.5"/>
+    <text class="label" x="284" y="302" font-size="24" font-weight="700">结果时效</text>
+    <text class="strong" x="284" y="350" font-size="26" font-weight="700">被测模型和裁判的接口会更新</text>
+    <text class="soft" x="284" y="396" font-size="24">精确结果未必长期保持</text>
+  </g>
+
+  <g id="audit" class="tone-accent" text-anchor="middle">
+    <text class="label" x="1125" y="80" font-size="24" font-weight="700">实际部署时</text>
+    <rect class="box" x="624" y="100" width="360" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="804" y="146" font-size="26">智能体的成功报告</text>
+    <rect class="box" x="624" y="194" width="360" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="804" y="240" font-size="26">独立的执行证据</text>
+    <path class="line" d="M988 136 H1030 V183 H1068" stroke-width="3" marker-end="url(#arrow)"/>
+    <path class="line" d="M988 230 H1030 V183" stroke-width="3"/>
+    <rect class="box solid" x="1074" y="141" width="552" height="84" rx="16"/>
+    <text class="on-solid" x="1350" y="194" font-size="28" font-weight="700">分开核对，看是否一致</text>
+  </g>
+
+  <g id="stress" class="tone-accent" text-anchor="middle">
+    <rect class="box" x="624" y="300" width="480" height="128" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="864" y="352" font-size="26" font-weight="700">也测试失败和目标冲突时</text>
+    <text class="soft" x="864" y="396" font-size="24">模型会怎样报告</text>
+  </g>
+
+  <g id="honest" class="tone-neutral" text-anchor="middle">
+    <rect class="box" x="1134" y="300" width="492" height="128" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="1380" y="352" font-size="26" font-weight="700">如实说明还没完成</text>
+    <text class="soft" x="1380" y="396" font-size="24">应是允许的结果，保留复核与更正</text>
+  </g>
+</svg>

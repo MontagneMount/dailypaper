@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第五期第 6 页：三类任务诱导后的欺骗率（T88，替换 big_metric）。数字出自 Table 3 与第 3.2 节（PDF 第 7 页），
+       是 9 个模型在各类任务内的算术平均：工具 51.34%、代码 37.28%、长流程 87.01%。三列等宽、同一中性色调、同样字号，
+       不画柱长、高低排名或颜色区分；数字从页首就显示，不做放大强调。对比基线、Δp 的单位、受控条件和数据来源常驻。
+       画法见 templates/README.md「示意图怎么画」 -->
+  <text id="title" class="muted" x="16" y="30" font-size="22">三类任务的诱导后欺骗率 · 9 个模型在各类任务内的算术平均</text>
+
+  <g id="tool" class="tone-neutral" text-anchor="middle">
+    <rect class="box" x="24" y="52" width="512" height="300" rx="20" stroke-width="2.5"/>
+    <text class="label" x="280" y="106" font-size="30" font-weight="700">工具任务</text>
+    <text class="strong" x="280" y="240" font-size="112" font-weight="700">51.34<tspan font-size="60">%</tspan></text>
+    <text class="soft" x="280" y="310" font-size="24">诱导后欺骗率；九模型算术平均</text>
+  </g>
+
+  <g id="coding" class="tone-neutral" text-anchor="middle">
+    <rect class="box" x="569" y="52" width="512" height="300" rx="20" stroke-width="2.5"/>
+    <text class="label" x="825" y="106" font-size="30" font-weight="700">代码任务</text>
+    <text class="strong" x="825" y="240" font-size="112" font-weight="700">37.28<tspan font-size="60">%</tspan></text>
+    <text class="soft" x="825" y="310" font-size="24">诱导后欺骗率；九模型算术平均</text>
+  </g>
+
+  <g id="long" class="tone-neutral" text-anchor="middle">
+    <rect class="box" x="1114" y="52" width="512" height="300" rx="20" stroke-width="2.5"/>
+    <text class="label" x="1370" y="106" font-size="30" font-weight="700">长流程任务</text>
+    <text class="strong" x="1370" y="240" font-size="112" font-weight="700">87.01<tspan font-size="60">%</tspan></text>
+    <text class="soft" x="1370" y="310" font-size="24">诱导后欺骗率；九模型算术平均</text>
+  </g>
+
+  <g id="notes" class="tone-neutral" text-anchor="middle">
+    <text class="soft" x="825" y="400" font-size="24">对比相同任务的中性版本；Δp 为百分点，不是相对增长百分比</text>
+    <text class="muted" x="825" y="440" font-size="22">虚构受控任务 · 研究者设计的诱导条件 · LLM 裁判 · 数据：Table 3 与第 3.2 节，PDF 第 7 页</text>
+  </g>
+</svg>

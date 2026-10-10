@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第五期第 4 页：配对与四类条件。依据第 2.3～2.4 节（PDF 第 4～6 页）：同一任务做成中性版和诱导版，
+       任务事实、材料、工具、预算两版相同（长流程的事实更新及其顺序也相同），诱导版只多一类指定的外部条件。
+       四类条件排成 2×2、同一色调，用无箭头的括线连到诱导版：它们是可选的干预类别，不是递进路径，
+       也不是每例同时叠加。只写类别定义，不写对话或提示词。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">配对设计示意 · 虚构受控任务</text>
+
+  <g id="scale" class="tone-neutral" text-anchor="middle">
+    <rect class="box" x="400" y="6" width="760" height="46" rx="12" stroke-width="2"/>
+    <text class="strong" x="780" y="38" font-size="24" font-weight="700">28 个职业场景 · 1,532 对任务 · 3,064 份样本</text>
+  </g>
+
+  <g id="paired" text-anchor="middle">
+    <g class="tone-neutral">
+      <rect class="box" x="24" y="196" width="180" height="84" rx="14" stroke-width="2.5"/>
+      <text class="strong" x="114" y="248" font-size="28" font-weight="700">同一任务</text>
+      <path class="line" d="M208 238 H236 V128 H270" stroke-width="3" marker-end="url(#arrow)"/>
+      <path class="line" d="M236 238 V348 H270" stroke-width="3" marker-end="url(#arrow)"/>
+    </g>
+    <g class="tone-accent">
+      <rect class="box" x="276" y="84" width="440" height="88" rx="14" stroke-width="2.5"/>
+      <text class="strong" x="496" y="122" font-size="28" font-weight="700">中性版</text>
+      <text class="soft" x="496" y="157" font-size="24">常规任务要求</text>
+    </g>
+    <g class="tone-neutral">
+      <path class="line" d="M496 174 V196" stroke-width="2.5"/>
+      <rect class="box" x="296" y="198" width="400" height="80" rx="12" stroke-width="2"/>
+      <text class="label" x="496" y="229" font-size="22" font-weight="700">两版相同</text>
+      <text class="strong" x="496" y="264" font-size="24">任务事实、材料、工具、预算</text>
+      <path class="line" d="M496 280 V302" stroke-width="2.5"/>
+    </g>
+    <g class="tone-highlight">
+      <rect class="box" x="276" y="304" width="440" height="88" rx="14" stroke-width="2.5"/>
+      <text class="strong" x="496" y="342" font-size="28" font-weight="700">诱导版</text>
+      <text class="soft" x="496" y="377" font-size="24">加入指定的外部条件</text>
+    </g>
+  </g>
+
+  <g id="timeline" class="tone-highlight">
+    <path class="line" d="M290 428 H410" stroke-width="2.5"/>
+    <circle class="box solid" cx="290" cy="428" r="7"/>
+    <circle class="box solid" cx="350" cy="428" r="7"/>
+    <circle class="box solid" cx="410" cy="428" r="7"/>
+    <text class="soft" x="430" y="436" font-size="24">长流程：事实更新和顺序也相同</text>
+  </g>
+
+  <g id="classes" class="tone-highlight" text-anchor="middle">
+    <path class="line" d="M720 348 H766 M766 126 V350 M766 126 H786 M766 350 H786" stroke-width="2.5"/>
+    <text class="label" x="1216" y="96" font-size="24" font-weight="700">四类外部条件 · 借鉴舞弊理论</text>
+    <text class="soft" x="1216" y="406" font-size="24">可选的干预类别，非每例同时叠加</text>
+  </g>
+
+  <g id="pressure" class="tone-highlight" text-anchor="middle">
+    <rect class="box" x="806" y="116" width="400" height="110" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1006" y="162" font-size="28" font-weight="700">压力 Pressure</text>
+    <text class="soft" x="1006" y="204" font-size="24">避免不利后果</text>
+  </g>
+  <g id="incentive" class="tone-highlight" text-anchor="middle">
+    <rect class="box" x="1226" y="116" width="400" height="110" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1426" y="162" font-size="28" font-weight="700">诱因 Incentive</text>
+    <text class="soft" x="1426" y="204" font-size="24">争取额外收益</text>
+  </g>
+  <g id="opportunity" class="tone-highlight" text-anchor="middle">
+    <rect class="box" x="806" y="246" width="400" height="110" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1006" y="292" font-size="28" font-weight="700">机会 Opportunity</text>
+    <text class="soft" x="1006" y="334" font-size="24">存在核验缺口</text>
+  </g>
+  <g id="conflict" class="tone-highlight" text-anchor="middle">
+    <rect class="box" x="1226" y="246" width="400" height="110" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1426" y="292" font-size="28" font-weight="700">冲突 Conflict</text>
+    <text class="soft" x="1426" y="334" font-size="24">目标或要求相互矛盾</text>
+  </g>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第五期第 3 页：三类任务。依据第 2.2 节（PDF 第 3～4 页）：三种评估设置并列，各自核对实际情况和对外报告。
+       三列等宽、同一色调，没有先后、难度或比例的含义，所以列之间不画箭头；只写抽象的环节，
+       不画诱导指令、具体代码或绕过方法。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">三类受控任务示意 · 核对可观察证据与报告，不展示诱导指令</text>
+
+  <g id="tool" class="tone-accent" text-anchor="middle">
+    <rect class="line" x="24" y="52" width="512" height="400" rx="20" stroke-width="2"/>
+    <text class="label" x="280" y="100" font-size="30" font-weight="700">工具任务</text>
+    <rect class="box" x="110" y="124" width="340" height="62" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="280" y="165" font-size="26">调用工具</text>
+    <path class="line" d="M280 190 V218" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="110" y="222" width="340" height="62" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="280" y="263" font-size="26">工具返回的结果</text>
+    <path class="line" d="M280 288 V316" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="110" y="320" width="340" height="62" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="280" y="361" font-size="26">对外报告</text>
+    <text class="label" x="280" y="428" font-size="26" font-weight="700">核对：结果和报告是否一致</text>
+  </g>
+
+  <g id="coding" class="tone-accent" text-anchor="middle">
+    <rect class="line" x="569" y="52" width="512" height="400" rx="20" stroke-width="2"/>
+    <text class="label" x="825" y="100" font-size="30" font-weight="700">代码任务</text>
+    <rect class="box" x="655" y="124" width="340" height="62" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="825" y="165" font-size="26">真实要求</text>
+    <path class="line" d="M825 190 V218" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="655" y="222" width="340" height="62" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="825" y="263" font-size="26">代码与测试</text>
+    <path class="line" d="M825 288 V316" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="655" y="320" width="340" height="62" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="825" y="361" font-size="26">对外报告</text>
+    <text class="label" x="825" y="428" font-size="26" font-weight="700">核对：是否满足真实要求</text>
+  </g>
+
+  <g id="long" class="tone-accent" text-anchor="middle">
+    <rect class="line" x="1114" y="52" width="512" height="400" rx="20" stroke-width="2"/>
+    <text class="label" x="1370" y="100" font-size="30" font-weight="700">长流程任务</text>
+    <rect class="box" x="1200" y="124" width="340" height="62" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="1370" y="165" font-size="26">先前的记录</text>
+    <path class="line" d="M1370 190 V218" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="1200" y="222" width="340" height="62" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="1370" y="263" font-size="26">新证据到来</text>
+    <path class="line" d="M1370 288 V316" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="1200" y="320" width="340" height="62" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="1370" y="361" font-size="26">更正或保留</text>
+    <text class="label" x="1370" y="428" font-size="26" font-weight="700">核对：记录是否与事实一致</text>
+  </g>
+</svg>

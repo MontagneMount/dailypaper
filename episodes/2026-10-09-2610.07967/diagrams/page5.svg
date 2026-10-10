@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第五期第 5 页：判定与人工复核。依据第 2.5、3.1 节（PDF 第 6～7 页）和附录 D.3（第 45 页）：
+       任务事实和观察到的执行轨迹（工具结果、报告与行动）合成完整证据链，交主要裁判 Claude Fable 5 按共同标准判定；
+       另从同一批实例里随机抽 100 例做人工复核（共 20 位志愿者，每例 5 人）。97% 只连接这 100 例的裁判判定和
+       汇总人工标签，不画成全量准确率，也不画访问隐藏推理的路径。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">判定与复核示意 · 按观察到的完整证据链判定</text>
+  <g id="models" class="tone-neutral">
+    <text class="label" x="16" y="446" font-size="22" font-weight="700">被测含 Claude、GPT 等 9 个模型；裁判也是 Claude 模型</text>
+  </g>
+
+  <g id="evidence" class="tone-neutral" text-anchor="middle">
+    <rect class="box" x="24" y="70" width="236" height="64" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="142" y="111" font-size="26">任务事实</text>
+    <rect class="box" x="24" y="162" width="236" height="64" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="142" y="203" font-size="26">可见工具结果</text>
+    <rect class="box" x="24" y="254" width="236" height="64" rx="12" stroke-width="2.5"/>
+    <text class="strong" x="142" y="295" font-size="26">对外报告与行动</text>
+    <path class="line" d="M264 102 H296 V286 H264 M264 194 H326" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect class="box" x="332" y="152" width="220" height="84" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="442" y="204" font-size="28" font-weight="700">完整证据链</text>
+  </g>
+
+  <g id="judge" class="tone-accent" text-anchor="middle">
+    <path class="line" d="M556 194 H606" stroke-width="4" marker-end="url(#arrow)"/>
+    <text class="label" x="782" y="124" font-size="22" font-weight="700">主要裁判</text>
+    <rect class="box" x="612" y="138" width="340" height="112" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="782" y="187" font-size="30" font-weight="700">Claude Fable 5</text>
+    <text class="soft" x="782" y="229" font-size="24">按共同标准判定</text>
+  </g>
+
+  <g id="sample" class="tone-special" text-anchor="middle">
+    <path class="line" d="M442 240 V372 H606" stroke-width="2.5" stroke-dasharray="10 8" marker-end="url(#arrow)"/>
+    <text class="soft" x="456" y="320" font-size="22" text-anchor="start">随机抽样</text>
+    <rect class="box" x="612" y="300" width="340" height="140" rx="16" stroke-width="2.5"/>
+    <text class="strong" x="782" y="346" font-size="28" font-weight="700">随机 100 个实例</text>
+    <text class="soft" x="782" y="386" font-size="24">共 20 位志愿者</text>
+    <text class="soft" x="782" y="422" font-size="24">每例 5 人独立判断</text>
+  </g>
+
+  <g id="agreement" class="tone-accent" text-anchor="middle">
+    <path class="line" d="M956 194 C1000 194 1000 226 1036 226" stroke-width="3" marker-end="url(#arrow)"/>
+    <path class="line" d="M956 370 C1000 370 1000 262 1036 262" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="1042" y="160" width="584" height="160" rx="18" stroke-width="2.5"/>
+    <text class="strong" x="1334" y="212" font-size="32" font-weight="700">抽样标签一致率 97%</text>
+    <text class="soft" x="1334" y="254" font-size="24">裁判判定与汇总人工标签相比</text>
+    <text class="label" x="1334" y="298" font-size="24" font-weight="700">只覆盖这 100 例，不是全量准确率</text>
+  </g>
+
+  <g id="disagreement" class="tone-neutral" text-anchor="middle">
+    <rect class="box" x="1042" y="346" width="584" height="76" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1334" y="393" font-size="26">分歧多来自隐含的信息隐藏</text>
+  </g>
+</svg>

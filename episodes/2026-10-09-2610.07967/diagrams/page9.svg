@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="460" viewBox="0 0 1650 460">
+  <!-- 第五期第 9 页：能力代理和可能解释。依据第 3.5～3.6 节（PDF 第 8～9 页）和第 3.2 节观察 (2)（第 7 页）：
+       能力用外部基准（Artificial Analysis）的分数近似，和欺骗率并排比较，三类任务里的关系各不相同；
+       右边用虚线隔开，是作者对代码任务比率较低的可能解释，本文没有单独验证因果。
+       不画散点、趋势线或模型排名。画法见 templates/README.md「示意图怎么画」 -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <text id="title" class="muted" x="16" y="30" font-size="22">能力分数与欺骗率的比较示意 · 描述性比较，非因果证明</text>
+  <g id="divider" class="tone-neutral">
+    <path class="line" d="M1130 64 V444" stroke-width="2" stroke-dasharray="10 8"/>
+  </g>
+
+  <g id="proxy" class="tone-accent" text-anchor="middle">
+    <rect class="box" x="24" y="96" width="440" height="270" rx="18" stroke-width="2.5"/>
+    <text class="label" x="244" y="144" font-size="24" font-weight="700">能力代理</text>
+    <text class="strong" x="244" y="200" font-size="32" font-weight="700">外部基准分数</text>
+    <text class="soft" x="244" y="246" font-size="24">只是能力的近似指标</text>
+    <text class="muted" x="244" y="292" font-size="22">来自 Artificial Analysis</text>
+    <text class="muted" x="244" y="330" font-size="22">不是本文实测的能力</text>
+  </g>
+
+  <g id="relations" class="tone-highlight" text-anchor="middle">
+    <path class="line" d="M468 196 H508" stroke-width="3" marker-end="url(#arrow)"/>
+    <text class="label" x="810" y="112" font-size="24" font-weight="700">能力分数 × 欺骗率</text>
+    <rect class="line" x="514" y="126" width="592" height="138" rx="18" stroke-width="2"/>
+    <rect class="box" x="530" y="140" width="170" height="110" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="615" y="205" font-size="28">工具</text>
+    <rect class="box" x="725" y="140" width="170" height="110" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="810" y="205" font-size="28">代码</text>
+    <rect class="box" x="920" y="140" width="170" height="110" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1005" y="205" font-size="28">长流程</text>
+    <text class="strong" x="810" y="314" font-size="30" font-weight="700">关系随任务而异</text>
+    <text class="soft" x="810" y="356" font-size="24">不能沿能力榜推断谁更诚实</text>
+  </g>
+
+  <g id="verification" class="tone-special" text-anchor="middle">
+    <rect class="box" x="1170" y="96" width="456" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1398" y="142" font-size="28" font-weight="700">代码任务的可执行检查</text>
+    <path class="line" d="M1398 172 V206" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect class="box" x="1170" y="212" width="456" height="72" rx="14" stroke-width="2.5"/>
+    <text class="strong" x="1398" y="258" font-size="26">可能帮助暴露报告与实际的差距</text>
+    <text class="label" x="1398" y="338" font-size="24" font-weight="700">作者提出的可能解释</text>
+    <text class="soft" x="1398" y="376" font-size="24">本文没有单独验证因果作用</text>
+  </g>
+</svg>

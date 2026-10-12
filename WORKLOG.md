@@ -7,11 +7,11 @@
 
 - **阶段**：M3 连续发布进行中（已发布 5 条，发布记录见 `episodes/published.json`）：第一期「【每日论文 #1】Kandinsky 6.0 Video｜画面和声音一起生成」（https://www.bilibili.com/video/BV1PdpN6SEk7/，5 分 21 秒）；第二期「【每日论文 #2】Memadapter｜记住你，也会被带偏」（https://www.bilibili.com/video/BV1PFpM6REtz/，5 分 6 秒），都在 2026-10-07 发布；第三期「【每日论文 #3】HateClipSeg｜问题出在视频哪一段」（https://www.bilibili.com/video/BV17NHX6KEmq/，4 分 54 秒），2026-10-08 发布，是第一期用视觉 v2（浅色学术风格、跟着旁白的动画）的视频；第四期「【每日论文 #4】HarnessDev｜AI 能改好自己的工具吗」（https://www.bilibili.com/video/BV1mNHQ6jEGH/，4 分 54 秒），2026-10-08 发布；第五期「【每日论文 #5】DecepEval｜AI 会承认失败吗」（https://www.bilibili.com/video/BV1tUH96REHZ/，5 分 5 秒），2026-10-09 发布。M2 的 `npm run topics`、`npm run new` 已完成，归档待做；格式 v1.2 已实现，字幕逐词对齐仍待 T12
 - **分工**：Claude 写代码（含视频合成脚本），并负责模板、画面素材（原图、示意图、红框位置）和成片的画面检查；ChatGPT 写稿，并审核代码和讲解稿；用户最终确认、听成片的声音（见 AGENTS.md）。Gemini 2026-10-07 起暂时退出
-- **方式**：视频走代码流水线（T10 选定方案 B）；手动协作继续可用。用户 2026-10-10 授权 ChatGPT 实现可选的本地 CLI 自动交接，首版已完成代码与本地验证；真实账号连接和新论文完整制作仍待验证
+- **方式**：视频走代码流水线（T10 选定方案 B）；手动协作继续可用。用户 2026-10-10 授权 ChatGPT 实现可选的本地 CLI 自动交接，首版已完成代码与本地验证；T95 的 Codex 带图调用及 Claude Code 文本结构化连接已验证；T104 查明命令行 claude 被环境变量转到 DeepSeek、读不了图，用户 2026-10-13 决定删掉全部 DeepSeek 设置、改用 Claude 订阅（T105、T107）；新论文完整制作未验证
 - **方向**：先只做 AI（跟着 Hugging Face 日榜选题），流程稳定后再加其他方向
 - **Git**：已推到 GitHub（https://github.com/MontagneMount/dailypaper），分支 main
-- **下一步**：第五期已发布、提交并推送（T91/T97）。T101 已由用户指定 ChatGPT 修复 R13，155 项测试通过，第五期真实预览的按页复用验证通过，Claude 已复审通过（T102），自动交接首版已提交并推到 GitHub（T103）。真实连接测试（T95）的前置修复都已完成，仍待用户明确授权。第六期选题及手动/自动流程由用户决定（T98）；模板通用问题留低优先级 T90
-- **自动交接**：T100 已确认 T99 主要修复；T101 去掉逐页审核指纹里的成片绝对时间和来源行号，保留本页实际画面/动作/时间/图片及共享环境，并加回其他期忽略原图的保护。155 项测试通过，T102 复审通过；真实模型与新论文完整制作仍未验证，没有自动发布
+- **下一步**：第五期已发布、提交并推送（T91/T97）；自动交接首版已审阅、提交并推送（T102/T103）。用户 2026-10-13 明确授权的只读真实连接测试 T95 已完成，Claude 已核查（T104）：命令行 claude 被用户环境变量指向 DeepSeek，读不了图片，自动流程目前走不到底。用户已决定删掉全部 DeepSeek 设置、改用 Claude 订阅（T105）：Claude 已删掉全局设置里残留的一项；用户已删掉环境变量、重启并用订阅账号登录命令行 claude（T107 已完成）；下一步按 T106 改程序、补带图片的 Claude 连接测试（用户指定 Claude 改、ChatGPT 审）；在此之前第六期建议用手动流程（T98）；模板通用问题留低优先级 T90
+- **自动交接**：T101 的按页指纹修复和其他期原图保护已由 T102 复审通过，155 项测试通过。T95：Codex 图片/stdin/结构化结果通过；Claude Code 的 structured_output、dontAsk 下只读文本调用和解析通过，但实际 modelUsage 为 DeepSeek，图片读取失败，见 T104；用户已决定改用 Claude 订阅（T105～T107）。完整制作、默认项目定制配置与写入阶段权限未验证，没有自动发布
 - **最近更新**：2026-10-13 · Claude
 
 ## 待办交接
@@ -106,7 +106,7 @@
 | T92 | 评估选定论文链接后 Claude / ChatGPT 自动交接的可行性：本机两种 CLI 与官方非交互能力已核实，建议复用现有制作流程，保留原文及图片审核、返修循环和用户最终确认；本轮仅讨论，未实施 | ChatGPT | 用户 | 已完成 |
 | T93 | 用户 2026-10-10 授权 ChatGPT 直接实现本地自动交接首版：一篇串行，Claude Code 制作、Codex 写稿与审核，保存 Markdown 交接和状态；用户最终确认、手动上传。本次代码分工例外已同步 AGENTS/README，实施见 T94 | 用户 | ChatGPT | 已完成 |
 | T94 | 本地自动制作/交接首版代码及本地验证完成：produce 入口、论文分页读取、独立原文复核、全部页手机/原尺寸图片审核、返修/恢复/锁/变更失效、最终用户交接；144 项测试通过。真实模型连接及一篇新论文的完整制作尚未验证，见 T95 | ChatGPT | 用户 | 已完成 |
-| T95 | 用户明确授权后，用本机已登录 Codex/Claude 做一次只读连接测试（项目规则、WORKLOG 当前/最新记录、一张示例图片；使用少量账号额度），确认结构化结果和图片输入实际可用，再选尚未开工论文试完整流程；自动审批拒绝原因见 T94 记录。用户要求先交 Claude 审阅 T96，本项暂不执行 | 用户、ChatGPT | ChatGPT | 暂缓 |
+| T95 | 用户 2026-10-13 明确授权的小范围只读连接测试已完成：Codex --image + stdin（无末尾「-」）通过；Claude Code structured_output、dontAsk 下只读文本及生产解析器通过。Claude 当前实际 modelUsage 为 DeepSeek，Read 图片失败，首轮 needs_user/findings 空数组被拒收；问题转 T104。没有新论文或完整制作，后续选择仍由 T98 决定 | 用户、ChatGPT | ChatGPT | 已完成 |
 | T96 | 审阅 T94 自动交接首版代码、测试与 docs/production.md：重点查 CLI 参数/权限与图片输入、结构化报告解析、返修/恢复与审核失效、文件保护/锁、WORKLOG 写入和用户确认边界；结论写入 WORKLOG。先做本地审核，不启动真实模型连接/新论文制作，不 commit（Claude 已审完：暂不通过，R1 大概率让图片审核调用失败，R2～R5 在真实规模下费额度或误判，P3 七项可选；144 项测试通过，CLI 参数用 --help 核过；修复转 T99、复审转 T100，详见本轮 Claude 记录） | Claude | 用户、ChatGPT | 已完成 |
 | T97 | 确认提交、推送第五期：稿件、素材清单、镜头表、6 张示意图、发布记录、README 里第五期的两处、工作记录（PDF、原图、成片不提交；T94 自动交接的改动不在这次提交里）（用户选「只提交第五期并推送」：一个提交，推到 GitHub） | 用户、Claude | Claude | 已完成 |
 | T98 | 选第六期论文（`npm run topics` 看 Hugging Face 日榜候选），定好目标时长；并决定用手动流程，还是等 T96 审阅（和 T95 连接测试）后试 `npm run produce`；选定后照所选流程开工 | 用户 | Claude | 待处理 |
@@ -115,6 +115,10 @@
 | T101 | 用户指定 ChatGPT 修复 R13：去 videoTime，页面/镜头输入去 lineNo 后重算，动作/标签改本页序号；真实预览结构回归及第五期实际记录验证通过；加回其他期被忽略 figures 的保护。npm test 155 项通过，交 T102；未调用模型、未做 T95、未 commit | ChatGPT | 用户、Claude | 已完成 |
 | T102 | Claude 复审 T101：审核指纹与普通预览新鲜度分离，绝对时间/来源行增减不影响未变页，本页内容/动作/局部时间/图片/环境仍使审核失效；复核其他期忽略原图保护与回归，运行 npm test。仅本地复审，不调用真实模型、不做 T95、不 commit（Claude 已复审：通过。用第五期真实数据验证，前页变长只影响本页、镜头表行号整体变化不影响任何页、本页内容变化只影响本页；其他期 26 张被忽略的原图已受保护；155 项测试通过） | Claude | Claude、ChatGPT | 已完成 |
 | T103 | 确认提交、推送自动交接首版：src/production*.js、src/paper-text.js、test/production.test.js、docs/production.md，以及 AGENTS.md、README.md、package.json、.gitignore、WORKLOG.md 的对应改动（.production/、PDF、原图、output/ 不提交）（用户选「提交并推送」：一个提交，推到 GitHub） | 用户、Claude | Claude | 已完成 |
+| T104 | 核查 T95 真实测试的两项问题：① Claude Code modelUsage 报 DeepSeek，Read 示例 PNG 返回 Unsupported Image，确认本机路由/模型是否符合用户预期及制作所需图片能力，不泄露凭据、不擅自切换；② needs_user/findings=[] 虽满足 schema 却被 validateResult 拒收，评估在 schema/提示词里明确非通过必须列原因并补回归。先检查本地证据，再交用户决定是否补测；不启动新论文、完整制作或提交（Claude 已核查：① 来源是 Windows 用户环境变量，把 Claude Code 的接口和全部模型档位都指向 DeepSeek，这条线路读不了图片，自动流程里「Claude 的活」实际由 DeepSeek 做、查成片会一直停住；② 建议提示词写明非通过必须列原因，程序在清单为空时用摘要当原因。都交用户决定，见 T105、T106） | Claude | ChatGPT | 已完成 |
+| T105 | 决定自动交接里「Claude 的活」用什么模型：A. 程序启动 claude 时去掉这几个 DeepSeek 变量，改用你的 Claude 账号登录（需先确认命令行 claude 已登录 Anthropic 账号，会用 Claude 订阅额度；你手动用的 DeepSeek 设置不变）；B. 保持 DeepSeek，把看图的检查都改给 Codex（截图取景没法自己看图核对，不推荐）；C. 全部改用 Codex。另外，这些 DeepSeek 模型变量也会影响桌面应用里的辅助功能（比如网页抓取、子代理），要不要只在需要时设置也由你决定（用户 2026-10-13 决定：DeepSeek 相关设置全部删掉，命令行 claude 改用用户的 Claude 订阅登录，相当于 A，但改为全局删除；Claude 已删掉全局设置里残留的一项，环境变量由用户自己删，见 T107） | 用户 | Claude | 已完成 |
+| T106 | 按 T105 的决定改程序：所选模型方案的启动方式与 doctor 显示（不显示密钥），以及 T104 ②（提示词写明非通过必须列原因，清单为空时用摘要当原因）；补回归测试，改完交另一方复审，再补一次带图片的 Claude 连接测试（需用户授权）（T105 定为全局删除 DeepSeek 设置，程序启动 claude 时不用再去掉变量；doctor 改为接口不是 Anthropic 官方时给出提醒。等 T107 做完再开始）（T107 已完成；用户 2026-10-13 指定 Claude 改、ChatGPT 审） | Claude | Claude | 进行中 |
+| T107 | 删除 DeepSeek 设置：① 在 PowerShell 运行 Claude 给的命令，删掉 Windows 用户环境变量里的 7 个（ANTHROPIC_BASE_URL、ANTHROPIC_AUTH_TOKEN、ANTHROPIC_MODEL、ANTHROPIC_DEFAULT_OPUS_MODEL、ANTHROPIC_DEFAULT_SONNET_MODEL、ANTHROPIC_DEFAULT_HAIKU_MODEL、CLAUDE_CODE_SUBAGENT_MODEL）；② 完全退出再重开 Claude 桌面应用、Codex App 和所有终端；③ 新终端运行 claude，按提示用 Claude 订阅账号登录，再用 /status 确认；④（可选）这个 DeepSeek API key 如果只给 Claude Code 用过，到 DeepSeek 平台作废。做完告诉 Claude 核对（只看变量名）（① 已完成：Claude 核对 7 个变量都已从用户环境变量删除；PowerShell 窗口停住是 Windows 在通知所有程序变量已改，有程序回应慢，不影响删除结果；② 用户已重启电脑，Claude 核对：系统和桌面应用里都没有 DeepSeek 变量了，命令行 claude 现在连 Anthropic 官方，但还没登录，等用户用 `claude auth login --claudeai` 登录订阅账号；③ 用户已登录，Claude 用 `claude auth status` 确认：已登录，方式 claude.ai（订阅），接口 Anthropic 官方） | 用户 | Claude | 已完成 |
 | T41 | 旧短版已合成并查画面；因用户决定扩写，剩余试听和发布审核改由 T44、T40 承接，短版不发布 | Claude、用户 | ChatGPT | 已取消 |
 | T42 | 决定首期时长：现在发 3 分钟版，还是扩写到 5 分钟左右（Claude 建议扩写：补上为什么难、两条流具体怎么配合、强化学习怎么调好口型和语音、普通人能不能跑起来）；扩写就交 ChatGPT 重写，Claude 补截图（用户选扩写，转 T43、T44） | 用户 | 用户 | 已完成 |
 | T43 | 首期已扩为 11 页科普稿：难点、双流、RL 奖励与效果、消费级部署；约 1605 字元，预估 302 秒；原文核对表 24 条，检查仅缺 4 张新增图 | ChatGPT | 用户 | 已完成 |
@@ -123,6 +127,117 @@
 | T46 | 按 T45 稿重新合成，检查 Figure 21(a) 的图例、柱内占比及数字字幕，实测时长，交用户最终试听 RL/SFT、百分数和运行耗时（已完成：实测 5 分 21 秒，没有警告） | Claude | Claude | 已完成 |
 
 ## 记录
+
+### 2026-10-13 · Claude（Claude Code）
+
+**任务**：T107：核对 DeepSeek 设置已删干净、命令行 claude 已改用 Claude 订阅登录
+
+**完成**
+- 用户运行了删除命令，7 个 DeepSeek 环境变量都已从用户环境变量删除。当时 PowerShell 窗口停住，是 Windows 在通知所有程序「环境变量改了」、有程序回应慢，不影响结果。
+- 用户重启电脑后核对（只看变量名）：用户和系统环境变量里都没有 DeepSeek 相关的了；桌面应用传给会话的环境变量里也没有，之前网页抓取报 `deepseek-v4-flash` 的原因已经去掉。
+- 用户用 `claude auth login --claudeai` 登录后，Claude 在去掉桌面应用变量的环境里（相当于新开的终端）运行 `claude auth status`：已登录，方式是 claude.ai（订阅），接口是 Anthropic 官方。输出里的 ID 已遮住，账号信息不写进记录。
+- 没有调用模型。
+
+**改动文件**
+- `WORKLOG.md`：新增本条记录；T107 改为已完成；更新当前状态
+
+**交接**
+- → 待分配（T106）：改程序（doctor 提醒、T104 ②、回归测试），复审后补一次带图片的 Claude 连接测试（需用户授权）
+
+**待确认 / 风险**
+- 命令行 claude 还没做过真实的模型调用：能不能看图、设置里指定的模型在当前订阅下能不能用，要等 T106 的连接测试确认
+- 自动交接的 Claude 步骤和用户平时用 Claude 共用同一份订阅额度；思考强度设成 max 时消耗更快
+- 未 commit
+
+### 2026-10-13 · Claude（Claude Code）
+
+**任务**：按用户要求删除 DeepSeek 相关设置，并回答订阅额度的问题（T105 已定）
+
+**完成**
+- 用户决定（T105）：DeepSeek 相关设置全部删掉，命令行 `claude` 改用用户自己的 Claude 订阅登录。相当于方案 A，但不是只在程序里去掉变量，而是全局删除。
+- 回答用户：之前说的「Anthropic 额度」就是用户的 Claude 每月订阅（Anthropic 是做 Claude 的公司）。
+  - 桌面应用里一直用的是订阅；单独运行的 `claude` 命令被环境变量转到了 DeepSeek，用的是 DeepSeek 的 API key，所以没用上订阅
+  - 删掉变量、用订阅账号登录后，`npm run produce` 里的 Claude 步骤也用订阅，和平时用 Claude 共用同一份额度
+- 删掉了 `~/.claude/settings.json` 里残留的 `modelSettings` → `deepseek-v4-pro`（只有思考强度一项，不影响路由）。删完 `modelSettings` 空了，整块去掉；其他设置没动。用脚本改，只输出设置项名称，改前在临时目录留了备份。
+- 重新核对 DeepSeek 设置在哪（只看名称，不看密钥）：
+  - Windows 用户环境变量里 7 个，名称见 T104 记录；系统级环境变量里没有
+  - `~/.claude/settings.json` 的 env 和 model 里没有
+  - 仓库里出现的 DeepSeek 都是论文里被测的模型名（第二、四、五期的稿件和素材，以及 visual-v2 方案里的例子），不是设置，不动
+- 环境变量属于系统设置，Claude 不代改；删除命令已交给用户（T107）。
+- 用户环境变量里另有 `CLAUDE_CODE_EFFORT_LEVEL`（max）和 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`，是 Claude Code 自己的设置，不是 DeepSeek 专用，没列进删除命令；已提醒用户 max 会让额度用得更快。
+
+**改动文件**
+- `~/.claude/settings.json`（全局设置，不在仓库里）：删除 `modelSettings` 里的 `deepseek-v4-pro`
+- `WORKLOG.md`：新增本条记录；T105 改为已完成，新增 T107，补充 T106 说明，更新当前状态
+
+**交接**
+- → 用户（T107）：删 7 个环境变量；完全退出再重开桌面应用、Codex App 和终端；用订阅账号登录命令行 `claude`，`/status` 确认；做完告诉 Claude 核对
+- → 待分配（T106）：T107 做完后开始
+
+**待确认 / 风险**
+- T107 做完之前，单独运行的 `claude` 仍走 DeepSeek，先别跑 `npm run produce`
+- 自动交接的 Claude 步骤会用掉订阅额度；用到上限会停下，要等额度重置
+- 未 commit
+
+### 2026-10-13 · Claude（Claude Code）
+
+**任务**：T104：核查 T95 的两个问题（Claude Code 实际用 DeepSeek、读图失败；needs_user 但问题清单为空被拒收）
+
+**完成**
+- 开工时 `git status`：只有 WORKLOG.md（ChatGPT 的 T95 记录），和记录对得上。
+- 看了 `.production/t95-1791826051784/` 里两次 Claude 调用的输出：
+  - 两次 `modelUsage` 都只有 `deepseek-v4-pro[1m]` 和 `deepseek-v4-flash`
+  - 读图那次 Read 返回「[Unsupported Image]」；同一张图 Codex 能识别，所以不是图片本身的问题
+- **① 模型来源**：只看变量名、模型名和接口域名，密钥类变量只确认「已设置」，没有读取或记录内容；没有读私人配置文件，也没有改任何设置。
+  - 来源是 Windows 的用户环境变量：`ANTHROPIC_BASE_URL` 指向 `api.deepseek.com`，`ANTHROPIC_MODEL`、`ANTHROPIC_DEFAULT_OPUS_MODEL`、`ANTHROPIC_DEFAULT_SONNET_MODEL` 是 `deepseek-v4-pro[1m]`，`ANTHROPIC_DEFAULT_HAIKU_MODEL`、`CLAUDE_CODE_SUBAGENT_MODEL` 是 `deepseek-v4-flash`，另外设了 `ANTHROPIC_AUTH_TOKEN`
+  - 所以凡是从用户环境启动的 `claude` 命令都走 DeepSeek，自动交接也一样
+  - 对自动交接的影响：截原图、画示意图、写镜头表、查成片这几步实际由 DeepSeek 做，不是 AGENTS.md 分工里的 Claude；这条线路读不了图片，截图取景没法自己看图核对，查成片要求实际看抽帧，所以每次都会停在「需要你决定」，自动流程走不到底
+  - 桌面应用这边：本会话的接口地址是 Anthropic 官方，主模型由桌面应用另外指定，但这几个模型名变量也传了进来，导致辅助功能用的小模型变成 `deepseek-v4-flash`。2026-10-10 用网页抓取工具时报「deepseek-v4-flash 不存在」就是这个原因；子代理也会受影响
+  - 这像是用户有意的设置（全局说明里提到 DeepSeek 接入），Claude 不改，交用户决定（T105）
+- **② needs_user 但问题清单为空**：结果格式（`RESULT_SCHEMA`）允许任何状态下清单为空，`validateResult` 却要求不通过时必须有清单，所以 T95 第一次被拒收，原因只写在了摘要里。
+  - 建议：提示词写明「状态不是 pass 时，findings 至少一条，不能只写在 summary 或 notes 里」；程序在不通过但清单为空时，用 summary 当作那一条原因，照常进入返修或「需要你决定」
+  - 不建议改成格式里的条件规则：Codex 的结构化输出不一定支持这种写法，两边不好统一
+  - 「通过但有问题」仍然拒收
+- 没有改代码，没有调用模型，没有 commit。
+
+**改动文件**
+- `WORKLOG.md`：新增本条记录；T104 改为已完成，新增 T105、T106；更新当前状态
+
+**交接**
+- → 用户（T105）：决定自动交接里「Claude 的活」用什么模型（A/B/C，见待办表），以及 DeepSeek 模型变量要不要只在需要时设置
+- → 待分配（T106）：按 T105 的决定改程序，并修 T104 ②；改完复审，再补一次带图片的 Claude 连接测试（需用户授权）
+
+**待确认 / 风险**
+- 选 A 的前提：命令行 `claude` 能用你的 Anthropic 账号登录。目前没有验证，也没有调用模型
+- 在 T105、T106 完成前，`npm run produce` 不能完整跑通，第六期建议先用手动流程（T98）
+- 未 commit
+
+### 2026-10-13 · ChatGPT（Codex App、Codex CLI、Claude Code）
+
+**任务**：T95：按用户明确授权，执行自动交接的小范围只读真实连接测试
+
+**完成**
+- 开工读完 AGENTS.md、WORKLOG 当前状态/待办交接及最上面 Claude 的 T103 记录；`git status` 干净。用户本次明确授权向已登录的两种 CLI 发送项目规则、WORKLOG 当前/最近记录和一张示例图，并消耗少量额度，解除 T95 的暂缓；没有延伸到 T98 或新论文制作。
+- 实际只发送 AGENTS.md、WORKLOG「当前状态」及最近 T103/T102 两条记录、一张既有示例预览 `episodes/example/output/preview/p03-05.png`。旧 `.production/cli-smoke.js` 所指的 `episodes/example/figures/figure1.png` 不存在，未运行旧脚本。
+- **Codex 通过**：CLI `0.162.0-alpha.17.2`，日志显示 `gpt-6.1-sol` / OpenAI；复用 `agentCommand` 的 `exec --sandbox read-only --output-schema --output-last-message --image <图片>`，没有位置提示词或末尾「-」，提示词由 stdin 传入。退出码 0，最终 JSON 经 `validateResult` 通过；确实识别左流程/右说明/底部字幕、红框内 Merge / 合并模块，准确回答已发布 5 期、最新 Claude 任务 T103，与本任务实际看图一致。
+- **Claude Code 文本结构化连接通过，图片失败**：CLI `2.1.231`；使用生产程序的 `-p --output-format json --json-schema ... --permission-mode dontAsk`。首轮 Read 图片返回模型自述的 `[Unsupported Image]`，返回 `structured_output.status=needs_user`，却把 findings 留空；schema 接受，`decodeClaude` / `validateResult` 正确拒收「未通过时必须列出具体原因」，没有被误判通过。随后仅补一次只读文本测试，明确失败需列 findings：Read 工作记录节选，回答 5 期/T103，`subtype=success`、`is_error=false`、`structured_output` 存在，经真实 `decodeClaude` 通过；两次 `permission_denials=[]`，未卡审批。
+- **实际模型配置须核查**：两次 Claude Code envelope 的 `modelUsage` 都列 `deepseek-v4-pro[1m]` / `deepseek-v4-flash`，不是 Claude 型号。本轮沿用机器配置，没有读取登录凭据、切换模型或修改配置；这证明 Claude Code 当前配置能返回结构化结果，不能据此声称已验证 Anthropic 账号额度或 Claude 模型图片能力。相同 PNG 已由本任务和 Codex 成功查看，不接受“原图损坏”作为已证实原因。
+- 两种调用在独立临时目录中进行，文本已节选；Codex 加 `--skip-git-repo-check --ephemeral`，Claude 加 `--safe-mode --tools Read --no-session-persistence`，保留认证及模型选择、关闭本次无关定制和写入工具。此范围收紧是为遵守用户的发送范围和只读要求，未测试默认项目插件/钩子或写入阶段。没有使用跳过全部权限/沙箱的参数，也没有主动试写文件或执行禁止命令。
+- 三次调用后，项目保护指纹（全部已跟踪/未忽略文件、其他期原图、项目配置与 Git 引用）、WORKLOG 哈希和示例原图哈希都与调用前一致，`git status` 仍干净。只有本任务随后写入这条记录。未改生产代码，未运行完整制作，未 commit。
+- 证据保存在被忽略的 `.production/t95-1791826051784/`：`report.json`、发送文本/提示词、schema、两家 stdout/stderr/log、成功结果 JSON。Codex 日志报 `tokens used 24,745`；Claude Code 两次合计报告 `total_cost_usd=0.175145`，仅为 CLI 自报计量，不能当作账号实际扣款。没有无界重试。
+
+**改动文件**
+- `WORKLOG.md`：新增本条记录，T95 改为已完成，新增 T104，更新当前状态。
+- `.production/t95-smoke-20261013.mjs`、`.production/t95-claude-text-20261013.mjs` 及上述证据目录：本地测试辅助文件/结果，被 git 忽略；不属于待提交项目源码。
+
+**交接**
+- → Claude（T104）：先看 `report.json` 和 `claude-stdout.txt` / `claude-text-stdout.txt`，核查实际模型路由及图片支持；评估 schema/提示词与 validator 对 needs_user/findings 的约束差异，必要时提修复与回归。不得把接口成功当作图片成功，不泄露凭据，不擅自改用户模型配置；额外真实补测先交用户决定。
+- → 用户（T98）：第六期选题及是否试完整制作仍由你决定，T95 不替代全流程验证或最终看成片/听声音。
+
+**待确认 / 风险**
+- 当前 Claude Code 路由与图片读取失败待 T104；完整制作暂不能宣称已经验证通过。
+- dontAsk 本次仅验证无审批停顿、只读请求完成及无权限拒绝；没有验证所有禁止动作都被拒绝，也不是操作系统级沙箱的证明。
+- 生产程序严格拒收首轮不合语义约束的结果符合保护预期，但原因只写在 summary 时会造成运行中断，需改善约束表达；本轮只记录，不修代码。
 
 ### 2026-10-13 · Claude（Claude Code）
 

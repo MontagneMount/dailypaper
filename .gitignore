@@ -17,6 +17,8 @@ figures/
 !episodes/example/figures/
 
 # Logs
+.production/
+.production-owner.json
 logs/
 *.log
 

@@ -12,6 +12,7 @@
     "figure": "node src/crop-figure.js",
     "topics": "node src/topics.js",
     "new": "node src/new-episode.js",
+    "produce": "node src/production.js",
     "test": "node --test"
   },
   "engines": {

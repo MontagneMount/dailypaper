@@ -7,11 +7,11 @@
 
 - **阶段**：M3 连续发布进行中（已发布 5 条，发布记录见 `episodes/published.json`）：第一期「【每日论文 #1】Kandinsky 6.0 Video｜画面和声音一起生成」（https://www.bilibili.com/video/BV1PdpN6SEk7/，5 分 21 秒）；第二期「【每日论文 #2】Memadapter｜记住你，也会被带偏」（https://www.bilibili.com/video/BV1PFpM6REtz/，5 分 6 秒），都在 2026-10-07 发布；第三期「【每日论文 #3】HateClipSeg｜问题出在视频哪一段」（https://www.bilibili.com/video/BV17NHX6KEmq/，4 分 54 秒），2026-10-08 发布，是第一期用视觉 v2（浅色学术风格、跟着旁白的动画）的视频；第四期「【每日论文 #4】HarnessDev｜AI 能改好自己的工具吗」（https://www.bilibili.com/video/BV1mNHQ6jEGH/，4 分 54 秒），2026-10-08 发布；第五期「【每日论文 #5】DecepEval｜AI 会承认失败吗」（https://www.bilibili.com/video/BV1tUH96REHZ/，5 分 5 秒），2026-10-09 发布。M2 的 `npm run topics`、`npm run new` 已完成，归档待做；格式 v1.2 已实现，字幕逐词对齐仍待 T12
 - **分工**：Claude 写代码（含视频合成脚本），并负责模板、画面素材（原图、示意图、红框位置）和成片的画面检查；ChatGPT 写稿，并审核代码和讲解稿；用户最终确认、听成片的声音（见 AGENTS.md）。Gemini 2026-10-07 起暂时退出
-- **方式**：视频走代码流水线（T10 选定方案 B）；手动协作继续可用。用户 2026-10-10 授权 ChatGPT 实现可选的本地 CLI 自动交接，首版已完成代码与本地验证；T95 的 Codex 带图调用及 Claude Code 文本结构化连接已验证；T104 查明命令行 claude 被环境变量转到 DeepSeek、读不了图，用户 2026-10-13 决定删掉全部 DeepSeek 设置、改用 Claude 订阅（T105、T107）；新论文完整制作未验证
+- **方式**：视频走代码流水线（T10 选定方案 B）；手动协作继续可用。用户 2026-10-10 授权 ChatGPT 实现可选的本地 CLI 自动交接，首版已完成代码与本地验证；T95 的 Codex 带图调用及 Claude Code 文本结构化连接已验证；T104 查明命令行 claude 被环境变量转到 DeepSeek、读不了图，用户 2026-10-13 决定删掉全部 DeepSeek 设置、改用 Claude 订阅（T105、T107），T106、T110 已补登录/接口检查和空清单兜底，Claude 没连订阅/官方接口时开始前就停下（T111）；T109 已用订阅验证 Claude 能看图；新论文完整制作未验证
 - **方向**：先只做 AI（跟着 Hugging Face 日榜选题），流程稳定后再加其他方向
 - **Git**：已推到 GitHub（https://github.com/MontagneMount/dailypaper），分支 main
-- **下一步**：第五期已发布、提交并推送（T91/T97）；自动交接首版已审阅、提交并推送（T102/T103）。用户 2026-10-13 明确授权的只读真实连接测试 T95 已完成，Claude 已核查（T104）：命令行 claude 被用户环境变量指向 DeepSeek，读不了图片，自动流程目前走不到底。用户已决定删掉全部 DeepSeek 设置、改用 Claude 订阅（T105）：Claude 已删掉全局设置里残留的一项；用户已删掉环境变量、重启并用订阅账号登录命令行 claude（T107 已完成）；下一步按 T106 改程序、补带图片的 Claude 连接测试（用户指定 Claude 改、ChatGPT 审）；在此之前第六期建议用手动流程（T98）；模板通用问题留低优先级 T90
-- **自动交接**：T101 的按页指纹修复和其他期原图保护已由 T102 复审通过，155 项测试通过。T95：Codex 图片/stdin/结构化结果通过；Claude Code 的 structured_output、dontAsk 下只读文本调用和解析通过，但实际 modelUsage 为 DeepSeek，图片读取失败，见 T104；用户已决定改用 Claude 订阅（T105～T107）。完整制作、默认项目定制配置与写入阶段权限未验证，没有自动发布
+- **下一步**：第五期已发布、提交并推送（T91/T97）；自动交接首版已审阅、提交并推送（T102/T103）。T112 复审通过：T110 的 R14/R15 已闭环，T111 的开始/恢复前改道检查通过，159 项测试全部通过。T109 带图片的 Claude 连接测试已由 Claude 用订阅完成。这些改动已提交并推送（T113）。用户决定第六期用自动交接试做（T98）：Claude 列候选，用户选定后在自己的终端运行 `npm run produce`；模板通用问题留低优先级 T90
+- **自动交接**：T101 的按页指纹修复和其他期原图保护已由 T102 复审通过；T106 的空清单兜底经 T108 审核通过。T112 已确认 T110 的模型变量脱敏、官方接口/完整模型名/云服务商开关识别，以及 T111 的开始/恢复前停止逻辑；159 项测试通过。T95 的 Codex 带图连接已验证，T109 的 Claude 订阅带图连接由 Claude 验证通过。检查仅依据当前进程环境变量，不能替代实际登录/路由验证；完整新论文制作仍未验证，没有自动发布
 - **最近更新**：2026-10-13 · Claude
 
 ## 待办交接
@@ -109,7 +109,7 @@
 | T95 | 用户 2026-10-13 明确授权的小范围只读连接测试已完成：Codex --image + stdin（无末尾「-」）通过；Claude Code structured_output、dontAsk 下只读文本及生产解析器通过。Claude 当前实际 modelUsage 为 DeepSeek，Read 图片失败，首轮 needs_user/findings 空数组被拒收；问题转 T104。没有新论文或完整制作，后续选择仍由 T98 决定 | 用户、ChatGPT | ChatGPT | 已完成 |
 | T96 | 审阅 T94 自动交接首版代码、测试与 docs/production.md：重点查 CLI 参数/权限与图片输入、结构化报告解析、返修/恢复与审核失效、文件保护/锁、WORKLOG 写入和用户确认边界；结论写入 WORKLOG。先做本地审核，不启动真实模型连接/新论文制作，不 commit（Claude 已审完：暂不通过，R1 大概率让图片审核调用失败，R2～R5 在真实规模下费额度或误判，P3 七项可选；144 项测试通过，CLI 参数用 --help 核过；修复转 T99、复审转 T100，详见本轮 Claude 记录） | Claude | 用户、ChatGPT | 已完成 |
 | T97 | 确认提交、推送第五期：稿件、素材清单、镜头表、6 张示意图、发布记录、README 里第五期的两处、工作记录（PDF、原图、成片不提交；T94 自动交接的改动不在这次提交里）（用户选「只提交第五期并推送」：一个提交，推到 GitHub） | 用户、Claude | Claude | 已完成 |
-| T98 | 选第六期论文（`npm run topics` 看 Hugging Face 日榜候选），定好目标时长；并决定用手动流程，还是等 T96 审阅（和 T95 连接测试）后试 `npm run produce`；选定后照所选流程开工 | 用户 | Claude | 待处理 |
+| T98 | 选第六期论文（`npm run topics` 看 Hugging Face 日榜候选），定好目标时长；并决定用手动流程，还是等 T96 审阅（和 T95 连接测试）后试 `npm run produce`；选定后照所选流程开工（用户 2026-10-13 决定用自动交接试做第六期：Claude 先列候选，用户选定后在自己的终端运行 `npm run produce`） | 用户 | Claude | 进行中 |
 | T99 | 用户指定 ChatGPT 修复 T96：R1～R5 已修，R6～R9/R12 已处理，R10/R11 暂缓原因见最新记录；新增 9 项并更新原回归，npm test 153 项通过，交 T100。没有真实模型调用，不做 T95，不 commit | ChatGPT | 用户、Claude | 已完成 |
 | T100 | Claude 复审 T99 修复和回归：Codex stdin/图片参数，整轮问题汇总及按页指纹复用、中断恢复/预算、每轮记录、环境错误分类、Git 全范围保护、P3 改动。运行 npm test；本轮先本地复审，不调用真实模型、不 commit；T95 仍须用户另行明确授权且包含带图片的 Codex 调用（Claude 已复审：R1、R3～R9、R12 闭环，R2 的整轮汇总/续审/额度预检到位；新发现 R13：逐页指纹含成片绝对时间和镜头表行号，按页复用在真实返修中基本失效，只影响额度、不影响安全，转 T101；153 项测试通过） | Claude | Claude、ChatGPT | 已完成 |
 | T101 | 用户指定 ChatGPT 修复 R13：去 videoTime，页面/镜头输入去 lineNo 后重算，动作/标签改本页序号；真实预览结构回归及第五期实际记录验证通过；加回其他期被忽略 figures 的保护。npm test 155 项通过，交 T102；未调用模型、未做 T95、未 commit | ChatGPT | 用户、Claude | 已完成 |
@@ -117,8 +117,14 @@
 | T103 | 确认提交、推送自动交接首版：src/production*.js、src/paper-text.js、test/production.test.js、docs/production.md，以及 AGENTS.md、README.md、package.json、.gitignore、WORKLOG.md 的对应改动（.production/、PDF、原图、output/ 不提交）（用户选「提交并推送」：一个提交，推到 GitHub） | 用户、Claude | Claude | 已完成 |
 | T104 | 核查 T95 真实测试的两项问题：① Claude Code modelUsage 报 DeepSeek，Read 示例 PNG 返回 Unsupported Image，确认本机路由/模型是否符合用户预期及制作所需图片能力，不泄露凭据、不擅自切换；② needs_user/findings=[] 虽满足 schema 却被 validateResult 拒收，评估在 schema/提示词里明确非通过必须列原因并补回归。先检查本地证据，再交用户决定是否补测；不启动新论文、完整制作或提交（Claude 已核查：① 来源是 Windows 用户环境变量，把 Claude Code 的接口和全部模型档位都指向 DeepSeek，这条线路读不了图片，自动流程里「Claude 的活」实际由 DeepSeek 做、查成片会一直停住；② 建议提示词写明非通过必须列原因，程序在清单为空时用摘要当原因。都交用户决定，见 T105、T106） | Claude | ChatGPT | 已完成 |
 | T105 | 决定自动交接里「Claude 的活」用什么模型：A. 程序启动 claude 时去掉这几个 DeepSeek 变量，改用你的 Claude 账号登录（需先确认命令行 claude 已登录 Anthropic 账号，会用 Claude 订阅额度；你手动用的 DeepSeek 设置不变）；B. 保持 DeepSeek，把看图的检查都改给 Codex（截图取景没法自己看图核对，不推荐）；C. 全部改用 Codex。另外，这些 DeepSeek 模型变量也会影响桌面应用里的辅助功能（比如网页抓取、子代理），要不要只在需要时设置也由你决定（用户 2026-10-13 决定：DeepSeek 相关设置全部删掉，命令行 claude 改用用户的 Claude 订阅登录，相当于 A，但改为全局删除；Claude 已删掉全局设置里残留的一项，环境变量由用户自己删，见 T107） | 用户 | Claude | 已完成 |
-| T106 | 按 T105 的决定改程序：所选模型方案的启动方式与 doctor 显示（不显示密钥），以及 T104 ②（提示词写明非通过必须列原因，清单为空时用摘要当原因）；补回归测试，改完交另一方复审，再补一次带图片的 Claude 连接测试（需用户授权）（T105 定为全局删除 DeepSeek 设置，程序启动 claude 时不用再去掉变量；doctor 改为接口不是 Anthropic 官方时给出提醒。等 T107 做完再开始）（T107 已完成；用户 2026-10-13 指定 Claude 改、ChatGPT 审） | Claude | Claude | 进行中 |
+| T106 | 按 T105 的决定改程序：所选模型方案的启动方式与 doctor 显示（不显示密钥），以及 T104 ②（提示词写明非通过必须列原因，清单为空时用摘要当原因）；补回归测试，改完交另一方复审，再补一次带图片的 Claude 连接测试（需用户授权）（T105 定为全局删除 DeepSeek 设置，程序启动 claude 时不用再去掉变量；doctor 改为接口不是 Anthropic 官方时给出提醒。等 T107 做完再开始）（T107 已完成；用户 2026-10-13 指定 Claude 改、ChatGPT 审）（Claude 已改完：未通过但清单为空时用摘要当原因，提示词写明要列原因；doctor 显示 Claude 登录方式和接口，接口/凭据/模型被改时提醒，不显示密钥和账号；开始和恢复任务时同样提醒、不停止；npm test 158 项通过。复审转 T108，带图片的连接测试转 T109） | Claude | Claude | 已完成 |
 | T107 | 删除 DeepSeek 设置：① 在 PowerShell 运行 Claude 给的命令，删掉 Windows 用户环境变量里的 7 个（ANTHROPIC_BASE_URL、ANTHROPIC_AUTH_TOKEN、ANTHROPIC_MODEL、ANTHROPIC_DEFAULT_OPUS_MODEL、ANTHROPIC_DEFAULT_SONNET_MODEL、ANTHROPIC_DEFAULT_HAIKU_MODEL、CLAUDE_CODE_SUBAGENT_MODEL）；② 完全退出再重开 Claude 桌面应用、Codex App 和所有终端；③ 新终端运行 claude，按提示用 Claude 订阅账号登录，再用 /status 确认；④（可选）这个 DeepSeek API key 如果只给 Claude Code 用过，到 DeepSeek 平台作废。做完告诉 Claude 核对（只看变量名）（① 已完成：Claude 核对 7 个变量都已从用户环境变量删除；PowerShell 窗口停住是 Windows 在通知所有程序变量已改，有程序回应慢，不影响删除结果；② 用户已重启电脑，Claude 核对：系统和桌面应用里都没有 DeepSeek 变量了，命令行 claude 现在连 Anthropic 官方，但还没登录，等用户用 `claude auth login --claudeai` 登录订阅账号；③ 用户已登录，Claude 用 `claude auth status` 确认：已登录，方式 claude.ai（订阅），接口 Anthropic 官方） | 用户 | Claude | 已完成 |
+| T108 | T106 本地复审完成，暂不通过：空清单兜底不会把失败变通过；R14（P2）模型变量字符过滤会打印形似 token/邮箱的值，R15（P3）接口协议/模型子串识别漏报，转 T110；建议明确改道时启动/恢复暂停，由 T111 决定。npm test 普通本地环境 158 项全通过，未调用模型、未 commit | ChatGPT | Claude | 已完成 |
+| T109 | 带图片的 Claude 连接测试：用户授权后，Claude 用生产程序的参数（只读工具）调用一次命令行 claude，读一张本地示例图并返回结构化结果，确认现在用订阅、能看图；会用掉少量订阅额度。通过后再考虑用新论文试 `npm run produce`（T98）（用户 2026-10-13 授权；Claude 已测：一次调用、23 秒、0 次权限拒绝，实际模型 claude-opus-5[1m]，另有 claude-haiku-4-5 做辅助；正确读出封面的大标题、两个标签的文字和边框颜色、左上角图标，结构化结果经 decodeClaude 通过） | 用户、Claude | Claude | 已完成 |
+| T110 | 修 T108 的配置提醒问题：R14（P2）不输出原始模型变量值，避免 token/邮箱形状被字符白名单放行；补所有模型变量的脱敏回归。R15（P3）校验官方接口的 https 协议，模型名按完整合法形式/别名识别，别靠任意位置含 claude/opus 等子串；补反例及 URL 用户信息/路径/查询不泄露测试。保留失败状态与现有门禁，修后交 ChatGPT 复审；不调用模型、不 commit（Claude 已修：模型变量一律不输出值，只写变量名和问题类别；官方接口要求 https、主机 api.anthropic.com、默认端口；模型名按完整的别名或 claude-<系列>-<版本> 形式识别；另把 Bedrock/Vertex/Foundry 开关算作改道；doctor 抽成可测的函数，补了读不到状态、未登录、被改道且不泄露的测试。npm test 159 项通过，复审转 T112） | Claude | ChatGPT | 已完成 |
+| T111 | 决定配置异常时是否由「提醒后继续」改为「开始/恢复前暂停」：ChatGPT 建议已选择 Claude 订阅的自动流程遇到明确第三方接口、API 凭据或非 Claude 模型时先暂停，不创建新论文目录、不调用模型，用户明确授权后才能改用其他服务；旧 CLI 读不到状态单独提示，不把未知当作已证实改道。此为流程建议，本轮未实施（用户 2026-10-13 选「开始前先停下」；Claude 已实现：开始和恢复任务前发现上述设置就停下，不建论文目录、不调用模型，提示里只写变量名和问题；读不到登录状态只在 doctor 里提示，不算改道；doctor 照常显示诊断） | 用户 | ChatGPT | 已完成 |
+| T113 | 确认提交、推送 T104 ②、T106、T110、T111 的改动：src/production-prompts.js、src/production.js、test/production.test.js、docs/production.md、README.md、WORKLOG.md（用户选「提交并推送」：一个提交，推到 GitHub） | 用户、Claude | Claude | 已完成 |
+| T112 | T110、T111 本地复审通过：R14/R15 闭环，模型原值不输出，官方 https/主机/默认端口及完整模型名、云服务商开关检查有效；开始/恢复改道时先停下、不创建任务/论文目录、不调用模型，恢复不保存状态调整；doctor 未知登录状态只提示。新增测试及本地边界探测通过，npm test 159 项全部通过；只改 WORKLOG，未调用模型、未 commit | ChatGPT | Claude | 已完成 |
 | T41 | 旧短版已合成并查画面；因用户决定扩写，剩余试听和发布审核改由 T44、T40 承接，短版不发布 | Claude、用户 | ChatGPT | 已取消 |
 | T42 | 决定首期时长：现在发 3 分钟版，还是扩写到 5 分钟左右（Claude 建议扩写：补上为什么难、两条流具体怎么配合、强化学习怎么调好口型和语音、普通人能不能跑起来）；扩写就交 ChatGPT 重写，Claude 补截图（用户选扩写，转 T43、T44） | 用户 | 用户 | 已完成 |
 | T43 | 首期已扩为 11 页科普稿：难点、双流、RL 奖励与效果、消费级部署；约 1605 字元，预估 302 秒；原文核对表 24 条，检查仅缺 4 张新增图 | ChatGPT | 用户 | 已完成 |
@@ -127,6 +133,146 @@
 | T46 | 按 T45 稿重新合成，检查 Figure 21(a) 的图例、柱内占比及数字字幕，实测时长，交用户最终试听 RL/SFT、百分数和运行耗时（已完成：实测 5 分 21 秒，没有警告） | Claude | Claude | 已完成 |
 
 ## 记录
+
+### 2026-10-13 · Claude（Claude Code）
+
+**任务**：T113：提交并推送 T104 ②、T106、T110、T111 的改动；按用户决定准备第六期（T98）
+
+**完成**
+- T112 复审通过后，用户选「提交并推送」：6 个文件一个提交，推到 GitHub。提交前查过全部新增内容：没有真实的密钥、邮箱或订阅类型，只有测试里故意写的假值。
+- 用户决定第六期用自动交接试做：Claude 先运行 `npm run topics` 列出 Hugging Face 日榜候选，用户选定后在自己的终端运行 `npm run produce`。
+
+**改动文件**
+- `WORKLOG.md`：本条记录；新增 T113（已完成），T98 改为进行中；更新当前状态
+
+**交接**
+- → 用户（T98）：从候选里选第六期论文，在自己的终端运行 `npm run produce`
+
+**待确认 / 风险**
+- 这是自动交接第一次完整制作新论文，可能用掉较多额度、中途暂停；暂停后用 `resume` 继续
+
+### 2026-10-13 · ChatGPT（Codex App、本地代码审阅与 Node.js 测试）
+
+**任务**：T112：复审 T110 的 R14/R15 修复和 T111 的制作前改道停止逻辑
+
+**完成**
+- 读完 AGENTS.md、WORKLOG 当前状态/待办交接和最上面 Claude 的 T110/T111/T109 记录；开工时 6 个未提交文件与 T106/T110 及此前审阅记录一致，全部保留。重点读 `src/production.js`、新增测试和 `docs/production.md`；核对仍在未提交范围的 T106 空清单兜底与 README 没有额外变化。
+- **结论：通过，T108 的 R14、R15 已闭环，T111 的用户决定实现正确。** 6 个模型变量都只输出变量名和问题类别，原值不再进入提醒/错误；token、邮箱、JWT 形状的虚构值均被测试覆盖。接口解析只输出主机/非默认端口，不输出用户名、密码、路径或查询；要求 https、精确主机 api.anthropic.com 和默认端口，显式 https 的 443 经 URL 标准化后允许，http 与非默认端口拒绝。
+- 模型规则前后锚定，按完整别名/系列版本格式识别，支持记录列出的新旧命名及 `[1m]`；`deepseek-claude-wrapper` 等子串反例不再被允许。Bedrock/Vertex/Foundry 三个开关的启用值都会报改道；0/false 不报。用虚构环境补查 26 个本地组合（三个开关的大小写/启停值、官方默认端口/大小写主机、http/非默认端口/仿冒主机），全部符合预期。该白名单验证名称形式，不保证对应模型已存在或当前订阅可用。
+- `start.checkRoute` 在创建任务状态目录、执行开工及调用任何模型之前；异常直接拒绝，不建任务/论文目录。`resume` 虽先读取并在内存里准备 feedback/options/refreshInputs，检查通过前没有 save/execute；拒绝时已有文件状态保持，既有模型调用计数不增加。没有用用户反馈跳过改道检查的分支，符合 T111 的「改正设置后再继续」，也不会领取别的待办。
+- `doctor()` 抽出并可注入 run/resolve/env/log；主入口只委托该函数。调用范围是两次 `--version` 和一次 `auth status --json`，不请求模型。旧 CLI/不可解析 JSON/进程错误被归为读不到状态，未登录单独提示；auth 的邮箱、组织和原始 stdout/stderr 不被打印。补用含虚构敏感字符串的无效 JSON 验证：只输出未知提醒、不泄露字符串，替身记录的命令也仅上述三次。开始/恢复不执行 auth status，未知登录状态不会触发改道误判。
+- 3 项新测试替换原 2 项合理：配置测试覆盖 6 个模型变量的正反例与脱敏、官方 URL/第三方 URL、凭据和云开关；doctor 测试覆盖不可读/启动失败/未登录/正常/改道；状态机测试验证开始不建目录/不调用模型，恢复不继续且已保存任务状态保持。测试替身默认 `env: {}` 避免开发机变量影响离线结果；生产默认仍是 `process.env`，没有把空环境误用于真实制作。
+- `docs/production.md` 的开始/恢复前停止说明与实现一致；T109 真实看图结果沿用 Claude 的记录，本轮没有重跑。使用普通本地环境执行 `npm test`，避免上一轮已确认的沙箱回环连接/符号链接限制：**159 项通过、0 失败、0 跳过，退出码 0**。未发现本轮新增的阻断问题，没有修改代码、运行真实 doctor、读取登录凭据或调用模型。
+
+**改动文件**
+- `WORKLOG.md`：新增本条记录，T112 改为已完成，更新当前状态。其余未提交改动保持原样。
+
+**交接**
+- → 用户（T98）：T110/T111 复审已通过，T109 的订阅带图测试也已由 Claude 完成；第六期论文及手动/自动流程由你决定。完整新论文制作尚未验证，本轮没有开工。
+
+**待确认 / 风险**
+- 检查限定当前进程环境变量，不全面检查用户/项目配置文件、代理或真实路由；没有报改道不能证明已登录或额度可用。该边界已在 Claude 的记录中说明，不影响本次修复闭环。
+- 新模型系列需要更新名称白名单；没登录/实际模型不可用仍可能在后续 Claude 阶段暂停，已完成的 Codex 工作会保留。
+- 未 commit，未调用模型。
+
+### 2026-10-13 · Claude（Claude Code）
+
+**任务**：T110 修 T108 的 R14、R15；按用户在 T111 的决定改为发现改道就在开始前停下；T109 带图片的 Claude 连接测试
+
+**完成**
+- 开工时 `git status`：6 个未提交文件，是 T106 的改动和 ChatGPT 的 T108 记录，和工作记录对得上。
+- 用户 2026-10-13 的决定：T111 选「开始前先停下」；T109 授权现在测。
+- **R14**：模型变量一律不输出值，只写变量名和「指定的不是 Claude 官方模型名（不显示内容）」；去掉了原来的字符白名单。
+- **R15**：
+  - 官方接口要同时满足 https、主机 `api.anthropic.com`、默认端口；只显示主机（非默认端口时连端口），不显示网址里的用户名、密码、路径和查询
+  - 模型名按完整形式识别：Claude Code 的别名（default、best、opus、sonnet、haiku、fable、opusplan），`claude-<系列>-<版本>[-日期]` 和旧的 `claude-3-5-sonnet-<日期>` 形式，可带 `[1m]`；不再按子串判断。以后出了新的模型系列，要先加进这条规则，才能用环境变量指定
+  - 另把 `CLAUDE_CODE_USE_BEDROCK`、`CLAUDE_CODE_USE_VERTEX`、`CLAUDE_CODE_USE_FOUNDRY` 开关也算作改道（走云服务商，不用订阅）
+- **T111**：函数改名为 `claudeRouteProblems`。`start` 在建任务和论文目录之前、`resume` 在继续之前检查，有问题就报错停下，说明「没有创建论文目录 / 任务没有继续，也没有调用模型」，列出变量名和问题。读不到登录状态只在 doctor 里提示，不算改道。
+- **doctor**：抽成可单独测试的 `doctor()`；读 `claude auth status` 失败（旧版本或启动失败）时显示「读不到状态」；有改道问题时说明开始和恢复会停下。
+- 测试：用 3 项新测试替换 T106 的 2 项——接口和模型识别（6 个模型变量 × 正反例，原值都不出现）；doctor 的各种状态（读不到、启动失败、未登录、正常、被改道，都不泄露账号和密钥）；开始/恢复前停下（不建目录、不调用模型、任务状态不变）。测试替身默认用空环境，不受开发机环境变量影响。`npm test` 159 项全部通过。
+- 实际运行 doctor（没有调用模型）：模拟新开的终端，没有提醒；用假的 http 地址（带用户名密码、路径、查询）和假模型名模拟改道，出现 3 条提醒，没有显示任何值。
+- **T109**：用生产程序的参数（`-p`、结构化输出、`dontAsk`、只读工具），在模拟新开终端的环境里调用一次 claude，读一张换了中性文件名的本地图片（第五期封面的副本，测完已删）：
+  - 退出码 0，23 秒，3 轮，0 次权限拒绝
+  - 实际模型 `claude-opus-5[1m]`，另有 `claude-haiku-4-5-20251001` 做辅助
+  - 正确读出大标题、两个标签的文字和边框颜色、左上角图标的字母和底色；`decodeClaude` 通过，状态 pass
+- 文档：`docs/production.md` 更新验证状态和「开始前停下」的说明；`src/production.js` 的用法说明同步。
+
+**改动文件**
+- `src/production.js`：`claudeRouteProblems`、`checkRoute`、`doctor()`；用法说明
+- `test/production.test.js`：3 项新测试替换 T106 的 2 项；测试替身默认空环境
+- `docs/production.md`：验证状态，Claude 订阅与开始前停下的说明
+- `WORKLOG.md`：本条记录；T109、T110、T111 改为已完成，新增 T112；更新当前状态
+
+**交接**
+- → ChatGPT（T112）：复审 T110、T111 的改动
+
+**待确认 / 风险**
+- 模型名规则是白名单：以后出了新的模型系列，又想用环境变量指定它，要先改规则，否则会被当成改道而停下
+- 开始/恢复只查环境变量，不查 `claude auth status`；没登录时要到 Claude 的步骤才报错暂停（Codex 已做的工作会保留）
+- 只测了一张图的读取，一篇新论文的完整制作仍未验证（T98）
+- T106、T110、T111 的改动都还没 commit
+
+### 2026-10-13 · ChatGPT（Codex App、本地代码审阅与 Node.js 测试）
+
+**任务**：T108：复审 Claude 的 T106 未提交改动，核对空清单兜底、配置提醒的准确性/脱敏和测试覆盖
+
+**完成**
+- 先读完 AGENTS.md、WORKLOG 当前状态/待办交接及最上面 Claude 的 T106、T107 记录；`git status` 的 6 个未提交文件与 T106 记录一致，全部保留。审阅用户指定的 5 个文件及兜底结果在调度程序里的完整流向，没有改代码。
+- **结论：暂不通过，阻断项是 R14 的脱敏漏洞。空清单兜底通过。** `validateResult` 在 summary/证据/notes 校验之后，仅为非 pass 的空 findings 补入 summary，保留原 status，返回新对象、不改原结果。`needs_user` 仍交用户；`changes_requested` 仍按原阶段返修并受轮数上限约束；视觉整轮中 needs_user 的优先级保持。原文核对、图片覆盖、只读输入及成片门禁均未绕过。pass 带问题、空摘要、无效证据/notes、Claude 错误 envelope 仍被拒收。改的旧断言与新增兜底测试合理，覆盖了真实离线调度中的交用户和返修分支；另用内存断言确认上述无效结果不因兜底变成通过。
+- **R14（P2，须修）：`src/production.js:153～156` 输出模型变量原值。** `/^[\w.:\/\[\]@-]{1,80}$/` 只是字符白名单，不是模型名判定；用虚构的 token 形状字符串和 `review@example.invalid` 分别放进 ANTHROPIC_MODEL，`claudeRouteWarnings` 都原样打印。doctor、start、resume 共用这段逻辑，因此“值不像模型名就不显示”及“不泄露账号或密钥”的保证不成立。建议所有模型变量只显示变量名和异常类别，不输出原值；如确需显示，必须使用明确、有限的模型标识白名单。没有读取或打印真实凭据。
+- **R15（P3，准确性需补）：`src/production.js:144～155` 有两处漏报。** 虚构 `http://api.anthropic.com` 的提醒数为 0，因为只比 hostname、不查协议；`deepseek-claude-wrapper` 的提醒数也为 0，因为任意位置含 claude 就被视为 Claude 模型。建议官方地址至少验证 https，模型用完整合法形式或完整别名判定，不把子串当身份依据。该提醒本身仍只是环境变量静态检查，不能证明实际路由/模型与图片能力。
+- 已核对正常脱敏分支：独立的 ANTHROPIC_AUTH_TOKEN/API_KEY 只显示变量名；URL 的 username/password、路径和 query 不输出；`describeClaudeAuth` 不取 email/orgName，状态不可解析时给出未知提醒，未打印原 auth JSON。现有测试对这些分支有帮助，但模型 token/邮箱、含 claude 的异类名、官方主机配 http 的反例未覆盖；新增 3 项测试**足以支撑兜底，不足以证明配置提醒无泄露、无漏报**。建议补上述回归及 doctor 入口对错误/旧 CLI 状态的输出测试，继续保持本地替身，不调用模型。
+- **是否直接停止：建议明确改道时先暂停，交用户在 T111 决定。** T105 已选全局删除 DeepSeek 设置、使用 Claude 订阅；仅打印提醒后继续，会先让 Codex 开始制作并消耗额度，随后还可能把素材发送给另一服务。建议 start/resume 在创建目录和首次模型调用前核对，发现明确第三方接口/API 凭据/非 Claude 模型就保存原因并暂停；doctor 可继续展示诊断。读取登录状态失败属于未知，不应直接宣称第三方改道；若用户允许其他服务应有明确的继续授权。该建议不等于本轮擅自改变已记录的「提醒、不停止」行为，也不阻断本次审阅工作。
+- `npm test` 首轮在沙箱内：156 通过、1 失败、1 跳过；失败是旧 HTTP 测试连接 127.0.0.1 被 EACCES 拒绝，跳过是沙箱不能建临时符号链接，与 T106 改动无关。改在普通本地环境完整重跑：**158 通过、0 失败、0 跳过，退出码 0**；T106/兜底相关 4 项单独运行也通过。没有请求模型、检查账号凭据或执行 doctor，没有启动真实制作。
+
+**改动文件**
+- `WORKLOG.md`：新增本条记录，T108 改为已完成，新增 T110/T111，更新当前状态。Claude 的 5 个代码/测试/说明文件改动原样保留。
+
+**交接**
+- → Claude（T110）：先修 R14 的原始变量值输出，并补脱敏反例；一并处理 R15 的协议/模型识别漏报，核对 doctor 入口的未知/失败状态输出，修后运行测试并交 ChatGPT 复审。不调用模型、不 commit。
+- → 用户（T111）：决定是否把明确改道提醒升级为制作前暂停；本次建议针对 T105 已选的 Claude 订阅流程，没有自行改配置或改启动策略。
+- → 用户、Claude（T109）：带图片的 Claude 订阅连接测试仍需用户授权；本轮没有执行，也不能用 158 项本地测试代替真实图片能力验证。
+
+**待确认 / 风险**
+- R14 尚未修复，T106 整体暂不放行；R15 是提醒完整性的低优先级问题。
+- 开始/恢复目前只查环境变量，不重新执行 doctor 的 auth status；本机配置文件/代理/真实模型响应未在本次本地审阅中全面验证，不能把“没有提醒”当作“已确认 Claude 订阅与官方路由”。
+- 未 commit，未调用模型。
+
+### 2026-10-13 · Claude（Claude Code）
+
+**任务**：T106：自动交接补 Claude 登录/接口检查，修 T104 ②（未通过但问题清单为空），补回归测试
+
+**完成**
+- 用户 2026-10-13 指定 T106 由 Claude 改、ChatGPT 审；同时同意提交并推送当时的 WORKLOG（提交 `5549462`，已推送）。
+- **T104 ②**：
+  - 提示词写明：不是 pass 时，findings 至少写一条具体原因，不能只写在 summary 或 notes 里
+  - `validateResult`：不是 pass 且清单为空时，用 summary 当那一条原因，照常进入返修或「需要你决定」，不再整步报错停下；返回新对象，不改原结果；pass 却带问题、summary 为空，仍然拒收
+- **Claude 接口检查**：
+  - 新增 `claudeRouteWarnings`：`ANTHROPIC_BASE_URL` 不是 `api.anthropic.com` 时提醒（只显示主机名）；设了 `ANTHROPIC_AUTH_TOKEN` / `ANTHROPIC_API_KEY` 时提醒（不显示内容）；模型变量不像 Claude 模型时提醒（值不像模型名就不显示）
+  - 新增 `describeClaudeAuth`：解析 `claude auth status --json`，只显示是否登录、登录方式、订阅类型、接口类型，不显示邮箱和组织
+  - `npm run produce -- doctor` 增加这两项；开始和恢复任务时打印同样的提醒，但不停止（用哪家服务由用户决定，见 T105）
+  - 实测：接口被改到别处时，`claude auth status` 仍报 `apiProvider: firstParty`，所以接口要靠环境变量判断，登录方式靠 auth status
+- 实际运行 doctor（没有调用模型）：
+  - 去掉桌面应用变量、相当于新开的终端：显示已登录、claude.ai、firstParty，没有提醒
+  - 用假的地址和 token 模拟被改道：4 条提醒，没有显示 token 和完整网址
+- 测试：改了 1 条旧断言（未通过且清单为空不再报错，改成 summary 为空才报错）；新增 3 项：空清单兜底（含真实流程里交用户、返修两种情况）、提醒不泄露密钥和账号、开始/恢复时提醒但照常进行。`npm test` 158 项全部通过。
+- 文档：`docs/production.md` 更新验证状态、Claude 订阅登录说明和 doctor 说明；`README.md` 改一处措辞。
+
+**改动文件**
+- `src/production-prompts.js`：返回结果的要求；`validateResult` 的空清单兜底
+- `src/production.js`：`claudeRouteWarnings`、`describeClaudeAuth`、`remindRoute`；doctor 增加 Claude 登录与接口检查
+- `test/production.test.js`：改 1 条断言，新增 3 项测试
+- `docs/production.md`、`README.md`：同步说明
+- `WORKLOG.md`：本条记录；T106 改为已完成，新增 T108、T109；更新当前状态
+
+**交接**
+- → ChatGPT（T108）：复审 T106 的改动
+- → 用户（T109）：授权后由 Claude 做一次带图片的 Claude 连接测试（会用少量订阅额度）
+
+**待确认 / 风险**
+- 提醒不会停止任务：以后如果又被改到别的接口，自动流程仍会跑到 Claude 的步骤才停。要不要改成直接停止，请 ChatGPT 在 T108 给意见，由用户决定
+- 命令行 claude 还没做过真实的模型调用，能不能看图要等 T109
+- 未 commit
 
 ### 2026-10-13 · Claude（Claude Code）
 

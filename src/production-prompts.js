@@ -68,8 +68,9 @@ export function buildPrompt(job, stage, { page, images = [], moments = [], feedb
     (feedback.length ? `\n## 上轮问题\n${feedback.map((item) => `- ${item}`).join("\n")}\n` : "") +
     (images.length ? `\n## 本批必须看的图\n${images.map((item) => `- ${item}`).join("\n")}\n` : "") +
     (moments.length ? `\n## 截图时刻（相对本页开头）\n${moments.map((m) => `- ${m.file}：${m.time} 秒；${m.labels.join("；")}；翻页取样时间 ${m.turnTime} 秒`).join("\n")}\n淡入/淡出/进场中是过渡帧，不把正常的过渡状态误判成稳定画面切字；仍需核对稳定时刻及限定语。\n` : "") +
-    `\n## 返回结果\n只返回符合程序提供JSON Schema的结果。pass表示这一步已完成并通过；changes_requested必须有具体问题；needs_user用于无法继续或需用户判断。\n` +
-    `summary用中文，findings列阻断问题或为空，notes列不阻断的可选建议（没有则为空）；不能把事实/可读性/内容安全问题放进notes而放行。evidence诚实列原文是否核对、页码、实际查看的图片和文件路径。程序会保存本轮Markdown交接、结构化结果和运行记录。\n`;
+    `\n## 返回结果\n只返回符合程序提供JSON Schema的结果。pass表示这一步已完成并通过，findings为空；changes_requested列具体问题；needs_user用于无法继续或需用户判断。\n` +
+    `不是pass时，findings至少写一条具体原因（要改什么，或需要用户决定什么、为什么不能继续），不能只写在summary或notes里。\n` +
+    `summary用中文，notes列不阻断的可选建议（没有则为空）；不能把事实/可读性/内容安全问题放进notes而放行。evidence诚实列原文是否核对、页码、实际查看的图片和文件路径。程序会保存本轮Markdown交接、结构化结果和运行记录。\n`;
 }
 
 export function validateResult(result) {
@@ -79,8 +80,9 @@ export function validateResult(result) {
   if (!e || typeof e.source_checked !== "boolean" || !Array.isArray(e.pages) || e.pages.some((n) => !Number.isInteger(n) || n < 1)
     || !Array.isArray(e.images) || e.images.some((item) => typeof item !== "string")
     || !Array.isArray(e.files) || e.files.some((item) => typeof item !== "string")) throw new Error("agent 没有返回有效的审核依据");
-  if (result.status !== "pass" && result.findings.length === 0) throw new Error("未通过时必须列出具体原因");
   if (result.status === "pass" && result.findings.length > 0) throw new Error("有未解决问题不能标记通过");
   if (result.notes !== undefined && (!Array.isArray(result.notes) || result.notes.some((item) => typeof item !== "string" || !item.trim()))) throw new Error("可选建议格式无效");
+  // T104: a refusal explained only in the summary must still reach revision or the user, not stop the job.
+  if (result.status !== "pass" && result.findings.length === 0) return { ...result, findings: [result.summary.trim()] };
   return result;
 }

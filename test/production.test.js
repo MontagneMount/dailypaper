@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { normalizePaper, parseArgs, agentCommand, decodeClaude, acquireLock, ProductionRunner, readJob } from "../src/production.js";
+import { normalizePaper, parseArgs, agentCommand, decodeClaude, acquireLock, ProductionRunner, readJob, claudeRouteProblems, describeClaudeAuth, doctor } from "../src/production.js";
 import { validateResult, buildPrompt } from "../src/production-prompts.js";
 import { safePath, fingerprint, inputFingerprint, protectedFingerprint, previewPageHashes, GateError, validatePreviewRecord, inspectDraft, inspectPreview } from "../src/production-gates.js";
 import { runProcess, resolveAgent } from "../src/production-process.js";
@@ -58,7 +58,7 @@ test("失败的Claude返回和不完整证据不能假报通过", () => {
   assert.throws(() => decodeClaude(JSON.stringify({ is_error: true, result: "Login required" })));
   assert.throws(() => decodeClaude(JSON.stringify({ subtype: "success", result: "done" })));
   assert.throws(() => validateResult({ ...pass(), findings: ["仍有问题"] }));
-  assert.throws(() => validateResult({ ...pass(), status: "changes_requested" }));
+  assert.throws(() => validateResult({ ...pass(), status: "changes_requested", summary: " " }));
   assert.throws(() => validateResult({ ...pass(), evidence: {} }));
 });
 
@@ -148,7 +148,7 @@ function harness(t, { responseFor, onCall, previewError, commandResult, draftErr
   let dir;
   const write = (relative, content) => { const file = path.join(root, relative); fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, content); };
   const dependencies = {
-    resolve: (name) => ({ command: `fake-${name}`, prefix: [] }), log: () => {},
+    resolve: (name) => ({ command: `fake-${name}`, prefix: [] }), log: () => {}, env: {},
     create: async (id, { dir: episodes, date }) => {
       dir = path.join(episodes, `${date}-${PAPER.id}`);
       if (fs.existsSync(dir)) throw new Error("已经存在");
@@ -571,4 +571,93 @@ test("T99 R12：合成前浏览器/字体变化回到预览并复审，不滞留
   const job = await h.runner.start(PAPER.versionedId);
   assert.equal(job.status, "ready"); assert.equal(job.revisions, 0); assert.equal(h.counts.assets_fix ?? 0, 0);
   assert.equal(h.counts.visual_review, 4);
+});
+
+test("T104 ②：未通过但问题清单为空时，用摘要当原因，照常返修或交用户", async (t) => {
+  const refusal = { ...pass(), status: "needs_user", summary: "读不了图片，需要你决定", findings: [] };
+  assert.deepEqual(validateResult(refusal).findings, ["读不了图片，需要你决定"]);
+  assert.deepEqual(refusal.findings, []);
+  assert.deepEqual(validateResult({ ...refusal, status: "changes_requested", summary: " 数字被框切到 " }).findings, ["数字被框切到"]);
+  assert.throws(() => validateResult({ ...pass(), findings: ["仍有问题"] }), /不能标记通过/);
+  const prompt = buildPrompt({ id: "job", folder: "episode", paper: PAPER, options: { minutes: 5, audience: "auto" } }, "assets");
+  assert.match(prompt, /不是pass时，findings至少写一条具体原因/);
+
+  const stuck = harness(t, { responseFor: (stage, n, result) => stage === "assets" ? { ...result, status: "needs_user", summary: "读不了图片，需要你决定", findings: [] } : result });
+  const paused = await stuck.runner.start(PAPER.versionedId);
+  assert.equal(paused.status, "needs_user"); assert.equal(paused.message, "读不了图片，需要你决定");
+
+  const fix = harness(t, { responseFor: (stage, n, result) => stage === "visual_review" && n === 1 ? { ...result, status: "changes_requested", summary: "数字被框切到", findings: [] } : result });
+  const done = await fix.runner.start(PAPER.versionedId);
+  assert.equal(done.status, "ready"); assert.equal(done.revisions, 1);
+  assert.match(fix.prompts.find((p) => p.stage === "assets_fix").text, /数字被框切到/);
+});
+
+test("T110：只认 Anthropic 官方 https 接口和完整的 Claude 模型名，任何变量值都不输出", () => {
+  assert.deepEqual(claudeRouteProblems({}), []);
+  for (const url of ["https://api.anthropic.com", "https://api.anthropic.com/", "https://api.anthropic.com:443"]) assert.deepEqual(claudeRouteProblems({ ANTHROPIC_BASE_URL: url }), [], url);
+  assert.match(claudeRouteProblems({ ANTHROPIC_BASE_URL: "http://api.anthropic.com" }).join(), /没有用 https/);
+  assert.match(claudeRouteProblems({ ANTHROPIC_BASE_URL: "https://api.anthropic.com:8443" }).join(), /指向 api\.anthropic\.com:8443，不是 Anthropic 官方/);
+  assert.match(claudeRouteProblems({ ANTHROPIC_BASE_URL: "https://api.anthropic.com.evil.example" }).join(), /指向 api\.anthropic\.com\.evil\.example，/);
+  const proxy = claudeRouteProblems({ ANTHROPIC_BASE_URL: "https://someone:hunter2@proxy.example.invalid/anthropic?token=abc123" }).join("\n");
+  assert.match(proxy, /指向 proxy\.example\.invalid，不是 Anthropic 官方/);
+  for (const secret of ["someone", "hunter2", "/anthropic", "token=abc123"]) assert.ok(!proxy.includes(secret), secret);
+  assert.match(claudeRouteProblems({ ANTHROPIC_BASE_URL: "not a url" }).join(), /不是有效网址/);
+  assert.match(claudeRouteProblems({ CLAUDE_CODE_USE_BEDROCK: "1" }).join(), /CLAUDE_CODE_USE_BEDROCK：Claude Code 会走云服务商/);
+  assert.deepEqual(claudeRouteProblems({ CLAUDE_CODE_USE_VERTEX: "0" }), []);
+  const credentials = claudeRouteProblems({ ANTHROPIC_AUTH_TOKEN: "sk-secret-value", ANTHROPIC_API_KEY: "sk-ant-secret" }).join("\n");
+  assert.match(credentials, /ANTHROPIC_AUTH_TOKEN（不显示内容）/); assert.match(credentials, /ANTHROPIC_API_KEY（不显示内容）/);
+  assert.ok(!credentials.includes("sk-secret-value") && !credentials.includes("sk-ant-secret"));
+
+  const names = ["ANTHROPIC_MODEL", "ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL", "ANTHROPIC_DEFAULT_HAIKU_MODEL", "ANTHROPIC_SMALL_FAST_MODEL", "CLAUDE_CODE_SUBAGENT_MODEL"];
+  const claude = ["claude-opus-5-5", "claude-sonnet-4-5-20250929", "claude-haiku-5-5", "claude-fable-5-1", "claude-opus-4-6[1m]", "claude-3-5-haiku-20241022", "opus", "sonnet[1m]", "haiku", "opusplan", "default"];
+  const other = ["deepseek-v4-pro[1m]", "deepseek-claude-wrapper", "claude-proxy", "gpt-5.6-sol", "review@example.invalid", "sk-ant-api03-FAKE0000000000000000000000", "eyJhbGciOiJIUzI1NiJ9.e30.FAKE"];
+  for (const name of names) {
+    for (const value of claude) assert.deepEqual(claudeRouteProblems({ [name]: value }), [], `${name}=${value}`);
+    for (const value of other) {
+      const problems = claudeRouteProblems({ [name]: value });
+      assert.equal(problems.length, 1, `${name}=${value}`);
+      assert.match(problems[0], new RegExp(`${name} 指定的不是 Claude 官方模型名（不显示内容）`));
+      assert.ok(!problems[0].includes(value), `${name} 的原值不能出现在提醒里`);
+    }
+  }
+});
+
+test("T110：doctor 读不到状态、未登录、设置被改时如实提示，不泄露账号和密钥", async () => {
+  const check = async (auth, env = {}) => {
+    const lines = [];
+    const run = async (command, args) => args.includes("--version") ? { code: 0, stdout: `${command} 1.0\n`, stderr: "" } : auth();
+    await doctor("D:/repo", { resolve: (name) => ({ command: name, prefix: [] }), run, env, log: (line) => lines.push(line) });
+    return lines.join("\n");
+  };
+  const old = await check(async () => ({ code: 1, stdout: "", stderr: "error: unknown option '--json'" }));
+  assert.match(old, /Claude 登录：读不到状态/); assert.match(old, /提醒：读不到 Claude Code 的登录状态/);
+  assert.match(await check(async () => { throw new Error("spawn failed"); }), /Claude 登录：读不到状态/);
+  const loggedOut = await check(async () => ({ code: 1, stdout: JSON.stringify({ loggedIn: false, authMethod: "none", apiProvider: "firstParty" }), stderr: "" }));
+  assert.match(loggedOut, /Claude 登录：未登录/); assert.match(loggedOut, /claude auth login --claudeai/);
+  const ok = await check(async () => ({ code: 0, stdout: JSON.stringify({ loggedIn: true, authMethod: "claude.ai", apiProvider: "firstParty", email: "someone@example.invalid", orgId: "org-fake", orgName: "Someone's Organization", subscriptionType: "pro" }), stderr: "" }));
+  assert.match(ok, /Claude 登录：已登录 · claude\.ai · pro · firstParty/);
+  for (const hidden of ["提醒", "someone@", "org-fake", "Someone's"]) assert.ok(!ok.includes(hidden), hidden);
+  const rerouted = await check(async () => ({ code: 0, stdout: JSON.stringify({ loggedIn: true, authMethod: "oauth_token", apiProvider: "firstParty" }), stderr: "" }),
+    { ANTHROPIC_BASE_URL: "https://user:pw@api.deepseek.invalid/anthropic", ANTHROPIC_AUTH_TOKEN: "sk-fake-secret", ANTHROPIC_MODEL: "review@example.invalid" });
+  assert.match(rerouted, /指向 api\.deepseek\.invalid，不是 Anthropic 官方/); assert.match(rerouted, /oauth_token 认证，不是 Claude 订阅登录/);
+  assert.match(rerouted, /开始和恢复自动任务会先停下/);
+  for (const secret of ["user:pw", "/anthropic", "sk-fake-secret", "review@example.invalid"]) assert.ok(!rerouted.includes(secret), secret);
+  assert.match(describeClaudeAuth({ loggedIn: true, authMethod: "claude.ai", apiProvider: "bedrock" }).warnings[0], /走 bedrock/);
+});
+
+test("T111：Claude 被改到别的服务时，开始和恢复前就停下，不建目录、不调用模型", async (t) => {
+  const h = harness(t);
+  h.runner.deps.env = { ANTHROPIC_BASE_URL: "https://api.deepseek.com/anthropic", ANTHROPIC_AUTH_TOKEN: "sk-fake-secret" };
+  await assert.rejects(h.runner.start(PAPER.versionedId), (error) => /已停下：没有创建论文目录，也没有调用模型/.test(error.message)
+    && /api\.deepseek\.com/.test(error.message) && !error.message.includes("sk-fake-secret"));
+  assert.equal(h.calls.length, 0); assert.equal(h.dir(), undefined);
+  assert.ok(!fs.existsSync(path.join(h.root, ".production", "jobs")));
+
+  h.runner.deps.env = {};
+  const job = await h.runner.start(PAPER.versionedId);
+  assert.equal(job.status, "ready");
+  const calls = h.calls.length;
+  h.runner.deps.env = { ANTHROPIC_MODEL: "deepseek-v4-pro[1m]" };
+  await assert.rejects(h.runner.resume(job.id), /已停下：任务没有继续，也没有调用模型/);
+  assert.equal(h.calls.length, calls); assert.equal(readJob(h.root, job.id).status, "ready");
 });

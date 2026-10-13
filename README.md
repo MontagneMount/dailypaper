@@ -17,7 +17,7 @@ npm run render -- episodes/example
 
 **做新的一期**：
 
-**自动交接（首版）**：`npm run produce -- <arXiv 链接或编号>` 自动完成写稿、独立查原文、素材制作、图片审核、返修和本地合成，最后交用户看成片、听声音并手动上传。先运行 `npm run produce -- doctor` 检查工具；完整用法、恢复方式和限制见 [docs/production.md](docs/production.md)。不接管已有稿件，不自动提交或发布；手动流程仍可继续使用。
+**自动交接（首版）**：`npm run produce -- <arXiv 链接或编号>` 自动完成写稿、独立查原文、素材制作、图片审核、返修和本地合成，最后交用户看成片、听声音并手动上传。先运行 `npm run produce -- doctor` 检查工具和 Claude Code 的登录；完整用法、恢复方式和限制见 [docs/production.md](docs/production.md)。不接管已有稿件，不自动提交或发布；手动流程仍可继续使用。
 
 ```bash
 npm run topics

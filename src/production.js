@@ -136,18 +136,64 @@ export function evidencePath(root, name) {
   return (path.isAbsolute(name) ? path.relative(root, name) : name).replaceAll("\\", "/");
 }
 
+const CLAUDE_MODEL_VARS = ["ANTHROPIC_MODEL", "ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL", "ANTHROPIC_DEFAULT_HAIKU_MODEL", "ANTHROPIC_SMALL_FAST_MODEL", "CLAUDE_CODE_SUBAGENT_MODEL"];
+// Whole names only: Claude Code's aliases, claude-<family>-<version> IDs and the older claude-3-5-sonnet form.
+// A new model family must be added here before these variables can name it.
+const CLAUDE_MODEL = /^(?:default|best|opus|sonnet|haiku|fable|opusplan|claude-(?:opus|sonnet|haiku|fable)-\d+(?:-\d+)?(?:-\d{8}|-latest)?|claude-\d+(?:-\d+)?-(?:opus|sonnet|haiku)(?:-\d{8}|-latest)?)(?:\[1m\])?$/i;
+
+/** Settings that send Claude's stages somewhere other than the user's Claude subscription (T104, T111). Never shows a value. */
+export function claudeRouteProblems(env = process.env) {
+  const problems = [];
+  if (env.ANTHROPIC_BASE_URL) {
+    let url = null;
+    try { url = new URL(env.ANTHROPIC_BASE_URL); } catch { /* reported as invalid below */ }
+    if (!url) problems.push("环境变量 ANTHROPIC_BASE_URL 不是有效网址");
+    else if (url.hostname !== "api.anthropic.com" || url.port) problems.push(`环境变量 ANTHROPIC_BASE_URL 把 Claude Code 指向 ${url.host}，不是 Anthropic 官方接口`);
+    else if (url.protocol !== "https:") problems.push("环境变量 ANTHROPIC_BASE_URL 没有用 https 连接 Anthropic 官方接口");
+  }
+  for (const name of ["ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY"]) {
+    if (env[name]) problems.push(`设置了环境变量 ${name}（不显示内容）：Claude Code 会用它认证，不用你的 Claude 订阅登录`);
+  }
+  for (const name of ["CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY"]) {
+    if (env[name] && !/^(0|false)$/i.test(env[name].trim())) problems.push(`设置了环境变量 ${name}：Claude Code 会走云服务商，不用你的 Claude 订阅`);
+  }
+  for (const name of CLAUDE_MODEL_VARS) {
+    if (env[name] && !CLAUDE_MODEL.test(env[name].trim())) problems.push(`环境变量 ${name} 指定的不是 Claude 官方模型名（不显示内容）`);
+  }
+  return problems;
+}
+
+/** One line from `claude auth status --json`, leaving out the email and organization. */
+export function describeClaudeAuth(status) {
+  const word = (value) => typeof value === "string" && /^[\w.-]{1,40}$/.test(value) ? value : "未知";
+  if (typeof status?.loggedIn !== "boolean") return { line: "Claude 登录：读不到状态", warnings: ["读不到 Claude Code 的登录状态（旧版本没有 claude auth status），请自行确认已用 Claude 订阅登录"] };
+  if (!status.loggedIn) return { line: "Claude 登录：未登录", warnings: ["Claude Code 还没登录：运行 claude auth login --claudeai，用你的 Claude 订阅账号登录"] };
+  const warnings = [];
+  if (status.authMethod !== "claude.ai") warnings.push(`Claude Code 现在用 ${word(status.authMethod)} 认证，不是 Claude 订阅登录；用量按那个凭据计算`);
+  if (status.apiProvider !== "firstParty") warnings.push(`Claude Code 现在走 ${word(status.apiProvider)}，不是 Anthropic 官方`);
+  const plan = status.subscriptionType ? ` · ${word(status.subscriptionType)}` : "";
+  return { line: `Claude 登录：已登录 · ${word(status.authMethod)}${plan} · ${word(status.apiProvider)}`, warnings };
+}
+
 /** Dependencies are injectable to test real state transitions without spending model usage. */
 export class ProductionRunner {
   constructor(root = ROOT, dependencies = {}) {
     this.root = path.resolve(root);
     this.deps = {
       run: runProcess, resolve: resolveAgent, create: createEpisode, draft: inspectDraft, preview: inspectPreview,
-      phones: makePhoneImages, log: console.log, ...dependencies,
+      phones: makePhoneImages, log: console.log, env: process.env, ...dependencies,
     };
     this.abort = new AbortController();
   }
 
   save(job) { atomicJson(path.join(jobDirectory(this.root, job.id), "state.json"), job); }
+
+  checkRoute(stopped) {
+    // T111 (user, 2026-10-13): Claude's stages run on the user's own Claude subscription, so stop before any model call.
+    const problems = claudeRouteProblems(this.deps.env);
+    if (problems.length) throw new Error(`Claude Code 没有用你的 Claude 订阅连 Anthropic 官方接口，已停下：${stopped}，也没有调用模型。\n` +
+      `${problems.map((item) => `- ${item}`).join("\n")}\n删掉或改正这些环境变量，重开终端后再试；可先运行 npm run produce -- doctor 查看。`);
+  }
 
   async start(input, options) {
     const requestedId = normalizePaper(input);
@@ -155,6 +201,7 @@ export class ProductionRunner {
     checkOptions(options);
     // Resolve both executables before downloading or creating a paper folder.
     this.deps.resolve("codex"); this.deps.resolve("claude");
+    this.checkRoute("没有创建论文目录");
     const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15);
     const job = {
       id: `${stamp}-${requestedId}-${crypto.randomBytes(4).toString("hex")}`,
@@ -181,6 +228,7 @@ export class ProductionRunner {
       job.visualPages = {}; job.visualRound = null;
     }
     this.deps.resolve("codex"); this.deps.resolve("claude");
+    this.checkRoute("任务没有继续");
     return this.execute(job);
   }
 
@@ -564,7 +612,7 @@ const USAGE = `DailyPaper 自动制作（本地运行，最后由你确认、上
   可选：--max-revisions 3（整项任务返修上限） --max-calls 100（总模型调用上限）
         --timeout-minutes 20（每次调用/制作步骤的超时）
   Ctrl+C 会停止并保留进度。任务及每轮交接在 .production/jobs/，不会提交到Git。
-  沿用本机CLI登录和模型配置；限额或认证失败时暂停，不自动切换API。`;
+  沿用本机CLI登录和模型配置；Claude 没连你的订阅/官方接口时开始前就停下，限额或认证失败时暂停，不自动切换API。`;
 
 export function parseArgs(args) {
   if (args.length === 0 || args[0] === "--help" || args[0] === "-h") return { action: "help" };
@@ -597,6 +645,29 @@ export function parseArgs(args) {
   return { action, id: positional[0], feedback, refreshInputs, options: changes };
 }
 
+/** Tool versions, Claude login and route. Never calls a model; dependencies are injectable for tests. */
+export async function doctor(root = ROOT, { resolve = resolveAgent, run = runProcess, env = process.env, log = console.log } = {}) {
+  const agents = {};
+  for (const name of ["codex", "claude"]) {
+    agents[name] = resolve(name);
+    const result = await run(agents[name].command, [...agents[name].prefix, "--version"], { cwd: root, timeoutMs: 30_000 });
+    if (result.code !== 0) throw new Error(`${name} 无法启动`);
+    log(`${name}：${result.stdout.trim()}`);
+  }
+  // Exits 1 when logged out but still prints the JSON; an old CLI without the command prints nothing usable.
+  let status = null;
+  try {
+    const auth = await run(agents.claude.command, [...agents.claude.prefix, "auth", "status", "--json"], { cwd: root, timeoutMs: 30_000 });
+    status = JSON.parse(auth.stdout);
+  } catch { /* described as unreadable */ }
+  const { line, warnings } = describeClaudeAuth(status);
+  log(line);
+  const problems = claudeRouteProblems(env);
+  for (const item of [...problems, ...warnings]) log(`提醒：${item}`);
+  if (problems.length) log("有上面的接口、凭据或模型设置时，开始和恢复自动任务会先停下，不调用模型。");
+  log("工具可启动。这项检查没有请求模型，也不验证剩余额度；Codex 的登录请自行确认。\n使用 --dry-run 可查看流程，提交论文链接后才开始模型调用。");
+}
+
 function printJob(job) {
   console.log(`${job.id}\n  ${job.requestedId} · ${STAGE_LABELS[job.stage] ?? "准备论文"} · ${job.status}\n  ${job.message ?? ""}\n  交接：.production/jobs/${job.id}/\n  本期：episodes/${job.folder}/`);
   if (job.status === "ready") console.log(`  成片：episodes/${job.folder}/output/video.mp4\n  封面：episodes/${job.folder}/output/cover.png`);
@@ -605,16 +676,7 @@ function printJob(job) {
 export async function main(args = process.argv.slice(2), root = ROOT) {
   const options = parseArgs(args);
   if (options.action === "help") { console.log(USAGE); return; }
-  if (options.action === "doctor") {
-    for (const name of ["codex", "claude"]) {
-      const { command, prefix } = resolveAgent(name);
-      const result = await runProcess(command, [...prefix, "--version"], { cwd: root, timeoutMs: 30_000 });
-      if (result.code !== 0) throw new Error(`${name} 无法启动`);
-      console.log(`${name}：${result.stdout.trim()}`);
-    }
-    console.log("工具可启动。请确保已分别登录；这项检查没有请求模型，也不验证剩余额度。\n使用 --dry-run 可查看流程，提交论文链接后才开始模型调用。");
-    return;
-  }
+  if (options.action === "doctor") { await doctor(root); return; }
   if (options.action === "list") {
     const dir = safePath(root, ".production/jobs");
     if (!fs.existsSync(dir)) { console.log("还没有自动制作任务。"); return; }
